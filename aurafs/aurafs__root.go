@@ -47,13 +47,13 @@ func (r *Root) OnAdd(ctx context.Context) {
 	// Less is more
 }
 
-func (r *Root) NewRegularSubfile(ctx context.Context, name string) {
+func (r *Root) NewRegularSubfile(ctx context.Context, name string, data []byte) {
 	r.AddChild(name,
-		r.NewInode(ctx, NewRegularFile(DefaultauraeFSINodePermissions),
+		r.NewInode(ctx, NewRegularFile(DefaultauraeFSINodePermissions, data),
 			fs.StableAttr{
 				Ino:  Ino(),
 				Mode: fuse.S_IFREG,
-			}), false)
+			}), true)
 }
 
 func (r *Root) NewRegularSubdirectory(ctx context.Context, name string) {

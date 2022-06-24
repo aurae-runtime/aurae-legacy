@@ -76,13 +76,14 @@ func Ino() uint64 {
 // -- gRPC Implementation --
 
 func (a *AuraeFS) SetRPC(ctx context.Context, req *rpc.SetReq) (*rpc.SetResp, error) {
-	//file := NewRegularFile(DefaultauraeFSINodePermissions)
-	//a.root.NewRegularSubfile(ctx, req.Val)
+	logrus.Infof("Set: %s %s", req.Key, req.Val)
+	a.root.NewRegularSubfile(ctx, req.Key)
 	resp := &rpc.SetResp{}
 	return resp, nil
 }
 
 func (a *AuraeFS) GetRPC(ctx context.Context, req *rpc.GetReq) (*rpc.GetResp, error) {
+	logrus.Infof("Get: %s", req.Key)
 	resp := &rpc.GetResp{}
 	return resp, nil
 }
