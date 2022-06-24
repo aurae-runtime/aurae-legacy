@@ -77,13 +77,25 @@ func Ino() uint64 {
 
 func (a *AuraeFS) SetRPC(ctx context.Context, req *rpc.SetReq) (*rpc.SetResp, error) {
 	logrus.Infof("Set: %s %s", req.Key, req.Val)
-	a.root.NewRegularSubfile(ctx, req.Key)
+	a.root.NewRegularSubfile(ctx, req.Key, []byte(req.Val)) // Map key, value directly to filename and []byte data
 	resp := &rpc.SetResp{}
 	return resp, nil
 }
 
 func (a *AuraeFS) GetRPC(ctx context.Context, req *rpc.GetReq) (*rpc.GetResp, error) {
 	logrus.Infof("Get: %s", req.Key)
-	resp := &rpc.GetResp{}
+	inode := a.root.GetChild(req.Key)
+	if inode == nil {
+		return &rpc.GetResp{
+			Val:  "",
+			Code: -1,
+		}, nil
+	}
+	// LEFT OFF HERE
+	//rf := inode.(*RegularFile)
+	resp := &rpc.GetResp{
+		Code: 1,
+		Val:  "",
+	}
 	return resp, nil
 }
