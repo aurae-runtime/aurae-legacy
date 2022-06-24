@@ -1,0 +1,47 @@
+/*===========================================================================*\
+ *           MIT License Copyright (c) 2022 Kris Nóva <kris@nivenly.com>     *
+ *                                                                           *
+ *                ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓                *
+ *                ┃   ███╗   ██╗ ██████╗ ██╗   ██╗ █████╗   ┃                *
+ *                ┃   ████╗  ██║██╔═████╗██║   ██║██╔══██╗  ┃                *
+ *                ┃   ██╔██╗ ██║██║██╔██║██║   ██║███████║  ┃                *
+ *                ┃   ██║╚██╗██║████╔╝██║╚██╗ ██╔╝██╔══██║  ┃                *
+ *                ┃   ██║ ╚████║╚██████╔╝ ╚████╔╝ ██║  ██║  ┃                *
+ *                ┃   ╚═╝  ╚═══╝ ╚═════╝   ╚═══╝  ╚═╝  ╚═╝  ┃                *
+ *                ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛                *
+ *                                                                           *
+ *                       This machine kills fascists.                        *
+ *                                                                           *
+\*===========================================================================*/
+
+syntax = "proto3";
+
+option go_package = "github.com/kris-nova/aurae/rpc";
+
+package aurae;
+
+// 	Set(key, value string) error
+//	Get(key string) string
+
+service AuraeFS {
+  rpc SetRPC (SetReq) returns (SetResp) {}
+  rpc GetRPC (GetReq) returns (GetResp) {}
+}
+
+message SetReq {
+  string key = 1;
+  string val = 2;
+}
+
+message SetResp {
+  int32 code = 1;
+}
+
+message GetReq {
+  string key = 1;
+}
+
+message GetResp {
+  string val = 1;
+  int32 code = 2;
+}
