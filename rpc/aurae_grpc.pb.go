@@ -22,8 +22,8 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CoreServiceClient interface {
-	Set(ctx context.Context, in *SetReq, opts ...grpc.CallOption) (*SetResp, error)
-	Get(ctx context.Context, in *GetReq, opts ...grpc.CallOption) (*GetResp, error)
+	SetRPC(ctx context.Context, in *SetReq, opts ...grpc.CallOption) (*SetResp, error)
+	GetRPC(ctx context.Context, in *GetReq, opts ...grpc.CallOption) (*GetResp, error)
 }
 
 type coreServiceClient struct {
@@ -34,18 +34,18 @@ func NewCoreServiceClient(cc grpc.ClientConnInterface) CoreServiceClient {
 	return &coreServiceClient{cc}
 }
 
-func (c *coreServiceClient) Set(ctx context.Context, in *SetReq, opts ...grpc.CallOption) (*SetResp, error) {
+func (c *coreServiceClient) SetRPC(ctx context.Context, in *SetReq, opts ...grpc.CallOption) (*SetResp, error) {
 	out := new(SetResp)
-	err := c.cc.Invoke(ctx, "/aurae.CoreService/Set", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/aurae.CoreService/SetRPC", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *coreServiceClient) Get(ctx context.Context, in *GetReq, opts ...grpc.CallOption) (*GetResp, error) {
+func (c *coreServiceClient) GetRPC(ctx context.Context, in *GetReq, opts ...grpc.CallOption) (*GetResp, error) {
 	out := new(GetResp)
-	err := c.cc.Invoke(ctx, "/aurae.CoreService/Get", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/aurae.CoreService/GetRPC", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -56,8 +56,8 @@ func (c *coreServiceClient) Get(ctx context.Context, in *GetReq, opts ...grpc.Ca
 // All implementations must embed UnimplementedCoreServiceServer
 // for forward compatibility
 type CoreServiceServer interface {
-	Set(context.Context, *SetReq) (*SetResp, error)
-	Get(context.Context, *GetReq) (*GetResp, error)
+	SetRPC(context.Context, *SetReq) (*SetResp, error)
+	GetRPC(context.Context, *GetReq) (*GetResp, error)
 	mustEmbedUnimplementedCoreServiceServer()
 }
 
@@ -65,11 +65,11 @@ type CoreServiceServer interface {
 type UnimplementedCoreServiceServer struct {
 }
 
-func (UnimplementedCoreServiceServer) Set(context.Context, *SetReq) (*SetResp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Set not implemented")
+func (UnimplementedCoreServiceServer) SetRPC(context.Context, *SetReq) (*SetResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetRPC not implemented")
 }
-func (UnimplementedCoreServiceServer) Get(context.Context, *GetReq) (*GetResp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
+func (UnimplementedCoreServiceServer) GetRPC(context.Context, *GetReq) (*GetResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetRPC not implemented")
 }
 func (UnimplementedCoreServiceServer) mustEmbedUnimplementedCoreServiceServer() {}
 
@@ -84,38 +84,38 @@ func RegisterCoreServiceServer(s grpc.ServiceRegistrar, srv CoreServiceServer) {
 	s.RegisterService(&CoreService_ServiceDesc, srv)
 }
 
-func _CoreService_Set_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _CoreService_SetRPC_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(SetReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CoreServiceServer).Set(ctx, in)
+		return srv.(CoreServiceServer).SetRPC(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/aurae.CoreService/Set",
+		FullMethod: "/aurae.CoreService/SetRPC",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CoreServiceServer).Set(ctx, req.(*SetReq))
+		return srv.(CoreServiceServer).SetRPC(ctx, req.(*SetReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _CoreService_Get_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _CoreService_GetRPC_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CoreServiceServer).Get(ctx, in)
+		return srv.(CoreServiceServer).GetRPC(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/aurae.CoreService/Get",
+		FullMethod: "/aurae.CoreService/GetRPC",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CoreServiceServer).Get(ctx, req.(*GetReq))
+		return srv.(CoreServiceServer).GetRPC(ctx, req.(*GetReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -128,12 +128,12 @@ var CoreService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*CoreServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Set",
-			Handler:    _CoreService_Set_Handler,
+			MethodName: "SetRPC",
+			Handler:    _CoreService_SetRPC_Handler,
 		},
 		{
-			MethodName: "Get",
-			Handler:    _CoreService_Get_Handler,
+			MethodName: "GetRPC",
+			Handler:    _CoreService_GetRPC_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

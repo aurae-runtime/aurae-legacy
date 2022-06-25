@@ -16,38 +16,15 @@
 
 package core
 
-import (
-	"context"
-	"github.com/kris-nova/aurae/rpc"
-)
+// Getters and Setters should (by design) not return an error.
+// The agreement between these interfaces and the calling code
+// is that the implementation will do everything it can to manage
+// an error, or will otherwise crash.
 
-var _ rpc.CoreServiceServer = &Database{}
-var _ Getter = &Database{}
-var _ Setter = &Database{}
-
-type Database struct {
-	rpc.UnimplementedCoreServiceServer
+type Getter interface {
+	Get(key string) string
 }
 
-func (c Database) Get(key string) string {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (c Database) Set(key, value string) {
-	//TODO implement me
-	panic("implement me")
-}
-func (c Database) SetRPC(ctx context.Context, req *rpc.SetReq) (*rpc.SetResp, error) {
-	response := &rpc.SetResp{}
-	return response, nil
-}
-
-func (c Database) GetRPC(ctx context.Context, req *rpc.GetReq) (*rpc.GetResp, error) {
-	response := &rpc.GetResp{}
-	return response, nil
-}
-
-func NewDatabase() *Database {
-	return &Database{}
+type Setter interface {
+	Set(key, value string)
 }

@@ -17,6 +17,11 @@
 package main
 
 import (
+	"context"
+	"fmt"
+	"github.com/kris-nova/aurae/pkg/runtime"
+	"github.com/kris-nova/aurae/rpc"
+	"google.golang.org/grpc"
 	"os"
 	"time"
 
@@ -29,13 +34,8 @@ import (
 var run = &RuntimeOptions{}
 
 type RuntimeOptions struct {
-	verbose  bool
-	nodename string
-	root     string
-
-	// Daemon
-	mountpoint string
-	socket     string
+	verbose bool
+	socket  string
 }
 
 func main() {
@@ -58,7 +58,7 @@ func main() {
 		HelpName:  aurae.Copyright,
 		Usage:     "Simple, secure distributed system for application teams.",
 		UsageText: `aurae <options> <command>`,
-		Commands:  []*cli.Command{
+		Commands: []*cli.Command{
 			// ----------------------------------------
 			// [ STUB ]
 			//{
@@ -82,62 +82,76 @@ func main() {
 			//		return nil
 			//	},
 			//},
-			//{
-			//	Name:      "get",
-			//	Usage:     "Get aurae values.",
-			//	UsageText: `aurae get <key>`,
-			//	Flags:     GlobalFlags([]cli.Flag{}),
-			//	Action: func(c *cli.Context) error {
-			//		key := c.Args().Get(0)
-			//		if key == "" {
-			//			return fmt.Errorf("usage: aurae get <key>")
-			//		}
-			//
-			//		conn, err := grpc.Dial(fmt.Sprintf("passthrough:///unix://%s", "/run/aurae.sock"), grpc.WithInsecure(), grpc.WithTimeout(time.Second*3))
-			//		if err != nil {
-			//			return err
-			//		}
-			//		client := rpc.NewAuraeFSClient(conn)
-			//		getResp, err := client.GetRPC(context.Background(), &rpc.GetReq{
-			//			Key: key,
-			//		})
-			//		if err != nil {
-			//			return err
-			//		}
-			//		fmt.Println(getResp.Val)
-			//		return nil
-			//	},
-			//},
-			//{
-			//	Name:      "set",
-			//	Usage:     "Set aurae values.",
-			//	UsageText: `aurae set <key> <value>`,
-			//	Flags:     GlobalFlags([]cli.Flag{}),
-			//	Action: func(c *cli.Context) error {
-			//		key := c.Args().Get(0)
-			//		val := c.Args().Get(1)
-			//		if key == "" {
-			//			return fmt.Errorf("usage: aurae set <key> <value>")
-			//		}
-			//		if val == "" {
-			//			return fmt.Errorf("usage: aurae set <key> <value>")
-			//		}
-			//
-			//		conn, err := grpc.Dial(fmt.Sprintf("passthrough:///unix://%s", "/run/aurae.sock"), grpc.WithInsecure(), grpc.WithTimeout(time.Second*3))
-			//		if err != nil {
-			//			return err
-			//		}
-			//		client := rpc.NewAuraeFSClient(conn)
-			//		_, err = client.SetRPC(context.Background(), &rpc.SetReq{
-			//			Key: key,
-			//			Val: val,
-			//		})
-			//		if err != nil {
-			//			return err
-			//		}
-			//		return nil
-			//	},
-			//},
+			{
+				Name:      "get",
+				Usage:     "Get aurae values.",
+				UsageText: `aurae get <key>`,
+				Flags: GlobalFlags([]cli.Flag{
+					&cli.StringFlag{
+						Name:        "socket",
+						Aliases:     []string{"sock"},
+						Destination: &run.socket,
+						Value:       runtime.DefaultSocketLocationLinux,
+					},
+				}),
+				Action: func(c *cli.Context) error {
+					key := c.Args().Get(0)
+					if key == "" {
+						return fmt.Errorf("usage: aurae get <key>")
+					}
+
+					conn, err := grpc.Dial(fmt.Sprintf("passthrough:///unix://%s", run.socket), grpc.WithInsecure(), grpc.WithTimeout(time.Second*3))
+					if err != nil {
+						return err
+					}
+					client := rpc.NewCoreServiceClient(conn)
+					getResp, err := client.GetRPC(context.Background(), &rpc.GetReq{
+						Key: key,
+					})
+					if err != nil {
+						return err
+					}
+					fmt.Println(getResp.Val)
+					return nil
+				},
+			},
+			{
+				Name:      "set",
+				Usage:     "Set aurae values.",
+				UsageText: `aurae set <key> <value>`,
+				Flags: GlobalFlags([]cli.Flag{
+					&cli.StringFlag{
+						Name:        "socket",
+						Aliases:     []string{"sock"},
+						Destination: &run.socket,
+						Value:       runtime.DefaultSocketLocationLinux,
+					},
+				}),
+				Action: func(c *cli.Context) error {
+					key := c.Args().Get(0)
+					val := c.Args().Get(1)
+					if key == "" {
+						return fmt.Errorf("usage: aurae set <key> <value>")
+					}
+					if val == "" {
+						return fmt.Errorf("usage: aurae set <key> <value>")
+					}
+
+					conn, err := grpc.Dial(fmt.Sprintf("passthrough:///unix://%s", run.socket), grpc.WithInsecure(), grpc.WithTimeout(time.Second*3))
+					if err != nil {
+						return err
+					}
+					client := rpc.NewCoreServiceClient(conn)
+					_, err = client.SetRPC(context.Background(), &rpc.SetReq{
+						Key: key,
+						Val: val,
+					})
+					if err != nil {
+						return err
+					}
+					return nil
+				},
+			},
 			//{
 			//	Name:      "run",
 			//	Usage:     "Run an Application.",
@@ -293,12 +307,6 @@ func GlobalFlags(c []cli.Flag) []cli.Flag {
 			Name:        "verbose",
 			Aliases:     []string{"v"},
 			Destination: &run.verbose,
-		},
-		&cli.StringFlag{
-			Name:        "root",
-			Aliases:     []string{"r"},
-			Destination: &run.root,
-			Value:       "/",
 		},
 	}
 	for _, gf := range g {

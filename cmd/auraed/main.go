@@ -76,7 +76,7 @@ func main() {
 				Name:        "socket",
 				Aliases:     []string{"sock"},
 				Destination: &run.socket,
-				Value:       "/run/aurae.sock",
+				Value:       runtime.DefaultSocketLocationLinux,
 			},
 		}),
 		EnableBashCompletion: true,

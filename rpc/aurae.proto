@@ -22,8 +22,8 @@ package aurae;
 
 
 service CoreService {
-  rpc Set (SetReq) returns (SetResp) {}
-  rpc Get (GetReq) returns (GetResp) {}
+  rpc SetRPC (SetReq) returns (SetResp) {}
+  rpc GetRPC (GetReq) returns (GetResp) {}
 }
 
 message SetReq {

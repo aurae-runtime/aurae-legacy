@@ -29,6 +29,10 @@ import (
 	"strings"
 )
 
+const (
+	DefaultSocketLocationLinux string = "/run/aurae.sock"
+)
+
 // Daemon is an aurae systemd style daemon.
 //
 // The daemon will securely mount an shape and
@@ -55,7 +59,7 @@ func New(socket string) *Daemon {
 func (d *Daemon) Run() error {
 
 	// Step 1. Establish context in the logs.
-	
+
 	logrus.Infof("Aurae runtime daemon. Version: %s", aurae.Version)
 	logrus.Infof("Aurae Socket [%s]", d.socket)
 
@@ -94,7 +98,7 @@ func (d *Daemon) Run() error {
 
 	// Step 4. Register the core database to the initialized server
 
-	coreDB := core.NewCoreDatabase()
+	coreDB := core.NewDatabase()
 	// TODO We need modular (but opinionated) store backing
 	rpc.RegisterCoreServiceServer(server, coreDB)
 	logrus.Infof("Registering Core Database.")
