@@ -20,14 +20,16 @@ import (
 	"context"
 	"github.com/kris-nova/aurae/pkg/core/mem"
 	"github.com/kris-nova/aurae/rpc"
+	"path"
 	"sync"
 )
 
 var _ rpc.CoreServiceServer = &PathDatabase{}
 
 const (
-	CoreCode_OKAY int32 = 0
-	CoreCode_ERR  int32 = 1
+	CoreCode_OKAY  int32 = 0
+	CoreCode_ERROR int32 = 1
+	CoreCode_EMPTY int32 = 2
 )
 
 // PathDatabase is the core data store structure for Aurae.
@@ -67,11 +69,29 @@ func (c *PathDatabase) ListRPC(ctx context.Context, req *rpc.ListReq) (*rpc.List
 	return response, nil
 }
 
+// SetRPC is liable to mutate data!
 func (c *PathDatabase) SetRPC(ctx context.Context, req *rpc.SetReq) (*rpc.SetResp, error) {
 	c.mtx.Lock()
 	defer c.mtx.Unlock()
+	var key, val, mutPath string
+	key = req.Key
+	val = req.Val
+
+	// Path mutation!
+
+	mutPath = path.Clean(path.Join("/", key))
+
+	// Ignore empty paths
+	if mutPath == "." {
+		return &rpc.SetResp{
+			Code: CoreCode_EMPTY,
+		}, nil
+	}
+
+	// Path mutation!
+
 	for _, setter := range c.Setters {
-		setter.Set(req.Key, req.Val)
+		setter.Set(mutPath, val)
 	}
 	response := &rpc.SetResp{
 		Code: CoreCode_OKAY,

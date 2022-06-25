@@ -22,6 +22,11 @@ type Database struct {
 	mtx sync.Mutex
 }
 
+type Node struct {
+	Name     string
+	Children []*Node
+}
+
 func NewDatabase() *Database {
 	return &Database{
 		mtx: sync.Mutex{},
