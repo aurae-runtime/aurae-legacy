@@ -14,70 +14,33 @@
  *                                                                           *
 \*===========================================================================*/
 
-package core
+package mem
 
-import (
-	"context"
-	"github.com/kris-nova/aurae/pkg/core/mem"
-	"github.com/kris-nova/aurae/rpc"
-	"sync"
-)
-
-var _ rpc.CoreServiceServer = &Database{}
-
-const (
-	CoreCode_OKAY int32 = 0
-	CoreCode_ERR  int32 = 1
-)
+import "sync"
 
 type Database struct {
 	mtx sync.Mutex
-	rpc.UnimplementedCoreServiceServer
-	// TODO we will need to prioritize our getters and setters
-	// TODO we need to manage inconsistencies
-	Getters []Getter
-	Setters []Setter
 }
 
-func (c *Database) SetRPC(ctx context.Context, req *rpc.SetReq) (*rpc.SetResp, error) {
-	c.mtx.Lock()
-	defer c.mtx.Unlock()
-	for _, setter := range c.Setters {
-		setter.Set(req.Key, req.Val)
-	}
-	response := &rpc.SetResp{
-		Code: CoreCode_OKAY,
-	}
-	return response, nil
-}
-
-func (c *Database) GetRPC(ctx context.Context, req *rpc.GetReq) (*rpc.GetResp, error) {
-	c.mtx.Lock()
-	defer c.mtx.Unlock()
-	resp := ""
-	for _, getter := range c.Getters {
-		resp = getter.Get(req.Key)
-		if resp != "" {
-			break
-		}
-	}
-	response := &rpc.GetResp{
-		Val:  resp,
-		Code: CoreCode_OKAY,
-	}
-	return response, nil
-}
-
-// NewDatabase will create a new database, and always initialize an in-memory cache.
 func NewDatabase() *Database {
-	memDB := mem.NewDatabase()
 	return &Database{
 		mtx: sync.Mutex{},
-		Getters: []Getter{
-			memDB,
-		},
-		Setters: []Setter{
-			memDB,
-		},
 	}
+}
+
+var packageCache = map[string]string{}
+
+func (c *Database) Get(key string) string {
+	c.mtx.Lock()
+	defer c.mtx.Unlock()
+	if r, ok := packageCache[key]; ok {
+		return r
+	}
+	return ""
+}
+
+func (c *Database) Set(key, value string) {
+	c.mtx.Lock()
+	defer c.mtx.Unlock()
+	packageCache[key] = value
 }
