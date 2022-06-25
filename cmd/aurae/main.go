@@ -175,13 +175,15 @@ func main() {
 						return err
 					}
 					client := rpc.NewCoreServiceClient(conn)
-					getResp, err := client.ListRPC(context.Background(), &rpc.ListReq{
+					listResp, err := client.ListRPC(context.Background(), &rpc.ListReq{
 						Key: key,
 					})
 					if err != nil {
 						return err
 					}
-					fmt.Println(getResp.Entries)
+					for k, v := range listResp.Entries {
+						fmt.Println(k, v)
+					}
 					return nil
 				},
 			},
