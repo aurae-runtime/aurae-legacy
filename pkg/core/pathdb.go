@@ -18,9 +18,9 @@ package core
 
 import (
 	"context"
+	"github.com/kris-nova/aurae/pkg/common"
 	"github.com/kris-nova/aurae/pkg/core/memfs"
 	"github.com/kris-nova/aurae/rpc"
-	"path"
 	"sync"
 )
 
@@ -78,11 +78,10 @@ func (c *PathDatabase) SetRPC(ctx context.Context, req *rpc.SetReq) (*rpc.SetRes
 	val = req.Val
 
 	// Path mutation!
-
-	mutPath = path.Clean(path.Join("/", key))
+	mutPath = common.Path(key)
 
 	// Ignore empty paths
-	if mutPath == "." {
+	if mutPath == "/" {
 		return &rpc.SetResp{
 			Code: CoreCode_EMPTY,
 		}, nil
