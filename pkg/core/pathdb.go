@@ -23,14 +23,24 @@ import (
 	"sync"
 )
 
-var _ rpc.CoreServiceServer = &Database{}
+var _ rpc.CoreServiceServer = &PathDatabase{}
 
 const (
 	CoreCode_OKAY int32 = 0
 	CoreCode_ERR  int32 = 1
 )
 
-type Database struct {
+// PathDatabase is the core data store structure for Aurae.
+//
+// This structure couples the concepts of "path" filesystem to a
+// key value store.
+//
+// If you store "boops" it becomes "/boops"
+// If you store "beeps/boops" it becomes "/beeps/boops"
+//
+// The path paradigm allows for a less effecient but more queryable data set.
+// This also allows us to expose the database as a mountable system over the socket.
+type PathDatabase struct {
 	mtx sync.Mutex
 	rpc.UnimplementedCoreServiceServer
 	// TODO we will need to prioritize our getters and setters
@@ -40,7 +50,7 @@ type Database struct {
 	Listers []Lister
 }
 
-func (c *Database) ListRPC(ctx context.Context, req *rpc.ListReq) (*rpc.ListResp, error) {
+func (c *PathDatabase) ListRPC(ctx context.Context, req *rpc.ListReq) (*rpc.ListResp, error) {
 	c.mtx.Lock()
 	defer c.mtx.Unlock()
 	var resp map[string]string
@@ -57,7 +67,7 @@ func (c *Database) ListRPC(ctx context.Context, req *rpc.ListReq) (*rpc.ListResp
 	return response, nil
 }
 
-func (c *Database) SetRPC(ctx context.Context, req *rpc.SetReq) (*rpc.SetResp, error) {
+func (c *PathDatabase) SetRPC(ctx context.Context, req *rpc.SetReq) (*rpc.SetResp, error) {
 	c.mtx.Lock()
 	defer c.mtx.Unlock()
 	for _, setter := range c.Setters {
@@ -69,7 +79,7 @@ func (c *Database) SetRPC(ctx context.Context, req *rpc.SetReq) (*rpc.SetResp, e
 	return response, nil
 }
 
-func (c *Database) GetRPC(ctx context.Context, req *rpc.GetReq) (*rpc.GetResp, error) {
+func (c *PathDatabase) GetRPC(ctx context.Context, req *rpc.GetReq) (*rpc.GetResp, error) {
 	c.mtx.Lock()
 	defer c.mtx.Unlock()
 	resp := ""
@@ -86,10 +96,10 @@ func (c *Database) GetRPC(ctx context.Context, req *rpc.GetReq) (*rpc.GetResp, e
 	return response, nil
 }
 
-// NewDatabase will create a new database, and always initialize an in-memory cache.
-func NewDatabase() *Database {
+// NewPathDatabase will create a new PathDatabase, and always initialize an in-memory cache.
+func NewPathDatabase() *PathDatabase {
 	memDB := mem.NewDatabase()
-	return &Database{
+	return &PathDatabase{
 		mtx: sync.Mutex{},
 		Getters: []Getter{
 			memDB,

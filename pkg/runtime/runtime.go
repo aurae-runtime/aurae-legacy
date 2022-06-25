@@ -98,7 +98,7 @@ func (d *Daemon) Run() error {
 
 	// Step 4. Register the core database to the initialized server
 
-	coreDB := core.NewDatabase()
+	coreDB := core.NewPathDatabase()
 	// TODO We need modular (but opinionated) store backing
 	rpc.RegisterCoreServiceServer(server, coreDB)
 	logrus.Infof("Registering Core Database.")
