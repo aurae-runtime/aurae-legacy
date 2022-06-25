@@ -2,12 +2,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/kris-nova/aurae/pkg/core/mem"
+	"github.com/kris-nova/aurae/pkg/core/memfs"
 )
 
 func main() {
 
-	db := mem.NewDatabase()
+	db := memfs.NewDatabase()
 	db.Set("/beeps/boops/meeps/moops", "testvalue")
 	result := db.Get("/beeps/boops/meeps/moops")
 	if result != "testvalue" {

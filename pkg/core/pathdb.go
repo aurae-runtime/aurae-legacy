@@ -18,7 +18,7 @@ package core
 
 import (
 	"context"
-	"github.com/kris-nova/aurae/pkg/core/mem"
+	"github.com/kris-nova/aurae/pkg/core/memfs"
 	"github.com/kris-nova/aurae/rpc"
 	"path"
 	"sync"
@@ -118,7 +118,7 @@ func (c *PathDatabase) GetRPC(ctx context.Context, req *rpc.GetReq) (*rpc.GetRes
 
 // NewPathDatabase will create a new PathDatabase, and always initialize an in-memory cache.
 func NewPathDatabase() *PathDatabase {
-	memDB := mem.NewDatabase()
+	memDB := memfs.NewDatabase()
 	return &PathDatabase{
 		mtx: sync.Mutex{},
 		Getters: []Getter{

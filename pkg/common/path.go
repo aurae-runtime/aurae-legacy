@@ -14,60 +14,35 @@
  *                                                                           *
 \*===========================================================================*/
 
-package mem
+package common
 
-import "testing"
+import (
+	"path"
+	"strings"
+)
 
-func TestBasicGetSetDepth(t *testing.T) {
-	db := NewDatabase()
-	db.Set("/beeps/boops/meeps/moops", "testvalue")
-	result := db.Get("/beeps/boops/meeps/moops")
-	if result != "testvalue" {
-		t.Errorf("failed basic test")
+// Path is a heavily tested (and heavily used) common Path sanitation function.
+// This function is deterministic and will attempt to turn a key into a meaningful
+// filesystem path.
+func Path(key string) string {
+	var ret string
+	ret = strings.ReplaceAll(key, "\\", "")
+	rawPieces := strings.Split(ret, "/")
+	var cleanPieces []string
+	for _, p := range rawPieces {
+		p = strings.TrimSpace(p)
+		cleanPieces = append(cleanPieces, p)
 	}
+	ret = strings.Join(cleanPieces, "/")
+	ret = path.Clean(ret)
+	ret = path.Join("/", ret)
+	return ret
 }
 
-func TestFuzzCases(t *testing.T) {
-	db := NewDatabase()
-	cases := []struct {
-		key      string
-		expected string
-	}{
-		{
-			key:      "boops",
-			expected: "/boops",
-		},
-		{
-			key:      "boops///",
-			expected: "/boops",
-		},
-		{
-			key:      "//boops",
-			expected: "/boops",
-		},
-		{
-			key:      "//\\/\\/\\//\\/\\//boops",
-			expected: "/boops",
-		},
-		{
-			key:      "beeps/boops/  zeeps",
-			expected: "/beeps/boops/zeeps",
-		},
+func recursiveStripLeadingSuffix(key string, suffix string) string {
+	if strings.HasSuffix(key, suffix) {
+		key = strings.TrimSuffix(key, suffix)
+		return recursiveStripLeadingSuffix(key, suffix)
 	}
-
-	for _, c := range cases {
-		db.Set(c.key, c.expected)
-		actual := db.Get(c.key)
-		if actual != c.expected {
-			t.Errorf("Expected: %s, Actual: %s", c.expected, actual)
-		} else {
-			t.Logf("Expected: %s, Actual: %s", c.expected, actual)
-		}
-	}
-
-	db.Set("/beeps/boops/meeps/moops", "testvalue")
-	result := db.Get("/beeps/boops/meeps/moops")
-	if result != "testvalue" {
-		t.Errorf("failed basic test")
-	}
+	return key
 }
