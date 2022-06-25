@@ -37,6 +37,24 @@ type Database struct {
 	// TODO we need to manage inconsistencies
 	Getters []Getter
 	Setters []Setter
+	Listers []Lister
+}
+
+func (c *Database) ListRPC(ctx context.Context, req *rpc.ListReq) (*rpc.ListResp, error) {
+	c.mtx.Lock()
+	defer c.mtx.Unlock()
+	var resp map[string]string
+	for _, lister := range c.Listers {
+		resp = lister.List(req.Key)
+		if len(resp) > 0 {
+			break
+		}
+	}
+	response := &rpc.ListResp{
+		Entries: resp,
+		Code:    CoreCode_OKAY,
+	}
+	return response, nil
 }
 
 func (c *Database) SetRPC(ctx context.Context, req *rpc.SetReq) (*rpc.SetResp, error) {
@@ -77,6 +95,9 @@ func NewDatabase() *Database {
 			memDB,
 		},
 		Setters: []Setter{
+			memDB,
+		},
+		Listers: []Lister{
 			memDB,
 		},
 	}

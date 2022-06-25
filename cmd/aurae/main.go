@@ -152,6 +152,39 @@ func main() {
 					return nil
 				},
 			},
+			{
+				Name:      "list",
+				Usage:     "List aurae values.",
+				UsageText: `aurae list <key>`,
+				Flags: GlobalFlags([]cli.Flag{
+					&cli.StringFlag{
+						Name:        "socket",
+						Aliases:     []string{"sock"},
+						Destination: &run.socket,
+						Value:       runtime.DefaultSocketLocationLinux,
+					},
+				}),
+				Action: func(c *cli.Context) error {
+					key := c.Args().Get(0)
+					if key == "" {
+						return fmt.Errorf("usage: aurae get <key>")
+					}
+
+					conn, err := grpc.Dial(fmt.Sprintf("passthrough:///unix://%s", run.socket), grpc.WithInsecure(), grpc.WithTimeout(time.Second*3))
+					if err != nil {
+						return err
+					}
+					client := rpc.NewCoreServiceClient(conn)
+					getResp, err := client.ListRPC(context.Background(), &rpc.ListReq{
+						Key: key,
+					})
+					if err != nil {
+						return err
+					}
+					fmt.Println(getResp.Entries)
+					return nil
+				},
+			},
 			//{
 			//	Name:      "run",
 			//	Usage:     "Run an Application.",

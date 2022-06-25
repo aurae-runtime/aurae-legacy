@@ -24,6 +24,7 @@ const _ = grpc.SupportPackageIsVersion7
 type CoreServiceClient interface {
 	SetRPC(ctx context.Context, in *SetReq, opts ...grpc.CallOption) (*SetResp, error)
 	GetRPC(ctx context.Context, in *GetReq, opts ...grpc.CallOption) (*GetResp, error)
+	ListRPC(ctx context.Context, in *ListReq, opts ...grpc.CallOption) (*ListResp, error)
 }
 
 type coreServiceClient struct {
@@ -52,12 +53,22 @@ func (c *coreServiceClient) GetRPC(ctx context.Context, in *GetReq, opts ...grpc
 	return out, nil
 }
 
+func (c *coreServiceClient) ListRPC(ctx context.Context, in *ListReq, opts ...grpc.CallOption) (*ListResp, error) {
+	out := new(ListResp)
+	err := c.cc.Invoke(ctx, "/aurae.CoreService/ListRPC", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CoreServiceServer is the server API for CoreService service.
 // All implementations must embed UnimplementedCoreServiceServer
 // for forward compatibility
 type CoreServiceServer interface {
 	SetRPC(context.Context, *SetReq) (*SetResp, error)
 	GetRPC(context.Context, *GetReq) (*GetResp, error)
+	ListRPC(context.Context, *ListReq) (*ListResp, error)
 	mustEmbedUnimplementedCoreServiceServer()
 }
 
@@ -70,6 +81,9 @@ func (UnimplementedCoreServiceServer) SetRPC(context.Context, *SetReq) (*SetResp
 }
 func (UnimplementedCoreServiceServer) GetRPC(context.Context, *GetReq) (*GetResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetRPC not implemented")
+}
+func (UnimplementedCoreServiceServer) ListRPC(context.Context, *ListReq) (*ListResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListRPC not implemented")
 }
 func (UnimplementedCoreServiceServer) mustEmbedUnimplementedCoreServiceServer() {}
 
@@ -120,6 +134,24 @@ func _CoreService_GetRPC_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CoreService_ListRPC_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CoreServiceServer).ListRPC(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/aurae.CoreService/ListRPC",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CoreServiceServer).ListRPC(ctx, req.(*ListReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // CoreService_ServiceDesc is the grpc.ServiceDesc for CoreService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -134,6 +166,10 @@ var CoreService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetRPC",
 			Handler:    _CoreService_GetRPC_Handler,
+		},
+		{
+			MethodName: "ListRPC",
+			Handler:    _CoreService_ListRPC_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

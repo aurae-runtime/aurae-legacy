@@ -44,3 +44,10 @@ func (c *Database) Set(key, value string) {
 	defer c.mtx.Unlock()
 	packageCache[key] = value
 }
+
+func (c *Database) List(key string) map[string]string {
+	c.mtx.Lock()
+	defer c.mtx.Unlock()
+	// TODO implement filesystem query by paths
+	return packageCache
+}

@@ -28,3 +28,7 @@ type Getter interface {
 type Setter interface {
 	Set(key, value string)
 }
+
+type Lister interface {
+	List(key string) map[string]string
+}

@@ -24,6 +24,7 @@ package aurae;
 service CoreService {
   rpc SetRPC (SetReq) returns (SetResp) {}
   rpc GetRPC (GetReq) returns (GetResp) {}
+  rpc ListRPC (ListReq) returns (ListResp) {}
 }
 
 message SetReq {
@@ -41,5 +42,14 @@ message GetReq {
 
 message GetResp {
   string val = 1;
+  int32 code = 2;
+}
+
+message ListReq {
+  string key = 1;
+}
+
+message ListResp {
+  map<string, string> entries = 1;
   int32 code = 2;
 }
