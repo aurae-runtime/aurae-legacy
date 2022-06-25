@@ -14,34 +14,60 @@
  *                                                                           *
 \*===========================================================================*/
 
-package shape
+package mem
 
-type Config struct {
-	DomainName string
-	NodeName   string
+import "testing"
+
+func TestBasicGetSetDepth(t *testing.T) {
+	db := NewDatabase()
+	db.Set("/beeps/boops/meeps/moops", "testvalue")
+	result := db.Get("/beeps/boops/meeps/moops")
+	if result != "testvalue" {
+		t.Errorf("failed basic test")
+	}
 }
 
-// AuraeFilesystem is a modular filesystem that represents a working aurae node
-// or client.
-//
-// The simplest auraeFilesystem is typically found in /aurae
-type AuraeFilesystem interface {
+func TestFuzzCases(t *testing.T) {
+	db := NewDatabase()
+	cases := []struct {
+		key      string
+		expected string
+	}{
+		{
+			key:      "boops",
+			expected: "/boops",
+		},
+		{
+			key:      "boops///",
+			expected: "/boops",
+		},
+		{
+			key:      "//boops",
+			expected: "/boops",
+		},
+		{
+			key:      "//\\/\\/\\//\\/\\//boops",
+			expected: "/boops",
+		},
+		{
+			key:      "beeps/boops/  zeeps",
+			expected: "/beeps/boops/zeeps",
+		},
+	}
 
-	// Initialize will prepare either a true or virtual filesystem for aurae
-	// This should manage ensuring the model, as well as hydrating any config
-	// and secret/cert material.
-	Initialize(cfg *Config) error
+	for _, c := range cases {
+		db.Set(c.key, c.expected)
+		actual := db.Get(c.key)
+		if actual != c.expected {
+			t.Errorf("Expected: %s, Actual: %s", c.expected, actual)
+		} else {
+			t.Logf("Expected: %s, Actual: %s", c.expected, actual)
+		}
+	}
 
-	MountPoint() string
-	Socket() string
-
-	//Enable() error
-	//Disable() error
-	//Isolate() error
-	//Drain() error
-
-	Destroy() error
-
-	Set(key, value string) error
-	Get(key string) string
+	db.Set("/beeps/boops/meeps/moops", "testvalue")
+	result := db.Get("/beeps/boops/meeps/moops")
+	if result != "testvalue" {
+		t.Errorf("failed basic test")
+	}
 }
