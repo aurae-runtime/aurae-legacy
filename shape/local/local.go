@@ -29,7 +29,7 @@ import (
 
 var _ shape.AuraeFilesystem = &LocalFilesystem{}
 
-// LocalFilesystem is a simple local state store for aurae
+// LocalFilesystem is a simple local state core for aurae
 type LocalFilesystem struct {
 	root  string
 	model *shape.Model

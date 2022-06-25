@@ -24,7 +24,7 @@ import (
 )
 
 func SignalHandler() chan bool {
-	logrus.Infof("Managing Signals.")
+	logrus.Infof("Initializing Signal Handler.")
 	sigCh := make(chan os.Signal, 2)
 	quitCh := make(chan bool)
 

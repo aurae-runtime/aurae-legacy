@@ -19,7 +19,7 @@ package runtime
 import (
 	"fmt"
 	"github.com/kris-nova/aurae"
-	"github.com/kris-nova/aurae/aurafs"
+	"github.com/kris-nova/aurae/pkg/core"
 	"github.com/kris-nova/aurae/pkg/posix"
 	"github.com/kris-nova/aurae/rpc"
 	"github.com/sirupsen/logrus"
@@ -41,28 +41,79 @@ import (
 // feature.
 //
 type Daemon struct {
-	runtime    bool
-	mountpoint string
-	socket     string
+	runtime bool
+	socket  string
 }
 
-func New(mountpoint, socket string) *Daemon {
+func New(socket string) *Daemon {
 	return &Daemon{
-		mountpoint: mountpoint,
-		runtime:    true,
-		socket:     socket,
+		runtime: true,
+		socket:  socket,
 	}
 }
 
 func (d *Daemon) Run() error {
-	// Start the Signal Handler
+
+	// Step 1. Establish context in the logs.
+	
+	logrus.Infof("Aurae runtime daemon. Version: %s", aurae.Version)
+	logrus.Infof("Aurae Socket [%s]", d.socket)
+
+	// Step 2. Establish runtime safety
+
 	quitCh := posix.SignalHandler()
 	go func() {
 		d.runtime = <-quitCh
 	}()
-	var err error
 
-	// Dispatch events from the filesystem
+	// Step 3. Establish gRPC server.
+
+	var err error
+	conn, err := net.Listen("unix", d.socket)
+	if err != nil {
+		if strings.Contains(err.Error(), "bind: address already in use") {
+			logrus.Warningf("Attempting to clean socket from failure!")
+			err = os.Remove(d.socket)
+			if err != nil {
+				return fmt.Errorf("unable to establish socket ownership: %v", err)
+			}
+			conn, err = net.Listen("unix", d.socket)
+			if err != nil {
+				return fmt.Errorf("unable to establish socket connection: %v", err)
+			}
+			logrus.Warningf("Socket acquired after previous abandonment.")
+		} else {
+			return err
+		}
+	} else {
+		logrus.Infof("Success. Socket acquired.")
+	}
+
+	server := grpc.NewServer()
+	logrus.Infof("Starting gRPC Server.")
+
+	// Step 4. Register the core database to the initialized server
+
+	coreDB := core.NewCoreDatabase()
+	// TODO We need modular (but opinionated) store backing
+	rpc.RegisterCoreServiceServer(server, coreDB)
+	logrus.Infof("Registering Core Database.")
+
+	// Step 5. Begin the empty loop by running a small go routine with an emergency cancel
+
+	serveCancel := make(chan error)
+	go func() {
+		err = server.Serve(conn)
+		if err != nil {
+			serveCancel <- err
+		}
+	}()
+
+	logrus.Infof("Listening.")
+
+	// Step 6. Dispatch events from the filesystem
+
+	// need to configure events directories/paths
 	//err := d.Dispatch()
 	//if err != nil {
 	//	logrus.Errorf("Dispatch failure: %v", err)
@@ -70,42 +121,24 @@ func (d *Daemon) Run() error {
 	//	d.runtime = false
 	//}
 
-	fs := aurafs.NewAuraeFS(d.mountpoint)
-	err = fs.Mount()
-	if err != nil {
-		return fmt.Errorf("unable to mount AuraeFS: %v", err)
-	}
+	// Step 7. Begin the runtime loop.
 
-	// Load gRPC server
-
-	// Clean this up after we understand the relationship with auraeFS and gRPC with mTLS
-	logrus.Infof("Aurae runtime daemon. Version: %s", aurae.Version)
-	logrus.Infof("Initializing Unix Domain Socket...")
-	conn, err := net.Listen("unix", d.socket)
-	if err != nil {
-		if strings.Contains(err.Error(), "bind: address already in use") {
-			logrus.Warningf("Attempting to clean socket from failure!")
-			os.Remove(d.socket)
-			conn, err = net.Listen("unix", d.socket)
+	for d.runtime {
+		select {
+		case err := <-serveCancel:
+			if err != nil {
+				logrus.Errorf("Auarae core serving error: %v", err)
+				d.runtime = false // Cancel the runtime during a core serving error
+			}
+		default:
+			// pass
 		}
 	}
-	if err != nil {
-		return fmt.Errorf("unable to start daemon: socket error: %v", err)
-	} else {
-		logrus.Infof("Success. Socket acquired.")
-	}
 
-	server := grpc.NewServer()
-	rpc.RegisterAuraeFSServer(server, fs)
-
-	logrus.Infof("Starting gRPC Server")
-	go server.Serve(conn)
-	for d.runtime {
-	}
-	logrus.Infof("Gracefully shutting aurae service.")
+	logrus.Infof("Gracefully stopping.")
 	server.GracefulStop()
-	server.Stop()
 	logrus.Infof("Gentle cleanup.")
+	server.Stop()
 	logrus.Infof("Safely exiting.")
 	return nil
 }

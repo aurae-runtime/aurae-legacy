@@ -17,8 +17,9 @@
 all: compile
 
 version       ?=  0.1.2            # Semantic versioning for the entire suite
-toplevel      ?=  aurae            # Top level package name for embedding values
+toplevel      ?=  aurae
 auraetarget   ?=  aurae            # Targets are written to local /bin directory
+auraedtarget  ?=  auraed           # Targets are written to local /bin directory
 auraefstarget ?=  auraefs          # Targets are written to local /bin directory
 org           ?=  kris-nova
 authorname    ?=  Kris Nóva
@@ -27,7 +28,7 @@ license       ?=  MIT
 year          ?=  2022
 copyright     ?=  Copyright (c) $(year)
 
-compile: gen aurae auraefs ## Compile for the local architecture ⚙
+compile: gen aurae auraed auraefs ## Compile for the local architecture ⚙
 
 .PHONY: aurae
 aurae: ## Compile aurae (local arch)
@@ -37,9 +38,19 @@ aurae: ## Compile aurae (local arch)
 	-X 'github.com/$(org)/$(toplevel).AuthorName=$(authorname)' \
 	-X 'github.com/$(org)/$(toplevel).AuthorEmail=$(authoremail)' \
 	-X 'github.com/$(org)/$(toplevel).Copyright=$(copyright)' \
-	-X 'github.com/$(org)/$(toplevel).License=$(license)' \
-	-X 'github.com/$(org)/$(toplevel).Name=$(target)'" \
+	-X 'github.com/$(org)/$(toplevel).License=$(license)'" \
 	-o bin/$(auraetarget) cmd/aurae/*.go
+
+.PHONY: auraed
+auraed: ## Compile auraed (local arch)
+	@echo "Compiling [auraed] ..."
+	go build -ldflags "\
+	-X 'github.com/$(org)/$(toplevel).Version=$(version)' \
+	-X 'github.com/$(org)/$(toplevel).AuthorName=$(authorname)' \
+	-X 'github.com/$(org)/$(toplevel).AuthorEmail=$(authoremail)' \
+	-X 'github.com/$(org)/$(toplevel).Copyright=$(copyright)' \
+	-X 'github.com/$(org)/$(toplevel).License=$(license)'" \
+	-o bin/$(auraedtarget) cmd/auraed/*.go
 
 .PHONY: auraefs
 auraefs: ## Compile auraefs (local arch)
@@ -49,8 +60,7 @@ auraefs: ## Compile auraefs (local arch)
 	-X 'github.com/$(org)/$(toplevel).AuthorName=$(authorname)' \
 	-X 'github.com/$(org)/$(toplevel).AuthorEmail=$(authoremail)' \
 	-X 'github.com/$(org)/$(toplevel).Copyright=$(copyright)' \
-	-X 'github.com/$(org)/$(toplevel).License=$(license)' \
-	-X 'github.com/$(org)/$(toplevel).Name=$(target)'" \
+	-X 'github.com/$(org)/$(toplevel).License=$(license)'" \
 	-o bin/$(auraefstarget) cmd/auraefs/*.go
 
 install: ## Install the program to /usr/bin 🎉

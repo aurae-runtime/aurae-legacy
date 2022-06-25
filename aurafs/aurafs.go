@@ -33,7 +33,6 @@ const (
 )
 
 type AuraeFS struct {
-	rpc.AuraeFSServer
 	root    *Root
 	runtime bool
 	service *fuse.Server

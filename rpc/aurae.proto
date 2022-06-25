@@ -20,12 +20,10 @@ option go_package = "github.com/kris-nova/aurae/rpc";
 
 package aurae;
 
-// 	Set(key, value string) error
-//	Get(key string) string
 
-service AuraeFS {
-  rpc SetRPC (SetReq) returns (SetResp) {}
-  rpc GetRPC (GetReq) returns (GetResp) {}
+service CoreService {
+  rpc Set (SetReq) returns (SetResp) {}
+  rpc Get (GetReq) returns (GetResp) {}
 }
 
 message SetReq {

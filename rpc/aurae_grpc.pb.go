@@ -18,122 +18,122 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
-// AuraeFSClient is the client API for AuraeFS service.
+// CoreServiceClient is the client API for CoreService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type AuraeFSClient interface {
-	SetRPC(ctx context.Context, in *SetReq, opts ...grpc.CallOption) (*SetResp, error)
-	GetRPC(ctx context.Context, in *GetReq, opts ...grpc.CallOption) (*GetResp, error)
+type CoreServiceClient interface {
+	Set(ctx context.Context, in *SetReq, opts ...grpc.CallOption) (*SetResp, error)
+	Get(ctx context.Context, in *GetReq, opts ...grpc.CallOption) (*GetResp, error)
 }
 
-type auraeFSClient struct {
+type coreServiceClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewAuraeFSClient(cc grpc.ClientConnInterface) AuraeFSClient {
-	return &auraeFSClient{cc}
+func NewCoreServiceClient(cc grpc.ClientConnInterface) CoreServiceClient {
+	return &coreServiceClient{cc}
 }
 
-func (c *auraeFSClient) SetRPC(ctx context.Context, in *SetReq, opts ...grpc.CallOption) (*SetResp, error) {
+func (c *coreServiceClient) Set(ctx context.Context, in *SetReq, opts ...grpc.CallOption) (*SetResp, error) {
 	out := new(SetResp)
-	err := c.cc.Invoke(ctx, "/aurae.AuraeFS/SetRPC", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/aurae.CoreService/Set", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *auraeFSClient) GetRPC(ctx context.Context, in *GetReq, opts ...grpc.CallOption) (*GetResp, error) {
+func (c *coreServiceClient) Get(ctx context.Context, in *GetReq, opts ...grpc.CallOption) (*GetResp, error) {
 	out := new(GetResp)
-	err := c.cc.Invoke(ctx, "/aurae.AuraeFS/GetRPC", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/aurae.CoreService/Get", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// AuraeFSServer is the server API for AuraeFS service.
-// All implementations must embed UnimplementedAuraeFSServer
+// CoreServiceServer is the server API for CoreService service.
+// All implementations must embed UnimplementedCoreServiceServer
 // for forward compatibility
-type AuraeFSServer interface {
-	SetRPC(context.Context, *SetReq) (*SetResp, error)
-	GetRPC(context.Context, *GetReq) (*GetResp, error)
-	mustEmbedUnimplementedAuraeFSServer()
+type CoreServiceServer interface {
+	Set(context.Context, *SetReq) (*SetResp, error)
+	Get(context.Context, *GetReq) (*GetResp, error)
+	mustEmbedUnimplementedCoreServiceServer()
 }
 
-// UnimplementedAuraeFSServer must be embedded to have forward compatible implementations.
-type UnimplementedAuraeFSServer struct {
+// UnimplementedCoreServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedCoreServiceServer struct {
 }
 
-func (UnimplementedAuraeFSServer) SetRPC(context.Context, *SetReq) (*SetResp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SetRPC not implemented")
+func (UnimplementedCoreServiceServer) Set(context.Context, *SetReq) (*SetResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Set not implemented")
 }
-func (UnimplementedAuraeFSServer) GetRPC(context.Context, *GetReq) (*GetResp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetRPC not implemented")
+func (UnimplementedCoreServiceServer) Get(context.Context, *GetReq) (*GetResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
 }
-func (UnimplementedAuraeFSServer) mustEmbedUnimplementedAuraeFSServer() {}
+func (UnimplementedCoreServiceServer) mustEmbedUnimplementedCoreServiceServer() {}
 
-// UnsafeAuraeFSServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to AuraeFSServer will
+// UnsafeCoreServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to CoreServiceServer will
 // result in compilation errors.
-type UnsafeAuraeFSServer interface {
-	mustEmbedUnimplementedAuraeFSServer()
+type UnsafeCoreServiceServer interface {
+	mustEmbedUnimplementedCoreServiceServer()
 }
 
-func RegisterAuraeFSServer(s grpc.ServiceRegistrar, srv AuraeFSServer) {
-	s.RegisterService(&AuraeFS_ServiceDesc, srv)
+func RegisterCoreServiceServer(s grpc.ServiceRegistrar, srv CoreServiceServer) {
+	s.RegisterService(&CoreService_ServiceDesc, srv)
 }
 
-func _AuraeFS_SetRPC_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _CoreService_Set_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(SetReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AuraeFSServer).SetRPC(ctx, in)
+		return srv.(CoreServiceServer).Set(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/aurae.AuraeFS/SetRPC",
+		FullMethod: "/aurae.CoreService/Set",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuraeFSServer).SetRPC(ctx, req.(*SetReq))
+		return srv.(CoreServiceServer).Set(ctx, req.(*SetReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AuraeFS_GetRPC_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _CoreService_Get_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AuraeFSServer).GetRPC(ctx, in)
+		return srv.(CoreServiceServer).Get(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/aurae.AuraeFS/GetRPC",
+		FullMethod: "/aurae.CoreService/Get",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuraeFSServer).GetRPC(ctx, req.(*GetReq))
+		return srv.(CoreServiceServer).Get(ctx, req.(*GetReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// AuraeFS_ServiceDesc is the grpc.ServiceDesc for AuraeFS service.
+// CoreService_ServiceDesc is the grpc.ServiceDesc for CoreService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var AuraeFS_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "aurae.AuraeFS",
-	HandlerType: (*AuraeFSServer)(nil),
+var CoreService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "aurae.CoreService",
+	HandlerType: (*CoreServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "SetRPC",
-			Handler:    _AuraeFS_SetRPC_Handler,
+			MethodName: "Set",
+			Handler:    _CoreService_Set_Handler,
 		},
 		{
-			MethodName: "GetRPC",
-			Handler:    _AuraeFS_GetRPC_Handler,
+			MethodName: "Get",
+			Handler:    _CoreService_Get_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

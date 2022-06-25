@@ -14,69 +14,48 @@
  *                                                                           *
 \*===========================================================================*/
 
-package net
+package main
 
 import (
-	"context"
 	"fmt"
-	"github.com/kris-nova/aurae/rpc"
-	"github.com/kris-nova/aurae/shape"
-	"github.com/kris-nova/aurae/shape/local"
+	"os"
 )
 
-var _ shape.AuraeFilesystem = &NetworkFilesystem{}
+var env = &EnvironmentOptions{}
 
-// NetworkFilesystem is a simple state core for IPC over unix domain sockets on localhost
-type NetworkFilesystem struct {
-	rpc.UnimplementedAuraeFilesystemServer
-	internal *local.LocalFilesystem
+type EnvironmentOptions struct {
+
+	// example fields
+	example string
 }
 
-func NewNetworkFilesystem(internal *local.LocalFilesystem) *NetworkFilesystem {
-	return &NetworkFilesystem{
-		internal: internal,
+var (
+	envOpt   = &EnvironmentOptions{}
+	registry = []*EnvironmentVariable{
+		{
+			Name:        "",
+			Value:       "",
+			Destination: &envOpt.example,
+			Required:    false,
+		},
 	}
+)
+
+type EnvironmentVariable struct {
+	Name        string
+	Value       string
+	Destination *string
+	Required    bool
 }
 
-func (a *NetworkFilesystem) Destroy() error {
-	return a.internal.Destroy()
-}
-
-func (a *NetworkFilesystem) Initialize(cfg *shape.Config) error {
-	return a.internal.Initialize(cfg)
-}
-
-func (a *NetworkFilesystem) MountPoint() string {
-	return a.internal.MountPoint()
-}
-
-func (a *NetworkFilesystem) Socket() string {
-	return a.internal.Socket()
-}
-
-func (a *NetworkFilesystem) Set(key, value string) error {
-	return a.internal.Set(key, value)
-}
-
-func (a *NetworkFilesystem) Get(key string) string {
-	return a.internal.Get(key)
-}
-
-func (a *NetworkFilesystem) SetRPC(ctx context.Context, set *rpc.SetReq) (*rpc.SetResp, error) {
-	err := a.Set(set.Key, set.Val)
-	if err != nil {
-		return &rpc.SetResp{
-			Code: -1,
-		}, fmt.Errorf("set() filesystem error: %v", err)
+func Environment() error {
+	for _, v := range registry {
+		v.Value = os.Getenv(v.Name)
+		if v.Required && v.Value == "" {
+			// If required and the variable is empty
+			return fmt.Errorf("empty or undefined environmental variable [%s]", v.Name)
+		}
+		*v.Destination = v.Value
 	}
-	return &rpc.SetResp{
-		Code: 1,
-	}, nil
-}
-func (a *NetworkFilesystem) GetRPC(ctx context.Context, get *rpc.GetReq) (*rpc.GetResp, error) {
-	val := a.Get(get.Key)
-	return &rpc.GetResp{
-		Code: 1,
-		Val:  val,
-	}, nil
+	return nil
 }

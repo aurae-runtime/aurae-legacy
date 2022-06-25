@@ -2,25 +2,6 @@ module github.com/kris-nova/aurae
 
 go 1.18
 
-// Taken from https://github.com/ory/kratos/blob/master/go.mod
-replace (
-	//github.com/bradleyjkemp/cupaloy/v2 => github.com/aeneasr/cupaloy/v2 v2.6.1-0.20210924214125-3dfdd01210a3
-	github.com/gorilla/sessions => github.com/ory/sessions v1.2.2-0.20220110165800-b09c17334dc2
-	github.com/jackc/pgconn => github.com/jackc/pgconn v1.10.1-0.20211002123621-290ee79d1e8d
-	github.com/knadh/koanf => github.com/aeneasr/koanf v0.14.1-0.20211230115640-aa3902b3267a
-	// github.com/luna-duclos/instrumentedsql => github.com/ory/instrumentedsql v1.2.0
-	// github.com/luna-duclos/instrumentedsql/opentracing => github.com/ory/instrumentedsql/opentracing v0.0.0-20210903114257-c8963b546c5c
-	github.com/mattn/go-sqlite3 => github.com/mattn/go-sqlite3 v1.14.7-0.20210414154423-1157a4212dcb
-	//github.com/oleiade/reflections => github.com/oleiade/reflections v1.0.1
-	// Use the internal httpclient which can be generated in this codebase but mark it as the
-	// official SDK, allowing for the Ory CLI to consume Ory Kratos' CLI commands.
-	//github.com/ory/kratos-client-go => ./internal/httpclient
-
-	//go.mongodb.org/mongo-driver => go.mongodb.org/mongo-driver v1.4.6
-	golang.org/x/sys => golang.org/x/sys v0.0.0-20220319134239-a9b59b0215f8
-//gopkg.in/DataDog/dd-trace-go.v1 => gopkg.in/DataDog/dd-trace-go.v1 v1.27.1-0.20201005154917-54b73b3e126a
-)
-
 require (
 	github.com/fsnotify/fsnotify v1.5.4
 	github.com/hanwen/go-fuse/v2 v2.1.0

@@ -1,5 +1,9 @@
 # aurae
 
+TODO This readme is out of date
+
+---
+
 A Simple Distributed System. Built for App teams.
 
 Reverse your relationship with the cloud. Shift your application posture from reliant upon cloud dependencies, to harvesting cloud services on your terms.
