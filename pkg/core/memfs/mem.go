@@ -17,6 +17,7 @@
 package memfs
 
 import (
+	"github.com/kris-nova/aurae/pkg/common"
 	"strings"
 	"sync"
 )
@@ -123,17 +124,20 @@ var rootNode = &Node{
 func (c *Database) Get(key string) string {
 	c.mtx.Lock()
 	defer c.mtx.Unlock()
-	return rootNode.GetChild(key).Value
+	path := common.Path(key) // Data mutation!
+	return rootNode.GetChild(path).Value
 }
 
 func (c *Database) Set(key, value string) {
 	c.mtx.Lock()
 	defer c.mtx.Unlock()
-	rootNode.AddChild(key, value)
+	path := common.Path(key) // Data mutation!
+	rootNode.AddChild(path, value)
 }
 
 func (c *Database) List(key string) map[string]string {
 	c.mtx.Lock()
 	defer c.mtx.Unlock()
-	return rootNode.ListChildren(key)
+	path := common.Path(key) // Data mutation!
+	return rootNode.ListChildren(path)
 }

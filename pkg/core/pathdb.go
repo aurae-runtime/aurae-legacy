@@ -55,9 +55,12 @@ type PathDatabase struct {
 func (c *PathDatabase) ListRPC(ctx context.Context, req *rpc.ListReq) (*rpc.ListResp, error) {
 	c.mtx.Lock()
 	defer c.mtx.Unlock()
+
+	path := common.Path(req.Key) // Data mutation!
+
 	var resp map[string]string
 	for _, lister := range c.Listers {
-		resp = lister.List(req.Key)
+		resp = lister.List(path)
 		if len(resp) > 0 {
 			break
 		}
@@ -73,15 +76,11 @@ func (c *PathDatabase) ListRPC(ctx context.Context, req *rpc.ListReq) (*rpc.List
 func (c *PathDatabase) SetRPC(ctx context.Context, req *rpc.SetReq) (*rpc.SetResp, error) {
 	c.mtx.Lock()
 	defer c.mtx.Unlock()
-	var key, val, mutPath string
-	key = req.Key
-	val = req.Val
 
-	// Path mutation!
-	mutPath = common.Path(key)
+	path := common.Path(req.Key) // Data mutation!
 
 	// Ignore empty paths
-	if mutPath == "/" {
+	if path == "/" {
 		return &rpc.SetResp{
 			Code: CoreCode_EMPTY,
 		}, nil
@@ -90,7 +89,7 @@ func (c *PathDatabase) SetRPC(ctx context.Context, req *rpc.SetReq) (*rpc.SetRes
 	// Path mutation!
 
 	for _, setter := range c.Setters {
-		setter.Set(mutPath, val)
+		setter.Set(path, req.Val)
 	}
 	response := &rpc.SetResp{
 		Code: CoreCode_OKAY,
@@ -101,9 +100,12 @@ func (c *PathDatabase) SetRPC(ctx context.Context, req *rpc.SetReq) (*rpc.SetRes
 func (c *PathDatabase) GetRPC(ctx context.Context, req *rpc.GetReq) (*rpc.GetResp, error) {
 	c.mtx.Lock()
 	defer c.mtx.Unlock()
+
+	path := common.Path(req.Key) // Data mutation!
+
 	resp := ""
 	for _, getter := range c.Getters {
-		resp = getter.Get(req.Key)
+		resp = getter.Get(path)
 		if resp != "" {
 			break
 		}
