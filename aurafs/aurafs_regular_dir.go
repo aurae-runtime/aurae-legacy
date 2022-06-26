@@ -22,7 +22,6 @@ import (
 	"github.com/hanwen/go-fuse/v2/fuse"
 	"github.com/kris-nova/aurae/client"
 	"github.com/kris-nova/aurae/rpc"
-	"github.com/sirupsen/logrus"
 	"os"
 	"syscall"
 )
@@ -75,8 +74,6 @@ func (r *RegularDir) Readdir(ctx context.Context) (fs.DirStream, syscall.Errno) 
 	listResp, err := r.client.ListRPC(ctx, &rpc.ListReq{
 		Key: r.path,
 	})
-	logrus.Infof("%v", listResp.Entries)
-	logrus.Infof("path: %s", r.path)
 	if err != nil {
 		return fs.NewListDirStream(dirents), 0
 	}
@@ -115,7 +112,7 @@ func (r *RegularDir) Rmdir(ctx context.Context, name string) syscall.Errno {
 func (r *RegularDir) NewRegularSubfile(ctx context.Context, c *client.Client, name string, data []byte) uint64 {
 	i := Ino()
 	r.AddChild(name,
-		r.NewInode(ctx, NewRegularFile(c, DefaultauraeFSINodePermissions, data),
+		r.NewInode(ctx, NewRegularFile(c, fuse.S_IFREG, name, data),
 			fs.StableAttr{
 				Ino:  i,
 				Mode: fuse.S_IFREG,

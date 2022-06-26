@@ -51,7 +51,7 @@ func (r *Root) OnAdd(ctx context.Context) {
 func (r *Root) NewRegularSubfile(ctx context.Context, c *client.Client, name string, data []byte) uint64 {
 	i := Ino()
 	r.AddChild(name,
-		r.NewInode(ctx, NewRegularFile(c, DefaultauraeFSINodePermissions, data),
+		r.NewInode(ctx, NewRegularFile(c, fuse.S_IFREG, name, data),
 			fs.StableAttr{
 				Ino:  i,
 				Mode: fuse.S_IFREG,
