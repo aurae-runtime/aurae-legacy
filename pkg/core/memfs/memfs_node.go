@@ -17,6 +17,7 @@
 package memfs
 
 import (
+	"fmt"
 	"os"
 	"strings"
 )
@@ -46,6 +47,11 @@ type Node struct {
 	// Sub nodes, or nested files and directories. Each with a unique name.
 	Children map[string]*Node
 
+	// parent is the parent of this *Node.
+	//
+	// parent is nil for the root of the tree.
+	parent *Node
+
 	// depth is the depth of this Node from the root.
 	// The root Node counts as 1, so the "/file/path" Node would have a depth
 	// of 3.
@@ -62,10 +68,14 @@ type Node struct {
 // There is no concept of creating an empty directory.
 func (n *Node) AddSubNode(key, value string) *Node {
 	key = strings.TrimSuffix(key, "/")
+	if key == "" {
+		return rootNode
+	}
 	child := &Node{
 		Children: make(map[string]*Node),
 		depth:    n.depth + 1,
 		file:     false,
+		parent:   n,
 	}
 	spl := strings.Split(key, "/")
 	if len(spl) > 1 {
@@ -88,6 +98,9 @@ func (n *Node) AddSubNode(key, value string) *Node {
 // GetSubNode will return a sub Node recursively if it is found in the tree.
 func (n *Node) GetSubNode(key string) *Node {
 	key = strings.TrimSuffix(key, "/")
+	if key == "" {
+		return rootNode
+	}
 	if n.Name == key && n.file {
 		return n
 	}
@@ -114,7 +127,7 @@ func (n *Node) ListSubNodes(key string) map[string]*Node {
 	result := make(map[string]*Node)
 	key = strings.TrimSuffix(key, "/")
 	// First check and see if a dir
-	found := rootNode.GetSubNode(key)
+	found := n.GetSubNode(key)
 	if found == nil {
 		return result // Nothing
 	}
@@ -131,4 +144,21 @@ func (n *Node) ListSubNodes(key string) map[string]*Node {
 		}
 	}
 	return result
+}
+
+// RemoveRecursive will remove this node, and all of its children from the tree
+func (n *Node) RemoveRecursive() {
+	for _, c := range n.Children {
+		c.RemoveRecursive()
+	}
+	n.remove()
+}
+
+// remove will remove this node from the tree. This is a dangerous operation
+// to call externally, so we only export RemoveRecursive to other packages.
+func (n *Node) remove() {
+	if n.parent == nil {
+		panic(fmt.Sprintf("abandon node in tree, unable to remove: %v", n))
+	}
+	delete(n.parent.Children, n.Name)
 }

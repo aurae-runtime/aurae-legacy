@@ -168,3 +168,26 @@ func TestListFiles(t *testing.T) {
 	}
 
 }
+
+func TestRemoveNodes(t *testing.T) {
+	rootNode.AddSubNode("/ztest/zpath/remove/me", "")
+	child := rootNode.GetSubNode("/ztest/zpath")
+	childShouldExist := rootNode.GetSubNode("/ztest/zpath/remove/me")
+	if childShouldExist == nil {
+		t.Errorf("child should exist")
+	}
+	child.RemoveRecursive()
+	childShouldNotExist := rootNode.GetSubNode("/ztest/zpath/remove/me")
+	if childShouldNotExist != nil {
+		t.Errorf("child should not exist")
+	}
+	childShouldNoLongerExist := rootNode.GetSubNode("/ztest/zpath")
+	if childShouldNoLongerExist != nil {
+		t.Errorf("child should no longer exist")
+	}
+	childShouldStillExist := rootNode.GetSubNode("/ztest")
+	if childShouldStillExist == nil {
+		t.Errorf("child should still exist")
+	}
+
+}
