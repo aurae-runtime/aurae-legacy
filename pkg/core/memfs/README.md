@@ -18,3 +18,10 @@ All nodes can have file content.
 
 The "node" `beeps` can contain file content even though it is a directory, as well as the "nodes" `meeps` and `boops`.
 
+### Package State 
+
+The `memfs` package has package level state. 
+
+This is because we know there will only be a single root node in our tree at one time. 
+
+We will need to be able to set values in the tree arbitrarily.

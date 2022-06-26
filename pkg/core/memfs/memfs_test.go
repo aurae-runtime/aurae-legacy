@@ -71,16 +71,14 @@ func TestAddChildFileCheck(t *testing.T) {
 }
 
 func TestBasicGetSetDepth(t *testing.T) {
-	db := NewDatabase()
-	db.Set("/beeps/boops/meeps/moops", "testvalue")
-	result := db.Get("/beeps/boops/meeps/moops")
+	Set("/beeps/boops/meeps/moops", "testvalue")
+	result := Get("/beeps/boops/meeps/moops")
 	if result != "testvalue" {
 		t.Errorf("failed basic test")
 	}
 }
 
 func TestFuzzCases(t *testing.T) {
-	db := NewDatabase()
 	cases := []struct {
 		key      string
 		expected string
@@ -108,8 +106,8 @@ func TestFuzzCases(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		db.Set(c.key, c.expected)
-		actual := db.Get(c.key)
+		Set(c.key, c.expected)
+		actual := Get(c.key)
 		if actual != c.expected {
 			t.Errorf("Expected: %s, Actual: %s", c.expected, actual)
 		} else {
@@ -117,20 +115,19 @@ func TestFuzzCases(t *testing.T) {
 		}
 	}
 
-	db.Set("/beeps/boops/meeps/moops", "testvalue")
-	result := db.Get("/beeps/boops/meeps/moops")
+	Set("/beeps/boops/meeps/moops", "testvalue")
+	result := Get("/beeps/boops/meeps/moops")
 	if result != "testvalue" {
 		t.Errorf("failed basic test")
 	}
 }
 
 func TestListFiles(t *testing.T) {
-	db := NewDatabase()
-	db.Set("/base/path1", "testData1")
-	db.Set("/base/path2", "testData2")
-	db.Set("/base/path3", "testData3")
+	Set("/base/path1", "testData1")
+	Set("/base/path2", "testData2")
+	Set("/base/path3", "testData3")
 
-	actual3 := db.Get("/base/path3")
+	actual3 := Get("/base/path3")
 	if actual3 != "testData3" {
 		t.Errorf("Multiple subfile data lookup error. Expected: testData3, Actual: %s", actual3)
 	}
@@ -139,7 +136,7 @@ func TestListFiles(t *testing.T) {
 		t.Errorf("Expecting node.file=true")
 	}
 
-	files := db.List("/base")
+	files := List("/base")
 	if len(files) != 3 {
 		t.Errorf("List failure. Expecting 3, Actual: %d", len(files))
 	}

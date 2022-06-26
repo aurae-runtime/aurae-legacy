@@ -17,44 +17,84 @@
 package memfs
 
 import (
-	"github.com/kris-nova/aurae/pkg/common"
-	"sync"
+	"strings"
 )
 
-var rootNode = &Node{
-	Name:     "/",
-	Children: make(map[string]*Node),
-	depth:    0,
+type Node struct {
+	Name     string
+	Value    string
+	Children map[string]*Node
+	depth    int
+	file     bool
 }
 
-var mtx = sync.Mutex{}
-
-func Get(key string) string {
-	mtx.Lock()
-	defer mtx.Unlock()
-	path := common.Path(key) // Data mutation!
-	return rootNode.GetChild(path).Value
+func (n *Node) AddChild(key, value string) *Node {
+	key = strings.TrimSuffix(key, "/")
+	child := &Node{
+		Children: make(map[string]*Node),
+		depth:    n.depth + 1,
+		file:     false,
+	}
+	spl := strings.Split(key, "/")
+	if len(spl) > 1 {
+		// See if the node already has the child
+		if cachedChild, ok := n.Children[spl[0]]; ok {
+			child = cachedChild
+		}
+		child.Name = spl[0]
+		child.file = false
+		child.AddChild(strings.Join(spl[1:], "/"), value)
+	} else {
+		child.Name = key
+		child.file = true
+		child.Value = value
+	}
+	n.Children[child.Name] = child
+	return child
 }
 
-func Set(key, value string) {
-	mtx.Lock()
-	defer mtx.Unlock()
-	path := common.Path(key) // Data mutation!
-	rootNode.AddChild(path, value)
-}
-
-func List(key string) map[string]string {
-	mtx.Lock()
-	defer mtx.Unlock()
-	base := common.Path(key)
-	lsMap := rootNode.ListChildren(base)
-	ret := make(map[string]string)
-	for file, node := range lsMap {
-		if node == nil {
-			ret[file] = ""
-		} else {
-			ret[file] = node.Value
+func (n *Node) GetChild(key string) *Node {
+	key = strings.TrimSuffix(key, "/")
+	if n.Name == key && n.file {
+		return n
+	}
+	spl := strings.Split(key, "/")
+	if len(spl) > 1 {
+		first := spl[0]
+		for _, child := range n.Children {
+			if child.Name == first {
+				return child.GetChild(strings.Join(spl[1:], "/"))
+			}
+		}
+	} else {
+		for _, child := range n.Children {
+			if child.Name == key {
+				return child
+			}
 		}
 	}
-	return ret
+	return nil
+}
+
+func (n *Node) ListChildren(key string) map[string]*Node {
+	result := make(map[string]*Node)
+	key = strings.TrimSuffix(key, "/")
+	// First check and see if its a dir
+	found := rootNode.GetChild(key)
+	if found == nil {
+		return result // Nothing
+	}
+	if found.file {
+		result[found.Name] = found
+	}
+	if !found.file {
+		for _, c := range found.Children {
+			if c.file {
+				result[c.Name] = c
+			} else {
+				result[c.Name] = nil
+			}
+		}
+	}
+	return result
 }

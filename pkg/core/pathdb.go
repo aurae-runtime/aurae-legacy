@@ -45,11 +45,6 @@ const (
 type PathDatabase struct {
 	mtx sync.Mutex
 	rpc.UnimplementedCoreServiceServer
-	// TODO we will need to prioritize our getters and setters
-	// TODO we need to manage inconsistencies
-	Getters []Getter
-	Setters []Setter
-	Listers []Lister
 }
 
 func (c *PathDatabase) ListRPC(ctx context.Context, req *rpc.ListReq) (*rpc.ListResp, error) {
@@ -59,12 +54,9 @@ func (c *PathDatabase) ListRPC(ctx context.Context, req *rpc.ListReq) (*rpc.List
 	path := common.Path(req.Key) // Data mutation!
 
 	var resp map[string]string
-	for _, lister := range c.Listers {
-		resp = lister.List(path)
-		if len(resp) > 0 {
-			break
-		}
-	}
+
+	resp = memfs.List(path) // MemFS implementation
+
 	response := &rpc.ListResp{
 		Entries: resp,
 		Code:    CoreCode_OKAY,
@@ -86,11 +78,8 @@ func (c *PathDatabase) SetRPC(ctx context.Context, req *rpc.SetReq) (*rpc.SetRes
 		}, nil
 	}
 
-	// Path mutation!
+	memfs.Set(path, req.Val) // MemFS implementation
 
-	for _, setter := range c.Setters {
-		setter.Set(path, req.Val)
-	}
 	response := &rpc.SetResp{
 		Code: CoreCode_OKAY,
 	}
@@ -103,13 +92,8 @@ func (c *PathDatabase) GetRPC(ctx context.Context, req *rpc.GetReq) (*rpc.GetRes
 
 	path := common.Path(req.Key) // Data mutation!
 
-	resp := ""
-	for _, getter := range c.Getters {
-		resp = getter.Get(path)
-		if resp != "" {
-			break
-		}
-	}
+	resp := memfs.Get(path) // MemFS implementation
+
 	response := &rpc.GetResp{
 		Val:  resp,
 		Code: CoreCode_OKAY,
@@ -119,17 +103,7 @@ func (c *PathDatabase) GetRPC(ctx context.Context, req *rpc.GetReq) (*rpc.GetRes
 
 // NewPathDatabase will create a new PathDatabase, and always initialize an in-memory cache.
 func NewPathDatabase() *PathDatabase {
-	memDB := memfs.NewDatabase()
 	return &PathDatabase{
 		mtx: sync.Mutex{},
-		Getters: []Getter{
-			memDB,
-		},
-		Setters: []Setter{
-			memDB,
-		},
-		Listers: []Lister{
-			memDB,
-		},
 	}
 }
