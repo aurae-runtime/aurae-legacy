@@ -96,7 +96,7 @@ func (n *Node) ListChildren(key string) map[string]*Node {
 	if !found.file {
 		for _, c := range found.Children {
 			if c.file {
-				result[c.Name] = found
+				result[c.Name] = c
 			} else {
 				result[c.Name] = nil
 			}

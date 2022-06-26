@@ -139,12 +139,16 @@ func TestListFiles(t *testing.T) {
 		t.Errorf("Expecting node.file=true")
 	}
 
-	// TODO Left off here
-	// TODO Need to fix list
-
 	files := db.List("/base")
 	if len(files) != 3 {
 		t.Errorf("List failure. Expecting 3, Actual: %d", len(files))
+	}
+	if actual1, ok := files["path1"]; ok {
+		if actual1 != "testData1" {
+			t.Errorf("Expected: testData1, Actual: %s %v", actual1, files)
+		}
+	} else {
+		t.Errorf("Unable to find file in list")
 	}
 
 }
