@@ -34,17 +34,18 @@ type Node struct {
 	file     bool
 }
 
-func (n *Node) AddChild(key, value string) *Node {
+func (n *Node) addChild(key, value string) *Node {
+	key = strings.TrimSuffix(key, "/")
 	child := &Node{
 		Value:    value,
 		Children: make(map[string]*Node),
 		depth:    n.depth + 1,
 		file:     false,
 	}
-	spl := strings.Split(key, "/")
+	spl := strings.Split(key, "/") // 0 is empty for /
 	if len(spl) > 1 {
 		child.Name = spl[0]
-		child.AddChild(strings.Join(spl[1:], "/"), value)
+		child.addChild(strings.Join(spl[1:], "/"), value)
 	} else {
 		child.Name = key
 		child.file = true
@@ -53,8 +54,9 @@ func (n *Node) AddChild(key, value string) *Node {
 	return child
 }
 
-func (n *Node) GetChild(key string) *Node {
-	if n.Name == key {
+func (n *Node) getChild(key string) *Node {
+	key = strings.TrimSuffix(key, "/")
+	if n.Name == key && n.file {
 		return n
 	}
 	spl := strings.Split(key, "/")
@@ -62,7 +64,7 @@ func (n *Node) GetChild(key string) *Node {
 		first := spl[0]
 		for _, child := range n.Children {
 			if child.Name == first {
-				return child.GetChild(strings.Join(spl[1:], "/"))
+				return child.getChild(strings.Join(spl[1:], "/"))
 			}
 		}
 	} else {
@@ -76,8 +78,9 @@ func (n *Node) GetChild(key string) *Node {
 }
 
 func (n *Node) ListChildren(key string) map[string]string {
+	key = common.Path(key)
 	result := make(map[string]string)
-	spl := strings.Split(key, "/")
+	spl := strings.Split(key, "/") // 0 is empty for /
 	if len(spl) > 1 {
 		first := spl[1]
 		for _, child := range n.Children {
@@ -119,20 +122,21 @@ func NewDatabase() *Database {
 var rootNode = &Node{
 	Name:     "/",
 	Children: make(map[string]*Node),
+	depth:    0,
 }
 
 func (c *Database) Get(key string) string {
 	c.mtx.Lock()
 	defer c.mtx.Unlock()
 	path := common.Path(key) // Data mutation!
-	return rootNode.GetChild(path).Value
+	return rootNode.getChild(path).Value
 }
 
 func (c *Database) Set(key, value string) {
 	c.mtx.Lock()
 	defer c.mtx.Unlock()
 	path := common.Path(key) // Data mutation!
-	rootNode.AddChild(path, value)
+	rootNode.addChild(path, value)
 }
 
 func (c *Database) List(key string) map[string]string {
