@@ -20,9 +20,10 @@ import (
 	"context"
 	"github.com/hanwen/go-fuse/v2/fs"
 	"github.com/hanwen/go-fuse/v2/fuse"
+	"github.com/kris-nova/aurae/client"
+	"github.com/kris-nova/aurae/rpc"
 	"github.com/sirupsen/logrus"
 	"os"
-	"path/filepath"
 	"syscall"
 )
 
@@ -37,25 +38,24 @@ type RegularDir struct {
 	path string
 	mode uint32
 	fs.Inode
+	client *client.Client
 }
 
-// NewRegularDir will build a passthrough directory based on whatever
-// is available on the disk.
-func NewRegularDir(path string) *RegularDir {
-	path = filepath.Join("/aurae", path)
-	logrus.Infof("auraeFS RegularDir: %s", path)
+func NewRegularDir(c *client.Client, path string) *RegularDir {
 	s, err := os.Stat(path)
 	if err != nil {
 		return &RegularDir{
-			path:  path,
-			mode:  DefaultauraeFSINodePermissions,
-			Inode: fs.Inode{},
+			path:   path,
+			mode:   DefaultauraeFSINodePermissions,
+			Inode:  fs.Inode{},
+			client: c,
 		}
 	}
 	return &RegularDir{
-		path:  path,
-		mode:  uint32(s.Mode()),
-		Inode: fs.Inode{},
+		path:   path,
+		mode:   uint32(s.Mode()),
+		Inode:  fs.Inode{},
+		client: c,
 	}
 }
 
@@ -69,6 +69,33 @@ func (r *RegularDir) Mkdir(ctx context.Context, name string, mode uint32, out *f
 
 func (r *RegularDir) Readdir(ctx context.Context) (fs.DirStream, syscall.Errno) {
 	var dirents []fuse.DirEntry
+	if r.client == nil {
+		return fs.NewListDirStream(dirents), 0
+	}
+	listResp, err := r.client.ListRPC(ctx, &rpc.ListReq{
+		Key: r.path,
+	})
+	logrus.Infof("%v", listResp.Entries)
+	logrus.Infof("path: %s", r.path)
+	if err != nil {
+		return fs.NewListDirStream(dirents), 0
+	}
+	for filename, content := range listResp.Entries {
+		var mode uint32
+		var ino uint64
+		if content == "" {
+			mode = fuse.S_IFDIR
+			ino = r.NewRegularSubdirectory(ctx, r.client, filename)
+		} else {
+			mode = fuse.S_IFREG
+			ino = r.NewRegularSubfile(ctx, r.client, filename, []byte(content))
+		}
+		dirents = append(dirents, fuse.DirEntry{
+			Mode: mode,
+			Name: filename,
+			Ino:  ino,
+		})
+	}
 	return fs.NewListDirStream(dirents), 0
 }
 
@@ -83,4 +110,26 @@ func (r *RegularDir) Open(ctx context.Context, flags uint32) (fh fs.FileHandle, 
 
 func (r *RegularDir) Rmdir(ctx context.Context, name string) syscall.Errno {
 	return 0
+}
+
+func (r *RegularDir) NewRegularSubfile(ctx context.Context, c *client.Client, name string, data []byte) uint64 {
+	i := Ino()
+	r.AddChild(name,
+		r.NewInode(ctx, NewRegularFile(c, DefaultauraeFSINodePermissions, data),
+			fs.StableAttr{
+				Ino:  i,
+				Mode: fuse.S_IFREG,
+			}), true)
+	return i
+}
+
+func (r *RegularDir) NewRegularSubdirectory(ctx context.Context, c *client.Client, name string) uint64 {
+	i := Ino()
+	r.AddChild(name,
+		r.NewInode(ctx, NewRegularDir(c, name),
+			fs.StableAttr{
+				Ino:  i,
+				Mode: fuse.S_IFDIR,
+			}), false)
+	return i
 }

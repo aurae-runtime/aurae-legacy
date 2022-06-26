@@ -65,8 +65,9 @@ auraefs: ## Compile auraefs (local arch)
 
 install: ## Install the program to /usr/bin 🎉
 	@echo "Installing..."
-	sudo cp $(auraetarget) /usr/bin/$(auraetarget)
-	sudo cp $(auraefstarget) /usr/bin/$(auraefstarget)
+	sudo cp -v bin/$(auraetarget) /usr/bin/$(auraetarget)
+	sudo cp -v bin/$(auraefstarget) /usr/bin/$(auraefstarget)
+	sudo cp -v bin/$(auraedtarget) /usr/bin/$(auraedtarget)
 
 
 gen: generate ## Alias for generate

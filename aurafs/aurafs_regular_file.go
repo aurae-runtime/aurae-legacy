@@ -20,6 +20,7 @@ import (
 	"context"
 	"github.com/hanwen/go-fuse/v2/fs"
 	"github.com/hanwen/go-fuse/v2/fuse"
+	"github.com/kris-nova/aurae/client"
 	"syscall"
 )
 
@@ -33,6 +34,7 @@ type RegularFile struct {
 	mode uint32
 	data []byte
 	fs.Inode
+	client *client.Client
 }
 
 func (r RegularFile) Read(ctx context.Context, f fs.FileHandle, dest []byte, off int64) (fuse.ReadResult, syscall.Errno) {
@@ -48,9 +50,10 @@ func (r RegularFile) Getattr(ctx context.Context, f fs.FileHandle, out *fuse.Att
 	return 0
 }
 
-func NewRegularFile(mode uint32, data []byte) *RegularFile {
+func NewRegularFile(c *client.Client, mode uint32, data []byte) *RegularFile {
 	return &RegularFile{
-		mode:  mode,
-		Inode: fs.Inode{},
+		mode:   mode,
+		client: c,
+		Inode:  fs.Inode{},
 	}
 }

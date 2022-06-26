@@ -40,9 +40,6 @@ func NewRoot(mountpoint string, c *client.Client) *Root {
 		mountpoint: mountpoint,
 		client:     c,
 	}
-
-	// App
-
 	return root
 }
 
@@ -51,20 +48,24 @@ func (r *Root) OnAdd(ctx context.Context) {
 	// Less is more
 }
 
-func (r *Root) NewRegularSubfile(ctx context.Context, name string, data []byte) {
+func (r *Root) NewRegularSubfile(ctx context.Context, c *client.Client, name string, data []byte) uint64 {
+	i := Ino()
 	r.AddChild(name,
-		r.NewInode(ctx, NewRegularFile(DefaultauraeFSINodePermissions, data),
+		r.NewInode(ctx, NewRegularFile(c, DefaultauraeFSINodePermissions, data),
 			fs.StableAttr{
-				Ino:  Ino(),
+				Ino:  i,
 				Mode: fuse.S_IFREG,
 			}), true)
+	return i
 }
 
-func (r *Root) NewRegularSubdirectory(ctx context.Context, name string) {
+func (r *Root) NewRegularSubdirectory(ctx context.Context, c *client.Client, name string) uint64 {
+	i := Ino()
 	r.AddChild(name,
-		r.NewInode(ctx, NewRegularDir(name),
-			fs.StableAttr{Ino: Ino(),
+		r.NewInode(ctx, NewRegularDir(c, name),
+			fs.StableAttr{Ino: i,
 				Mode: fuse.S_IFDIR}), false)
+	return i
 }
 
 func (r *Root) Getattr(ctx context.Context, fh fs.FileHandle, out *fuse.AttrOut) syscall.Errno {
@@ -80,11 +81,20 @@ func (r *Root) Readdir(ctx context.Context) (fs.DirStream, syscall.Errno) {
 	if err != nil {
 		return fs.NewListDirStream(dirents), 1
 	}
-	for filename, _ := range listResp.Entries {
+	for filename, content := range listResp.Entries {
+		var mode uint32
+		var ino uint64
+		if content == "" {
+			mode = fuse.S_IFDIR
+			ino = r.NewRegularSubdirectory(ctx, r.client, filename)
+		} else {
+			mode = fuse.S_IFREG
+			ino = r.NewRegularSubfile(ctx, r.client, filename, []byte(content))
+		}
 		dirents = append(dirents, fuse.DirEntry{
-			Mode: DefaultauraeFSINodePermissions,
+			Mode: mode,
 			Name: filename,
-			Ino:  Ino(),
+			Ino:  ino,
 		})
 	}
 	return fs.NewListDirStream(dirents), 0
