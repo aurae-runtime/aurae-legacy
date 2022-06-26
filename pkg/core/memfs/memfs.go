@@ -33,21 +33,21 @@ func Get(key string) string {
 	mtx.Lock()
 	defer mtx.Unlock()
 	path := common.Path(key) // Data mutation!
-	return string(rootNode.GetChild(path).Content)
+	return string(rootNode.GetSubNode(path).Content)
 }
 
 func Set(key, value string) {
 	mtx.Lock()
 	defer mtx.Unlock()
 	path := common.Path(key) // Data mutation!
-	rootNode.AddChild(path, value)
+	rootNode.AddSubNode(path, value)
 }
 
 func List(key string) map[string]string {
 	mtx.Lock()
 	defer mtx.Unlock()
 	base := common.Path(key)
-	lsMap := rootNode.ListChildren(base)
+	lsMap := rootNode.ListSubNodes(base)
 	ret := make(map[string]string)
 	for file, node := range lsMap {
 		if node == nil {

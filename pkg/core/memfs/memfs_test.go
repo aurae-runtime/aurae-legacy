@@ -20,9 +20,9 @@ import (
 	"testing"
 )
 
-func TestAddChildSimple(t *testing.T) {
-	rootNode.AddChild("/test/path", "testData")
-	child := rootNode.GetChild("/test/path")
+func TestAddSubNodeSimple(t *testing.T) {
+	rootNode.AddSubNode("/test/path", "testData")
+	child := rootNode.GetSubNode("/test/path")
 	if child.depth != 3 {
 		t.Errorf("Expected: 3, Actual: %d", child.depth)
 	}
@@ -34,11 +34,11 @@ func TestAddChildSimple(t *testing.T) {
 	}
 }
 
-func TestAddChildFileCheck(t *testing.T) {
-	rootNode.AddChild("/test/path/beeps/boops", "testData")
-	child := rootNode.GetChild("/test/path/beeps/boops")
+func TestAddSubNodeFileCheck(t *testing.T) {
+	rootNode.AddSubNode("/test/path/beeps/boops", "testData")
+	child := rootNode.GetSubNode("/test/path/beeps/boops")
 	if child == nil {
-		t.Errorf("nil child from GetChild")
+		t.Errorf("nil child from GetSubNode")
 		t.FailNow()
 	}
 	if child.depth != 5 {
@@ -53,15 +53,15 @@ func TestAddChildFileCheck(t *testing.T) {
 	if !child.file {
 		t.Errorf("Nested child file error, expected child.file=true")
 	}
-	baseDir := rootNode.GetChild("/test/path/beeps")
+	baseDir := rootNode.GetSubNode("/test/path/beeps")
 	if baseDir.file {
 		t.Errorf("Base dir file error, expected child.file=false")
 	}
-	baseDir = rootNode.GetChild("/test/path")
+	baseDir = rootNode.GetSubNode("/test/path")
 	if baseDir.file {
 		t.Errorf("Base dir file error, expected child.file=false")
 	}
-	baseDir = rootNode.GetChild("/test")
+	baseDir = rootNode.GetSubNode("/test")
 	if baseDir.file {
 		t.Errorf("Base dir file error, expected child.file=false")
 	}
@@ -131,7 +131,7 @@ func TestListFiles(t *testing.T) {
 	if actual3 != "testData3" {
 		t.Errorf("Multiple subfile data lookup error. Expected: testData3, Actual: %s", actual3)
 	}
-	node := rootNode.GetChild("/base/path3")
+	node := rootNode.GetSubNode("/base/path3")
 	if !node.file {
 		t.Errorf("Expecting node.file=true")
 	}
@@ -154,7 +154,7 @@ func TestListFiles(t *testing.T) {
 	} else {
 		t.Errorf("Unable to find file in list")
 	}
-	children := rootNode.ListChildren("/base")
+	children := rootNode.ListSubNodes("/base")
 	for _, node := range children {
 		if !node.file {
 			t.Errorf("Only expecting files in list")

@@ -56,7 +56,7 @@ type Node struct {
 	file bool
 }
 
-func (n *Node) AddChild(key, value string) *Node {
+func (n *Node) AddSubNode(key, value string) *Node {
 	key = strings.TrimSuffix(key, "/")
 	child := &Node{
 		Children: make(map[string]*Node),
@@ -71,7 +71,7 @@ func (n *Node) AddChild(key, value string) *Node {
 		}
 		child.Name = spl[0]
 		child.file = false
-		child.AddChild(strings.Join(spl[1:], "/"), value)
+		child.AddSubNode(strings.Join(spl[1:], "/"), value)
 	} else {
 		child.Name = key
 		child.file = true
@@ -81,7 +81,7 @@ func (n *Node) AddChild(key, value string) *Node {
 	return child
 }
 
-func (n *Node) GetChild(key string) *Node {
+func (n *Node) GetSubNode(key string) *Node {
 	key = strings.TrimSuffix(key, "/")
 	if n.Name == key && n.file {
 		return n
@@ -91,7 +91,7 @@ func (n *Node) GetChild(key string) *Node {
 		first := spl[0]
 		for _, child := range n.Children {
 			if child.Name == first {
-				return child.GetChild(strings.Join(spl[1:], "/"))
+				return child.GetSubNode(strings.Join(spl[1:], "/"))
 			}
 		}
 	} else {
@@ -104,11 +104,11 @@ func (n *Node) GetChild(key string) *Node {
 	return nil
 }
 
-func (n *Node) ListChildren(key string) map[string]*Node {
+func (n *Node) ListSubNodes(key string) map[string]*Node {
 	result := make(map[string]*Node)
 	key = strings.TrimSuffix(key, "/")
 	// First check and see if its a dir
-	found := rootNode.GetChild(key)
+	found := rootNode.GetSubNode(key)
 	if found == nil {
 		return result // Nothing
 	}
