@@ -17,6 +17,7 @@
 package memfs
 
 import (
+	"sync"
 	"testing"
 )
 
@@ -189,5 +190,42 @@ func TestRemoveNodes(t *testing.T) {
 	if childShouldStillExist == nil {
 		t.Errorf("child should still exist")
 	}
+}
 
+func TestEmptyTree(t *testing.T) {
+	rootNode.AddSubNode("/ztest/zpath/remove/me", "")
+	rootNode.AddSubNode("/ztest/zzpath/remove/me", "")
+	rootNode.AddSubNode("/zzztest/zpath/remove/me", "")
+	rootNode.AddSubNode("/zzzzzzzztest/zpath/remove/me", "")
+	rootNode.AddSubNode("/zzzzzzztest/zzzzpath/remove/me", "")
+	rootNode.RemoveRecursive()
+	if rootNode.TotalChildren() != 0 {
+		t.Errorf("unable to empty tree")
+	}
+}
+
+var countChildrenMtx = sync.Mutex{}
+
+func TestCountChildren(t *testing.T) {
+	countChildrenMtx.Lock()
+	defer countChildrenMtx.Unlock()
+	rootNode.RemoveRecursive()
+	rootNode.AddSubNode("/single", "") // Root is 1, we are 1
+	if rootNode.TotalChildren() != 2 {
+		t.Errorf("Failed tree children count. Expected: 2, Actual: %d", rootNode.TotalChildren())
+	}
+	rootNode.AddSubNode("/single/double", "") // Root is 1, we are 1, child is 1
+	if rootNode.TotalChildren() != 3 {
+		t.Errorf("Failed tree children count. Expected: 3, Actual: %d", rootNode.TotalChildren())
+	}
+	rootNode.AddSubNode("/single/double/triple", "") // Root is 1, we are 1, child is 1, child is 1
+	if rootNode.TotalChildren() != 4 {
+		t.Errorf("Failed tree children count. Expected: 4, Actual: %d", rootNode.TotalChildren())
+	}
+
+	doubleNode := rootNode.GetSubNode("/single/double")
+	doubleNode.RemoveRecursive()
+	if rootNode.TotalChildren() != 2 {
+		t.Errorf("Failed tree children count. Expected: 2, Actual: %d", rootNode.TotalChildren())
+	}
 }

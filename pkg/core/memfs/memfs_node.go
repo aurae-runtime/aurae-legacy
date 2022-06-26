@@ -17,7 +17,6 @@
 package memfs
 
 import (
-	"fmt"
 	"os"
 	"strings"
 )
@@ -158,7 +157,21 @@ func (n *Node) RemoveRecursive() {
 // to call externally, so we only export RemoveRecursive to other packages.
 func (n *Node) remove() {
 	if n.parent == nil {
-		panic(fmt.Sprintf("abandon node in tree, unable to remove: %v", n))
+		// Root node
+		return
 	}
 	delete(n.parent.Children, n.Name)
+}
+
+func (n *Node) TotalChildren() int {
+	var i int
+	if n.parent == nil {
+		i = 0
+	} else {
+		i = 1
+	}
+	for _, c := range n.Children {
+		i = i + c.TotalChildren()
+	}
+	return i
 }
