@@ -88,7 +88,7 @@ func (n *Node) ListChildren(key string) map[string]string {
 		return result // Nothing
 	}
 	if found.file {
-		result[found.Name] = found.Value
+		result[found.Name] = found.Value // Return the query file exactly
 	}
 	if !found.file {
 		for _, c := range found.Children {
@@ -132,6 +132,5 @@ func (c *Database) List(key string) map[string]string {
 	c.mtx.Lock()
 	defer c.mtx.Unlock()
 	base := common.Path(key)
-	fmt.Println(base)
 	return rootNode.ListChildren(base)
 }
