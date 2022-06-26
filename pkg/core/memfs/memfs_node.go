@@ -17,15 +17,43 @@
 package memfs
 
 import (
+	"os"
 	"strings"
 )
 
+// Node represents the vertex in a Graph, or, an Inode in a file system.
+//
+// A Node can represent a directory, or a file.
+//
+// If a Node is a file (and not a directory) it's Node.file=true flag will
+// be set.
 type Node struct {
-	Name     string
-	Value    string
+
+	// Name is the exact name of the Node, also known as its filename.
+	// The Name should be unique for its subtree, in the same way that a
+	// directory cannot have multiple files with the same name.
+	Name string
+
+	// Content is the content of the virtual file.
+	Content []byte
+
+	// perm is the permissions bits of the file to represent to the user.
+	//
+	// We carefully use the word "perm" here as "mode" has special meaning
+	// in libfuse.
+	perm os.FileMode
+
+	// Sub nodes, or nested files and directories. Each with a unique name.
 	Children map[string]*Node
-	depth    int
-	file     bool
+
+	// depth is the depth of this Node from the root.
+	// The root Node counts as 1, so the "/file/path" Node would have a depth
+	// of 3.
+	depth int
+
+	// file=true The Node is a file (with content)
+	// file=false The Node is a directory (without content)
+	file bool
 }
 
 func (n *Node) AddChild(key, value string) *Node {
@@ -47,7 +75,7 @@ func (n *Node) AddChild(key, value string) *Node {
 	} else {
 		child.Name = key
 		child.file = true
-		child.Value = value
+		child.Content = []byte(value)
 	}
 	n.Children[child.Name] = child
 	return child

@@ -29,7 +29,7 @@ func TestAddChildSimple(t *testing.T) {
 	if child.Name != "path" {
 		t.Errorf("Nested child name error. Expected: path, Actual: %s", child.Name)
 	}
-	if child.Value != "testData" {
+	if string(child.Content) != "testData" {
 		t.Errorf("Nested child value error. Expected: testData, Actual: %s", child.Name)
 	}
 }
@@ -47,7 +47,7 @@ func TestAddChildFileCheck(t *testing.T) {
 	if child.Name != "boops" {
 		t.Errorf("Nested child name error. Expected: boops, Actual: %s", child.Name)
 	}
-	if child.Value != "testData" {
+	if string(child.Content) != "testData" {
 		t.Errorf("Nested child value error. Expected: testData, Actual: %s", child.Name)
 	}
 	if !child.file {

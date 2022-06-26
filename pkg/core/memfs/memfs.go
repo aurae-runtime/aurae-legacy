@@ -33,7 +33,7 @@ func Get(key string) string {
 	mtx.Lock()
 	defer mtx.Unlock()
 	path := common.Path(key) // Data mutation!
-	return rootNode.GetChild(path).Value
+	return string(rootNode.GetChild(path).Content)
 }
 
 func Set(key, value string) {
@@ -53,7 +53,7 @@ func List(key string) map[string]string {
 		if node == nil {
 			ret[file] = ""
 		} else {
-			ret[file] = node.Value
+			ret[file] = string(node.Content)
 		}
 	}
 	return ret
