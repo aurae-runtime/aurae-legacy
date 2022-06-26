@@ -17,6 +17,7 @@
 package memfs
 
 import (
+	"fmt"
 	"github.com/kris-nova/aurae/pkg/common"
 	"strings"
 	"sync"
@@ -34,7 +35,7 @@ type Node struct {
 	file     bool
 }
 
-func (n *Node) addChild(key, value string) *Node {
+func (n *Node) AddChild(key, value string) *Node {
 	key = strings.TrimSuffix(key, "/")
 	child := &Node{
 		Value:    value,
@@ -45,7 +46,7 @@ func (n *Node) addChild(key, value string) *Node {
 	spl := strings.Split(key, "/") // 0 is empty for /
 	if len(spl) > 1 {
 		child.Name = spl[0]
-		child.addChild(strings.Join(spl[1:], "/"), value)
+		child.AddChild(strings.Join(spl[1:], "/"), value)
 	} else {
 		child.Name = key
 		child.file = true
@@ -54,7 +55,7 @@ func (n *Node) addChild(key, value string) *Node {
 	return child
 }
 
-func (n *Node) getChild(key string) *Node {
+func (n *Node) GetChild(key string) *Node {
 	key = strings.TrimSuffix(key, "/")
 	if n.Name == key && n.file {
 		return n
@@ -64,7 +65,7 @@ func (n *Node) getChild(key string) *Node {
 		first := spl[0]
 		for _, child := range n.Children {
 			if child.Name == first {
-				return child.getChild(strings.Join(spl[1:], "/"))
+				return child.GetChild(strings.Join(spl[1:], "/"))
 			}
 		}
 	} else {
@@ -78,36 +79,24 @@ func (n *Node) getChild(key string) *Node {
 }
 
 func (n *Node) ListChildren(key string) map[string]string {
-	key = common.Path(key)
 	result := make(map[string]string)
-	spl := strings.Split(key, "/") // 0 is empty for /
-	if len(spl) > 1 {
-		first := spl[1]
-		for _, child := range n.Children {
-			if child.Name == first {
-				return child.ListChildren(strings.Join(spl[1:], "/"))
-			}
-		}
-	} else if key == "*" {
-		for _, child := range n.Children {
-			if child.file {
-				result[child.Name] = child.Value // File
+	key = strings.TrimSuffix(key, "/")
+	// First check and see if its a dir
+	found := rootNode.GetChild(key)
+	fmt.Println(found)
+	if found == nil {
+		return result // Nothing
+	}
+	if found.file {
+		result[found.Name] = found.Value
+	}
+	if !found.file {
+		for _, c := range found.Children {
+			if c.file {
+				result[found.Name] = found.Value
 			} else {
-				result[child.Name] = "" // Dir
+				result[found.Name] = ""
 			}
-		}
-	} else if len(spl) == 1 {
-		for _, child := range n.Children {
-			if child.Name == spl[0] {
-				return child.ListChildren("*")
-			}
-		}
-	} else {
-		for _, child := range n.Children {
-			if child.Name == key {
-				return child.ListChildren(key)
-			}
-
 		}
 	}
 	return result
@@ -129,19 +118,20 @@ func (c *Database) Get(key string) string {
 	c.mtx.Lock()
 	defer c.mtx.Unlock()
 	path := common.Path(key) // Data mutation!
-	return rootNode.getChild(path).Value
+	return rootNode.GetChild(path).Value
 }
 
 func (c *Database) Set(key, value string) {
 	c.mtx.Lock()
 	defer c.mtx.Unlock()
 	path := common.Path(key) // Data mutation!
-	rootNode.addChild(path, value)
+	rootNode.AddChild(path, value)
 }
 
 func (c *Database) List(key string) map[string]string {
 	c.mtx.Lock()
 	defer c.mtx.Unlock()
-	path := common.Path(key) // Data mutation!
-	return rootNode.ListChildren(path)
+	base := common.Path(key)
+	fmt.Println(base)
+	return rootNode.ListChildren(base)
 }

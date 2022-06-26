@@ -21,8 +21,8 @@ import (
 )
 
 func TestAddChildSimple(t *testing.T) {
-	rootNode.addChild("/test/path", "testData")
-	child := rootNode.getChild("/test/path")
+	rootNode.AddChild("/test/path", "testData")
+	child := rootNode.GetChild("/test/path")
 	if child.depth != 3 {
 		t.Errorf("Expected: 3, Actual: %d", child.depth)
 	}
@@ -35,10 +35,10 @@ func TestAddChildSimple(t *testing.T) {
 }
 
 func TestAddChildFileCheck(t *testing.T) {
-	rootNode.addChild("/test/path/beeps/boops", "testData")
-	child := rootNode.getChild("/test/path/beeps/boops")
+	rootNode.AddChild("/test/path/beeps/boops", "testData")
+	child := rootNode.GetChild("/test/path/beeps/boops")
 	if child == nil {
-		t.Errorf("nil child from getChild")
+		t.Errorf("nil child from GetChild")
 		t.FailNow()
 	}
 	if child.depth != 5 {
@@ -53,15 +53,15 @@ func TestAddChildFileCheck(t *testing.T) {
 	if !child.file {
 		t.Errorf("Nested child file error, expected child.file=true")
 	}
-	baseDir := rootNode.getChild("/test/path/beeps")
+	baseDir := rootNode.GetChild("/test/path/beeps")
 	if baseDir.file {
 		t.Errorf("Base dir file error, expected child.file=false")
 	}
-	baseDir = rootNode.getChild("/test/path")
+	baseDir = rootNode.GetChild("/test/path")
 	if baseDir.file {
 		t.Errorf("Base dir file error, expected child.file=false")
 	}
-	baseDir = rootNode.getChild("/test")
+	baseDir = rootNode.GetChild("/test")
 	if baseDir.file {
 		t.Errorf("Base dir file error, expected child.file=false")
 	}
@@ -122,4 +122,29 @@ func TestFuzzCases(t *testing.T) {
 	if result != "testvalue" {
 		t.Errorf("failed basic test")
 	}
+}
+
+func TestListFiles(t *testing.T) {
+	db := NewDatabase()
+	db.Set("/base/path1", "testData1")
+	db.Set("/base/path2", "testData2")
+	db.Set("/base/path3", "testData3")
+
+	actual3 := db.Get("/base/path3")
+	if actual3 != "testData3" {
+		t.Errorf("Multiple subfile data lookup error. Expected: testData3, Actual: %s", actual3)
+	}
+	node := rootNode.GetChild("/base/path3")
+	if !node.file {
+		t.Errorf("Expecting node.file=true")
+	}
+
+	// TODO Left off here
+	// TODO Need to fix list
+	
+	files := db.List("/base")
+	if len(files) != 3 {
+		t.Errorf("List failure. Expecting 3, Actual: %d", len(files))
+	}
+
 }
