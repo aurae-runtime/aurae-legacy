@@ -82,8 +82,8 @@ func (n *Node) GetChild(key string) *Node {
 	return nil
 }
 
-func (n *Node) ListChildren(key string) map[string]string {
-	result := make(map[string]string)
+func (n *Node) ListChildren(key string) map[string]*Node {
+	result := make(map[string]*Node)
 	key = strings.TrimSuffix(key, "/")
 	// First check and see if its a dir
 	found := rootNode.GetChild(key)
@@ -91,14 +91,14 @@ func (n *Node) ListChildren(key string) map[string]string {
 		return result // Nothing
 	}
 	if found.file {
-		result[found.Name] = found.Value
+		result[found.Name] = found
 	}
 	if !found.file {
 		for _, c := range found.Children {
 			if c.file {
-				result[c.Name] = found.Value
+				result[c.Name] = found
 			} else {
-				result[c.Name] = ""
+				result[c.Name] = nil
 			}
 		}
 	}
@@ -135,5 +135,14 @@ func (c *Database) List(key string) map[string]string {
 	c.mtx.Lock()
 	defer c.mtx.Unlock()
 	base := common.Path(key)
-	return rootNode.ListChildren(base)
+	lsMap := rootNode.ListChildren(base)
+	ret := make(map[string]string)
+	for file, node := range lsMap {
+		if node == nil {
+			ret[file] = ""
+		} else {
+			ret[file] = node.Value
+		}
+	}
+	return ret
 }

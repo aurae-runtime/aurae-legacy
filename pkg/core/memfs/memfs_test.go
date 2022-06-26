@@ -141,7 +141,7 @@ func TestListFiles(t *testing.T) {
 
 	// TODO Left off here
 	// TODO Need to fix list
-	
+
 	files := db.List("/base")
 	if len(files) != 3 {
 		t.Errorf("List failure. Expecting 3, Actual: %d", len(files))
