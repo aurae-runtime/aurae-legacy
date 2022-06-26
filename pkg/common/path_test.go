@@ -71,7 +71,7 @@ func TestPath(t *testing.T) {
 		if actual != c.expected {
 			t.Errorf("Expected: %s, Actual: %s", c.expected, actual)
 		} else {
-			t.Logf("Expected: %s, Actual: %s", c.expected, actual)
+			//t.Logf("Expected: %s, Actual: %s", c.expected, actual)
 		}
 	}
 }

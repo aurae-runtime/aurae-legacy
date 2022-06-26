@@ -157,5 +157,17 @@ func TestListFiles(t *testing.T) {
 	} else {
 		t.Errorf("Unable to find file in list")
 	}
+	children := rootNode.ListChildren("/base")
+	for _, node := range children {
+		if !node.file {
+			t.Errorf("Only expecting files in list")
+		}
+		if node.depth != 3 {
+			t.Errorf("Only expecting 3 depth in list, actual: %d", node.depth)
+		}
+		if len(node.Children) != 0 {
+			t.Errorf("Unexpected sub children.")
+		}
+	}
 
 }
