@@ -56,6 +56,10 @@ type Node struct {
 	file bool
 }
 
+// AddSubNode is how to introduce a new sub node.
+//
+// Directories are created recursively, and as needed.
+// There is no concept of creating an empty directory.
 func (n *Node) AddSubNode(key, value string) *Node {
 	key = strings.TrimSuffix(key, "/")
 	child := &Node{
@@ -81,6 +85,7 @@ func (n *Node) AddSubNode(key, value string) *Node {
 	return child
 }
 
+// GetSubNode will return a sub Node recursively if it is found in the tree.
 func (n *Node) GetSubNode(key string) *Node {
 	key = strings.TrimSuffix(key, "/")
 	if n.Name == key && n.file {
@@ -104,10 +109,11 @@ func (n *Node) GetSubNode(key string) *Node {
 	return nil
 }
 
+// ListSubNodes will return a flat listing of all children of a Node in the tree.
 func (n *Node) ListSubNodes(key string) map[string]*Node {
 	result := make(map[string]*Node)
 	key = strings.TrimSuffix(key, "/")
-	// First check and see if its a dir
+	// First check and see if a dir
 	found := rootNode.GetSubNode(key)
 	if found == nil {
 		return result // Nothing
