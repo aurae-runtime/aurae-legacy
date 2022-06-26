@@ -19,9 +19,9 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/kris-nova/aurae/client"
 	"github.com/kris-nova/aurae/pkg/runtime"
 	"github.com/kris-nova/aurae/rpc"
-	"google.golang.org/grpc"
 	"os"
 	"time"
 
@@ -100,12 +100,12 @@ func main() {
 						return fmt.Errorf("usage: aurae get <key>")
 					}
 
-					conn, err := grpc.Dial(fmt.Sprintf("passthrough:///unix://%s", run.socket), grpc.WithInsecure(), grpc.WithTimeout(time.Second*3))
+					auraeClient := client.NewClient(run.socket)
+					err := auraeClient.Connect()
 					if err != nil {
 						return err
 					}
-					client := rpc.NewCoreServiceClient(conn)
-					getResp, err := client.GetRPC(context.Background(), &rpc.GetReq{
+					getResp, err := auraeClient.GetRPC(context.Background(), &rpc.GetReq{
 						Key: key,
 					})
 					if err != nil {
@@ -137,12 +137,12 @@ func main() {
 						return fmt.Errorf("usage: aurae set <key> <value>")
 					}
 
-					conn, err := grpc.Dial(fmt.Sprintf("passthrough:///unix://%s", run.socket), grpc.WithInsecure(), grpc.WithTimeout(time.Second*3))
+					auraeClient := client.NewClient(run.socket)
+					err := auraeClient.Connect()
 					if err != nil {
 						return err
 					}
-					client := rpc.NewCoreServiceClient(conn)
-					_, err = client.SetRPC(context.Background(), &rpc.SetReq{
+					_, err = auraeClient.SetRPC(context.Background(), &rpc.SetReq{
 						Key: key,
 						Val: val,
 					})
@@ -170,12 +170,12 @@ func main() {
 						return fmt.Errorf("usage: aurae get <key>")
 					}
 
-					conn, err := grpc.Dial(fmt.Sprintf("passthrough:///unix://%s", run.socket), grpc.WithInsecure(), grpc.WithTimeout(time.Second*3))
+					auraeClient := client.NewClient(run.socket)
+					err := auraeClient.Connect()
 					if err != nil {
 						return err
 					}
-					client := rpc.NewCoreServiceClient(conn)
-					listResp, err := client.ListRPC(context.Background(), &rpc.ListReq{
+					listResp, err := auraeClient.ListRPC(context.Background(), &rpc.ListReq{
 						Key: key,
 					})
 					if err != nil {

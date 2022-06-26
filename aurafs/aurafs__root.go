@@ -20,6 +20,8 @@ import (
 	"context"
 	"github.com/hanwen/go-fuse/v2/fs"
 	"github.com/hanwen/go-fuse/v2/fuse"
+	"github.com/kris-nova/aurae/client"
+	"github.com/kris-nova/aurae/rpc"
 	"syscall"
 )
 
@@ -29,12 +31,14 @@ import (
 type Root struct {
 	mountpoint string
 	fs.Inode
+	client *client.Client
 }
 
 // NewRoot is where the magic happens.
-func NewRoot(mountpoint string) *Root {
+func NewRoot(mountpoint string, c *client.Client) *Root {
 	root := &Root{
 		mountpoint: mountpoint,
+		client:     c,
 	}
 
 	// App
@@ -68,6 +72,30 @@ func (r *Root) Getattr(ctx context.Context, fh fs.FileHandle, out *fuse.AttrOut)
 	return 0
 }
 
+func (r *Root) Readdir(ctx context.Context) (fs.DirStream, syscall.Errno) {
+	var dirents []fuse.DirEntry
+	listResp, err := r.client.ListRPC(ctx, &rpc.ListReq{
+		Key: "/",
+	})
+	if err != nil {
+		return fs.NewListDirStream(dirents), 1
+	}
+	for filename, _ := range listResp.Entries {
+		dirents = append(dirents, fuse.DirEntry{
+			Mode: DefaultauraeFSINodePermissions,
+			Name: filename,
+			Ino:  Ino(),
+		})
+	}
+	return fs.NewListDirStream(dirents), 0
+}
+
+func (r *Root) Opendir(ctx context.Context) syscall.Errno {
+	return 0
+}
+
 // Root Attributes
 var _ fs.NodeGetattrer = &Root{}
 var _ fs.NodeOnAdder = &Root{}
+var _ fs.NodeOpendirer = &Root{}
+var _ fs.NodeReaddirer = &Root{}

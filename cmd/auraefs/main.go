@@ -19,6 +19,8 @@ package main
 import (
 	"fmt"
 	aurfs "github.com/kris-nova/aurae/aurafs"
+	"github.com/kris-nova/aurae/client"
+	"github.com/kris-nova/aurae/pkg/runtime"
 	"os"
 	"time"
 
@@ -31,9 +33,8 @@ import (
 var run = &RuntimeOptions{}
 
 type RuntimeOptions struct {
-	verbose  bool
-	nodename string
-	root     string
+	verbose bool
+	socket  string
 }
 
 func main() {
@@ -74,14 +75,31 @@ func main() {
 				Name:      "mount",
 				Usage:     "Mount an auraeFS system.",
 				UsageText: `auraefs mount <path>`,
-				Flags:     GlobalFlags([]cli.Flag{}),
+				Flags: GlobalFlags([]cli.Flag{
+					&cli.StringFlag{
+						Name:        "socket",
+						Aliases:     []string{"sock"},
+						Destination: &run.socket,
+						Value:       runtime.DefaultSocketLocationLinux,
+					},
+				}),
 				Action: func(c *cli.Context) error {
 					path := c.Args().Get(0)
 					if path == "" {
 						return fmt.Errorf("usage: auraefs mount <path>")
 					}
-					fs := aurfs.NewAuraeFS(path)
-					return fs.Mount()
+					auraeClient := client.NewClient(run.socket)
+					err := auraeClient.Connect()
+					if err != nil {
+						return err
+					}
+					fs := aurfs.NewAuraeFS(path, auraeClient)
+					err = fs.Mount()
+					if err != nil {
+						return err
+					}
+					fs.Runtime()
+					return nil
 				},
 			},
 		},

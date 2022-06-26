@@ -69,44 +69,6 @@ func (r *RegularDir) Mkdir(ctx context.Context, name string, mode uint32, out *f
 
 func (r *RegularDir) Readdir(ctx context.Context) (fs.DirStream, syscall.Errno) {
 	var dirents []fuse.DirEntry
-	logrus.Infof("Reading path: %s", r.path)
-
-	files, err := os.ReadDir(r.path)
-	if err != nil {
-		logrus.Warnf("Unable to read passthrough: %v", err)
-		return fs.NewListDirStream(dirents), 0
-	}
-
-	for _, file := range files {
-		logrus.Infof("FileName: %s", file.Name())
-	}
-	return fs.NewListDirStream(dirents), 0
-
-	logrus.Infof("Files: %d", len(files))
-	for _, file := range files {
-		logrus.Infof("File: %s", file.Name())
-		var mode uint32
-		var ino uint64
-		finfo, err := file.Info()
-		if err != nil {
-			mode = DefaultauraeFSINodePermissions
-			ino = 0
-		} else {
-			mode = uint32(finfo.Mode())
-			stat, ok := finfo.Sys().(*syscall.Stat_t)
-			if !ok {
-				ino = stat.Ino
-			} else {
-				ino = 0
-			}
-		}
-		dirents = append(dirents, fuse.DirEntry{
-			Name: file.Name(),
-			Mode: mode,
-			Ino:  ino,
-		})
-		logrus.Infof("DirEnt: %s", file.Name())
-	}
 	return fs.NewListDirStream(dirents), 0
 }
 

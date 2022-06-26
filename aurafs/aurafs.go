@@ -17,10 +17,10 @@
 package aurafs
 
 import (
-	"context"
 	"github.com/hanwen/go-fuse/v2/fs"
 	"github.com/hanwen/go-fuse/v2/fuse"
-	"github.com/kris-nova/aurae/rpc"
+	"github.com/kris-nova/aurae/client"
+	"github.com/kris-nova/aurae/pkg/posix"
 	"github.com/sirupsen/logrus"
 )
 
@@ -36,12 +36,14 @@ type AuraeFS struct {
 	root    *Root
 	runtime bool
 	service *fuse.Server
+	client  *client.Client
 }
 
-func NewAuraeFS(mountpoint string) *AuraeFS {
+func NewAuraeFS(mountpoint string, c *client.Client) *AuraeFS {
 	return &AuraeFS{
 		runtime: true,
-		root:    NewRoot(mountpoint),
+		root:    NewRoot(mountpoint, c),
+		client:  c,
 	}
 }
 
@@ -60,9 +62,16 @@ func (a *AuraeFS) Mount() error {
 		return err
 	}
 	a.service = svc
-	go a.service.Wait()
 	logrus.Infof("AuraeFS Started!")
 	return nil
+}
+
+func (a *AuraeFS) Runtime() {
+	quitCh := posix.SignalHandler()
+	go func() {
+		a.runtime = <-quitCh
+	}()
+	a.service.Wait()
 }
 
 var ino uint64 = 1 // 1 is always reserved, and we immediately begin indexing, thus we actually start with 2
@@ -70,31 +79,4 @@ var ino uint64 = 1 // 1 is always reserved, and we immediately begin indexing, t
 func Ino() uint64 {
 	ino = ino + 1
 	return ino
-}
-
-// -- gRPC Implementation --
-
-func (a *AuraeFS) SetRPC(ctx context.Context, req *rpc.SetReq) (*rpc.SetResp, error) {
-	logrus.Infof("Set: %s %s", req.Key, req.Val)
-	a.root.NewRegularSubfile(ctx, req.Key, []byte(req.Val)) // Map key, value directly to filename and []byte data
-	resp := &rpc.SetResp{}
-	return resp, nil
-}
-
-func (a *AuraeFS) GetRPC(ctx context.Context, req *rpc.GetReq) (*rpc.GetResp, error) {
-	logrus.Infof("Get: %s", req.Key)
-	inode := a.root.GetChild(req.Key)
-	if inode == nil {
-		return &rpc.GetResp{
-			Val:  "",
-			Code: -1,
-		}, nil
-	}
-	// LEFT OFF HERE
-	//rf := inode.(*RegularFile)
-	resp := &rpc.GetResp{
-		Code: 1,
-		Val:  "",
-	}
-	return resp, nil
 }
