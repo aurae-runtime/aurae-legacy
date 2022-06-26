@@ -150,5 +150,12 @@ func TestListFiles(t *testing.T) {
 	} else {
 		t.Errorf("Unable to find file in list")
 	}
+	if actual2, ok := files["path2"]; ok {
+		if actual2 != "testData2" {
+			t.Errorf("Expected: testData2, Actual: %s %v", actual2, files)
+		}
+	} else {
+		t.Errorf("Unable to find file in list")
+	}
 
 }
