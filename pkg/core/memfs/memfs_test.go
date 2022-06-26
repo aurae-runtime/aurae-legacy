@@ -53,11 +53,21 @@ func TestAddChildFileCheck(t *testing.T) {
 	if !child.file {
 		t.Errorf("Nested child file error, expected child.file=true")
 	}
-	//baseDir := rootNode.getChild("/test/path/beeps.")
-	//if baseDir.file {
-	//	t.Errorf("Base dir file error, expected child.file=false")
-	//}
-
+	baseDir := rootNode.getChild("/test/path/beeps")
+	if baseDir.file {
+		t.Errorf("Base dir file error, expected child.file=false")
+	}
+	baseDir = rootNode.getChild("/test/path")
+	if baseDir.file {
+		t.Errorf("Base dir file error, expected child.file=false")
+	}
+	baseDir = rootNode.getChild("/test")
+	if baseDir.file {
+		t.Errorf("Base dir file error, expected child.file=false")
+	}
+	if len(baseDir.Children) != 1 {
+		t.Errorf("final basedir check children count failed: %d", len(baseDir.Children))
+	}
 }
 
 func TestBasicGetSetDepth(t *testing.T) {
