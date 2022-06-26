@@ -70,6 +70,7 @@ func (a *AuraeFS) Runtime() {
 	quitCh := posix.SignalHandler()
 	go func() {
 		a.runtime = <-quitCh
+		a.service.Unmount()
 	}()
 	a.service.Wait()
 }
