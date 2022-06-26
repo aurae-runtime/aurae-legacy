@@ -17,7 +17,6 @@
 package memfs
 
 import (
-	"fmt"
 	"github.com/kris-nova/aurae/pkg/common"
 	"strings"
 	"sync"
@@ -38,18 +37,23 @@ type Node struct {
 func (n *Node) AddChild(key, value string) *Node {
 	key = strings.TrimSuffix(key, "/")
 	child := &Node{
-		Value:    value,
 		Children: make(map[string]*Node),
 		depth:    n.depth + 1,
 		file:     false,
 	}
-	spl := strings.Split(key, "/") // 0 is empty for /
+	spl := strings.Split(key, "/")
 	if len(spl) > 1 {
+		// See if the node already has the child
+		if cachedChild, ok := n.Children[spl[0]]; ok {
+			child = cachedChild
+		}
 		child.Name = spl[0]
+		child.file = false
 		child.AddChild(strings.Join(spl[1:], "/"), value)
 	} else {
 		child.Name = key
 		child.file = true
+		child.Value = value
 	}
 	n.Children[child.Name] = child
 	return child
@@ -83,19 +87,18 @@ func (n *Node) ListChildren(key string) map[string]string {
 	key = strings.TrimSuffix(key, "/")
 	// First check and see if its a dir
 	found := rootNode.GetChild(key)
-	fmt.Println(found)
 	if found == nil {
 		return result // Nothing
 	}
 	if found.file {
-		result[found.Name] = found.Value // Return the query file exactly
+		result[found.Name] = found.Value
 	}
 	if !found.file {
 		for _, c := range found.Children {
 			if c.file {
-				result[found.Name] = found.Value
+				result[c.Name] = found.Value
 			} else {
-				result[found.Name] = ""
+				result[c.Name] = ""
 			}
 		}
 	}
