@@ -20,6 +20,7 @@ import (
 	"context"
 	"github.com/hanwen/go-fuse/v2/fs"
 	"github.com/hanwen/go-fuse/v2/fuse"
+	"github.com/kris-nova/aurae/pkg/core/memfs"
 	"sync"
 	"syscall"
 )
@@ -38,18 +39,23 @@ var _ fs.MemRegularFile
 
 type File struct {
 	fs.Inode
+	Node *memfs.Node
+
+	path string // Absolute path
 
 	mu   sync.Mutex
 	Data []byte
 	Attr fuse.Attr
 }
 
-func NewFile(attr fuse.Attr, data []byte) *File {
+func NewFile(path string, data []byte) *File {
 	return &File{
 		Inode: fs.Inode{},
+		path:  path,
 		mu:    sync.Mutex{},
 		Data:  data,
-		Attr:  attr,
+		Attr:  fuse.Attr{}, // Set default attributes here
+		Node:  root.Node.AddSubNode(path, string(data)),
 	}
 }
 

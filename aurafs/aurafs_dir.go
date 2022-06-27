@@ -20,6 +20,8 @@ import (
 	"context"
 	"github.com/hanwen/go-fuse/v2/fs"
 	"github.com/hanwen/go-fuse/v2/fuse"
+	"github.com/kris-nova/aurae/pkg/core/memfs"
+	"github.com/kris-nova/aurae/rpc"
 	"sync"
 	"syscall"
 )
@@ -34,17 +36,24 @@ var _ fs.MemRegularFile
 
 type Dir struct {
 	fs.Inode
+	Node *memfs.Node
+
+	path string // Absolute path
 
 	mu   sync.Mutex
 	mode uint32
 	Attr fuse.Attr
 }
 
-func NewDir(attr fuse.Attr) *File {
-	return &File{
+func NewDir(path string) *Dir {
+	var node *memfs.Node
+	node = root.Node.AddSubNode(path, "") // TODO We need mkdir!
+	return &Dir{
+		path:  path,
 		Inode: fs.Inode{},
 		mu:    sync.Mutex{},
-		Attr:  attr,
+		Attr:  fuse.Attr{}, // Set default attributes here
+		Node:  node,
 	}
 }
 
@@ -86,31 +95,27 @@ func (n *Dir) Mkdir(ctx context.Context, name string, mode uint32, out *fuse.Ent
 
 func (n *Dir) Readdir(ctx context.Context) (fs.DirStream, syscall.Errno) {
 	var dirents []fuse.DirEntry
-	//if r.client == nil {
-	//	return fs.NewListDirStream(dirents), 0
-	//}
-	//listResp, err := r.client.ListRPC(ctx, &rpc.ListReq{
-	//	Key: r.path,
-	//})
-	//if err != nil {
-	//	return fs.NewListDirStream(dirents), 0
-	//}
-	//for filename, content := range listResp.Entries {
-	//	var mode uint32
-	//	var ino uint64
-	//	if content == "" {
-	//		mode = fuse.S_IFDIR
-	//		ino = r.NewRegularSubdirectory(ctx, r.client, filename)
-	//	} else {
-	//		mode = fuse.S_IFREG
-	//		ino = r.NewRegularSubfile(ctx, r.client, filename, []byte(content))
-	//	}
-	//	dirents = append(dirents, fuse.DirEntry{
-	//		Mode: mode,
-	//		Name: filename,
-	//		Ino:  ino,
-	//	})
-	//}
+	if c == nil {
+		return fs.NewListDirStream(dirents), 0
+	}
+	listResp, err := c.ListRPC(ctx, &rpc.ListReq{
+		Key: n.path,
+	})
+	if err != nil {
+		return fs.NewListDirStream(dirents), 0
+	}
+	for filename, node := range listResp.Entries {
+		var mode uint32
+		if node.GetFile() {
+			mode = fuse.S_IFREG
+		} else {
+			mode = fuse.S_IFDIR
+		}
+		dirents = append(dirents, fuse.DirEntry{
+			Mode: mode,
+			Name: filename,
+		})
+	}
 	return fs.NewListDirStream(dirents), 0
 }
 
