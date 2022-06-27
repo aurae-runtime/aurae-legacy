@@ -22,6 +22,7 @@ import (
 	"github.com/hanwen/go-fuse/v2/fuse"
 	"github.com/kris-nova/aurae/pkg/core/memfs"
 	"github.com/kris-nova/aurae/rpc"
+	"github.com/sirupsen/logrus"
 	"sync"
 	"syscall"
 )
@@ -98,6 +99,7 @@ func (n *Dir) Readdir(ctx context.Context) (fs.DirStream, syscall.Errno) {
 	if c == nil {
 		return fs.NewListDirStream(dirents), 0
 	}
+	logrus.Debugf("dir.Readdir() -> client.ListRPC() path=%s", n.path)
 	listResp, err := c.ListRPC(ctx, &rpc.ListReq{
 		Key: n.path,
 	})

@@ -175,6 +175,7 @@ func main() {
 					if err != nil {
 						return err
 					}
+					logrus.Infof("Listing: %s", key)
 					listResp, err := auraeClient.ListRPC(context.Background(), &rpc.ListReq{
 						Key: key,
 					})

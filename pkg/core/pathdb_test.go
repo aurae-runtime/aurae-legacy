@@ -204,6 +204,7 @@ func TestComplexListIOCases(t *testing.T) {
 	db := NewPathDatabase()
 
 	cases := []struct {
+		message          string // TODO set and log messages in the test output
 		setKeys          []string
 		setVal           string
 		listKey          string
@@ -274,6 +275,13 @@ func TestComplexListIOCases(t *testing.T) {
 			listKey:          "/dir1",
 			expectedListKeys: []string{"dirSub1", "dirSub2"},
 		},
+		{
+			// Ensure we list /
+			setKeys:          []string{"/dir1/file1", "dir2/file2"},
+			setVal:           "testVal",
+			listKey:          "/",
+			expectedListKeys: []string{"dir1", "dir2"},
+		},
 	}
 
 	for _, c := range cases {
@@ -327,6 +335,71 @@ func listResponseToStrings(lsResp *rpc.ListResp) []string {
 		ret = append(ret, k)
 	}
 	return ret
+}
+
+func TestExerciseIntegrationIO(t *testing.T) {
+
+	db := NewPathDatabase()
+
+	// Set Sad
+	var setResp *rpc.SetResp
+	setResp, err := db.SetRPC(context.Background(), &rpc.SetReq{
+		Key: "/dir1/file1",
+		Val: "badData", // This should overwritten below
+	})
+	if err != nil {
+		t.Errorf("unable to SetRPC: %v", err)
+	}
+	if setResp.Code != CoreCode_OKAY {
+		t.Errorf("Invalid code in integration test. Expected: %d, Actual: %d", CoreCode_OKAY, setResp.Code)
+	}
+
+	setResp, err = db.SetRPC(context.Background(), &rpc.SetReq{
+		Key: "/dir1/file1",
+		Val: "-testData-", // Overwrite here
+	})
+	if err != nil {
+		t.Errorf("unable to SetRPC: %v", err)
+	}
+	if setResp.Code != CoreCode_OKAY {
+		t.Errorf("Invalid code in integration test. Expected: %d, Actual: %d", CoreCode_OKAY, setResp.Code)
+	}
+
+	// Get
+	var getResp *rpc.GetResp
+	getResp, err = db.GetRPC(context.Background(), &rpc.GetReq{
+		Key: "/dir1/file1",
+	})
+	if err != nil {
+		t.Errorf("unable to GetRPC: %v", err)
+	}
+
+	// Check for overwritten data
+	if getResp.Val != "-testData-" {
+		t.Errorf("Invalid test data result. Expected: %s, Actual: %s", "-testData-", getResp.Val)
+	}
+
+	// List
+
+	// TODO Left off here!!
+	// TODO We have a bug!!
+	// TODO List is not working in root directories!
+
+	var lsResp *rpc.ListResp
+	lsResp, err = db.ListRPC(context.Background(), &rpc.ListReq{
+		Key: "/",
+	})
+	if len(lsResp.Entries) != 1 {
+		t.Errorf("Expecting single file in list, Actual: %d", len(lsResp.Entries))
+	}
+	if dirent, ok := lsResp.Entries["file1"]; !ok {
+		t.Errorf("Expecting %s in list", "file1")
+	} else {
+		if dirent.Name != "file1" {
+			t.Errorf("Invalid filename. Expecting: %s, Actual: %s", "file1", dirent.Name)
+		}
+	}
+
 }
 
 //func TestTODO(t *testing.T) {

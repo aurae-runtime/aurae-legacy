@@ -98,6 +98,7 @@ func (n *Node) AddSubNode(key, value string) *Node {
 
 	// Check if the node exists
 	if _, ok := n.Children[child.Name]; ok {
+		n.Children[child.Name].Content = []byte(value)
 		return n.Children[child.Name]
 	}
 
@@ -138,6 +139,9 @@ func (n *Node) GetSubNode(key string) *Node {
 // ListSubNodes will return a flat listing of all children of a Node in the tree.
 func (n *Node) ListSubNodes(key string) map[string]*Node {
 	result := make(map[string]*Node)
+	if key == "" || key == "/" {
+		return rootNode.Children
+	}
 	key = strings.TrimSuffix(key, "/")
 	// First check and see if a dir
 	found := n.GetSubNode(key)
