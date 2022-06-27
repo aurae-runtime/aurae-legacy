@@ -25,9 +25,9 @@ import (
 	"os"
 	"time"
 
+	"github.com/fatih/color"
 	"github.com/kris-nova/aurae"
 	"github.com/sirupsen/logrus"
-
 	"github.com/urfave/cli/v2"
 )
 
@@ -175,7 +175,6 @@ func main() {
 					if err != nil {
 						return err
 					}
-					logrus.Infof("Listing: %s", key)
 					listResp, err := auraeClient.ListRPC(context.Background(), &rpc.ListReq{
 						Key: key,
 					})
@@ -183,7 +182,11 @@ func main() {
 						return err
 					}
 					for k, v := range listResp.Entries {
-						fmt.Println(k, v)
+						if v.File {
+							color.Green(k)
+						} else {
+							color.Blue(k)
+						}
 					}
 					return nil
 				},
