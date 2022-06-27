@@ -340,6 +340,9 @@ func listResponseToStrings(lsResp *rpc.ListResp) []string {
 func TestSingleRootFile(t *testing.T) {
 
 	db := NewPathDatabase()
+	db.RemoveRPC(context.Background(), &rpc.RemoveReq{
+		Key: "/",
+	})
 
 	// Set Sad
 	var setResp *rpc.SetResp
@@ -377,6 +380,9 @@ func TestSingleRootFile(t *testing.T) {
 func TestExerciseIntegrationIO(t *testing.T) {
 
 	db := NewPathDatabase()
+	db.RemoveRPC(context.Background(), &rpc.RemoveReq{
+		Key: "/",
+	})
 
 	// Set Sad
 	var setResp *rpc.SetResp
@@ -419,7 +425,7 @@ func TestExerciseIntegrationIO(t *testing.T) {
 	// List
 	var lsResp *rpc.ListResp
 	lsResp, err = db.ListRPC(context.Background(), &rpc.ListReq{
-		Key: "/",
+		Key: "/dir1",
 	})
 	if len(lsResp.Entries) != 1 {
 		t.Errorf("Expecting single file in list, Actual: %d", len(lsResp.Entries))

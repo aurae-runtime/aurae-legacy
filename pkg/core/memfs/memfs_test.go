@@ -24,8 +24,8 @@ import (
 func TestAddSubNodeSimple(t *testing.T) {
 	rootNode.AddSubNode("/test/path", "testData")
 	child := rootNode.GetSubNode("/test/path")
-	if child.depth != 3 {
-		t.Errorf("Expected: 3, Actual: %d", child.depth)
+	if child.depth != 2 {
+		t.Errorf("Expected: 2, Actual: %d", child.depth)
 	}
 	if child.Name != "path" {
 		t.Errorf("Nested child name error. Expected: path, Actual: %s", child.Name)
@@ -42,8 +42,8 @@ func TestAddSubNodeFileCheck(t *testing.T) {
 		t.Errorf("nil child from GetSubNode")
 		t.FailNow()
 	}
-	if child.depth != 5 {
-		t.Errorf("Expected: 5, Actual: %d", child.depth)
+	if child.depth != 4 {
+		t.Errorf("Expected: 4, Actual: %d", child.depth)
 	}
 	if child.Name != "boops" {
 		t.Errorf("Nested child name error. Expected: boops, Actual: %s", child.Name)
@@ -160,8 +160,8 @@ func TestListFiles(t *testing.T) {
 		if !node.File {
 			t.Errorf("Only expecting files in list")
 		}
-		if node.depth != 3 {
-			t.Errorf("Only expecting 3 depth in list, actual: %d", node.depth)
+		if node.depth != 2 {
+			t.Errorf("Only expecting 2 depth in list, actual: %d", node.depth)
 		}
 		if len(node.Children) != 0 {
 			t.Errorf("Unexpected sub children.")
@@ -210,22 +210,22 @@ func TestCountChildren(t *testing.T) {
 	countChildrenMtx.Lock()
 	defer countChildrenMtx.Unlock()
 	rootNode.RemoveRecursive()
-	rootNode.AddSubNode("/single", "") // Root is 1, we are 1
+	rootNode.AddSubNode("/single", "")
+	if rootNode.TotalChildren() != 1 {
+		t.Errorf("Failed tree children count. Expected: 1, Actual: %d", rootNode.TotalChildren())
+	}
+	rootNode.AddSubNode("/single/double", "")
 	if rootNode.TotalChildren() != 2 {
 		t.Errorf("Failed tree children count. Expected: 2, Actual: %d", rootNode.TotalChildren())
 	}
-	rootNode.AddSubNode("/single/double", "") // Root is 1, we are 1, child is 1
+	rootNode.AddSubNode("/single/double/triple", "")
 	if rootNode.TotalChildren() != 3 {
 		t.Errorf("Failed tree children count. Expected: 3, Actual: %d", rootNode.TotalChildren())
-	}
-	rootNode.AddSubNode("/single/double/triple", "") // Root is 1, we are 1, child is 1, child is 1
-	if rootNode.TotalChildren() != 4 {
-		t.Errorf("Failed tree children count. Expected: 4, Actual: %d", rootNode.TotalChildren())
 	}
 
 	doubleNode := rootNode.GetSubNode("/single/double")
 	doubleNode.RemoveRecursive()
-	if rootNode.TotalChildren() != 2 {
-		t.Errorf("Failed tree children count. Expected: 2, Actual: %d", rootNode.TotalChildren())
+	if rootNode.TotalChildren() != 1 {
+		t.Errorf("Failed tree children count. Expected: 1, Actual: %d", rootNode.TotalChildren())
 	}
 }
