@@ -155,6 +155,47 @@ func TestIOCases(t *testing.T) {
 			t.Errorf("Unexpected code: Expected: %d, Actual: %d", c.expectedCode, getResp.Code)
 		}
 	}
+}
+
+func TestBasicListIOHappy(t *testing.T) {
+
+	db := NewPathDatabase()
+
+	// Set
+	var setResp *rpc.SetResp
+	setResp, err := db.SetRPC(context.Background(), &rpc.SetReq{
+		Key: "testKey",
+		Val: "testVal",
+	})
+	if err != nil {
+		t.Errorf("unable to SetRPC: %v", err)
+	}
+	if setResp.Code != CoreCode_OKAY {
+		t.Errorf("Invalid response code. Expected: %d, Actual: %d", CoreCode_OKAY, setResp.Code)
+	}
+
+	// List
+	var lsResp *rpc.ListResp
+	lsResp, err = db.ListRPC(context.Background(), &rpc.ListReq{
+		Key: "testKey",
+	})
+	if err != nil {
+		t.Errorf("unable to GetRPC: %v", err)
+	}
+	if lsResp.Code != CoreCode_OKAY {
+		t.Errorf("Invalid response code. Expected: %d, Actual: %d", CoreCode_OKAY, getResp.Code)
+	}
+
+	if dirent, ok := lsResp.Entries["testKey"]; !ok {
+		t.Errorf("Missing testKey in list")
+	} else {
+		if dirent.Name != "testKey" {
+			t.Errorf("List data IO. Expected: %s, Actual: %s", "testKey", dirent.Name)
+		}
+		if dirent.File != true {
+			t.Errorf("Expected file=true, Actual file=false")
+		}
+	}
 
 }
 
