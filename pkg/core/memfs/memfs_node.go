@@ -70,10 +70,7 @@ type Node struct {
 // Directories are created recursively, and as needed.
 // There is no concept of creating an empty directory.
 func (n *Node) AddSubNode(key, value string) *Node {
-	key = strings.TrimSuffix(key, "/")
-	if key == "" {
-		return rootNode
-	}
+	key = strings.TrimPrefix(key, "/")
 	child := &Node{
 		Children: make(map[string]*Node),
 		depth:    n.depth + 1,
@@ -81,6 +78,10 @@ func (n *Node) AddSubNode(key, value string) *Node {
 		parent:   n,
 		perm:     DefaultNodePerm,
 	}
+	if key == "" {
+		return n
+	}
+
 	spl := strings.Split(key, "/")
 	if len(spl) > 1 {
 		// See if the node already has the child
@@ -111,7 +112,7 @@ func (n *Node) AddSubNode(key, value string) *Node {
 
 // GetSubNode will return a sub Node recursively if it is found in the tree.
 func (n *Node) GetSubNode(key string) *Node {
-	key = strings.TrimSuffix(key, "/")
+	key = strings.TrimPrefix(key, "/")
 	if key == "" {
 		return rootNode
 	}
@@ -138,11 +139,12 @@ func (n *Node) GetSubNode(key string) *Node {
 
 // ListSubNodes will return a flat listing of all children of a Node in the tree.
 func (n *Node) ListSubNodes(key string) map[string]*Node {
-	result := make(map[string]*Node)
+	key = strings.TrimPrefix(key, "/")
 	if key == "" || key == "/" {
 		return rootNode.Children
 	}
-	key = strings.TrimSuffix(key, "/")
+	result := make(map[string]*Node)
+
 	// First check and see if a dir
 	found := n.GetSubNode(key)
 	if found == nil {

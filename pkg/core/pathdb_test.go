@@ -317,7 +317,7 @@ func TestComplexListIOCases(t *testing.T) {
 			}
 			if dirent, ok := lsResp.Entries[expectedKey]; !ok {
 				t.Errorf("Missing %s in list", expectedKey)
-				t.Errorf("Returned keys: %s", strings.Join(listResponseToStrings(lsResp), " "))
+				t.Errorf("Returned keys: [%s]", strings.Join(listResponseToStrings(lsResp), " "))
 			} else {
 				if dirent.Name != expectedKey {
 					t.Errorf("List data IO. Expected: %s, Actual: %s", "testKey", dirent.Name)
@@ -335,6 +335,43 @@ func listResponseToStrings(lsResp *rpc.ListResp) []string {
 		ret = append(ret, k)
 	}
 	return ret
+}
+
+func TestSingleRootFile(t *testing.T) {
+
+	db := NewPathDatabase()
+
+	// Set Sad
+	var setResp *rpc.SetResp
+	setResp, err := db.SetRPC(context.Background(), &rpc.SetReq{
+		Key: "/singleRootFile",
+		Val: "data",
+	})
+	if err != nil {
+		t.Errorf("unable to SetRPC: %v", err)
+	}
+	if setResp.Code != CoreCode_OKAY {
+		t.Errorf("Invalid code in integration test. Expected: %d, Actual: %d", CoreCode_OKAY, setResp.Code)
+	}
+
+	// List
+
+	var lsResp *rpc.ListResp
+	lsResp, err = db.ListRPC(context.Background(), &rpc.ListReq{
+		Key: "/",
+	})
+	if len(lsResp.Entries) != 1 {
+		t.Errorf("Expecting single file in list, Actual: %d", len(lsResp.Entries))
+	}
+	if dirent, ok := lsResp.Entries["singleRootFile"]; !ok {
+		t.Errorf("Expecting %s in list", "singleRootFile")
+		t.Errorf("Returned keys: [%s]", strings.Join(listResponseToStrings(lsResp), " "))
+
+	} else {
+		if dirent.Name != "singleRootFile" {
+			t.Errorf("Invalid filename. Expecting: %s, Actual: %s", "singleRootFile", dirent.Name)
+		}
+	}
 }
 
 func TestExerciseIntegrationIO(t *testing.T) {
@@ -380,11 +417,6 @@ func TestExerciseIntegrationIO(t *testing.T) {
 	}
 
 	// List
-
-	// TODO Left off here!!
-	// TODO We have a bug!!
-	// TODO List is not working in root directories!
-
 	var lsResp *rpc.ListResp
 	lsResp, err = db.ListRPC(context.Background(), &rpc.ListReq{
 		Key: "/",
@@ -399,7 +431,6 @@ func TestExerciseIntegrationIO(t *testing.T) {
 			t.Errorf("Invalid filename. Expecting: %s, Actual: %s", "file1", dirent.Name)
 		}
 	}
-
 }
 
 //func TestTODO(t *testing.T) {
