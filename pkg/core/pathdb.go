@@ -27,9 +27,10 @@ import (
 var _ rpc.CoreServiceServer = &PathDatabase{}
 
 const (
-	CoreCode_OKAY  int32 = 0
-	CoreCode_ERROR int32 = 1
-	CoreCode_EMPTY int32 = 2
+	CoreCode_OKAY   int32 = 0
+	CoreCode_ERROR  int32 = 1
+	CoreCode_EMPTY  int32 = 2
+	CoreCode_REJECT int32 = 3
 )
 
 // PathDatabase is the core data store structure for Aurae.
@@ -93,6 +94,23 @@ func (c *PathDatabase) SetRPC(ctx context.Context, req *rpc.SetReq) (*rpc.SetRes
 	memfs.Set(path, req.Val) // MemFS implementation
 
 	response := &rpc.SetResp{
+		Code: CoreCode_OKAY,
+	}
+	return response, nil
+}
+
+// RemoveRPC is irreversible!
+//
+// To empty the database pass "/"
+func (c *PathDatabase) RemoveRPC(ctx context.Context, req *rpc.RemoveReq) (*rpc.RemoveResp, error) {
+	c.mtx.Lock()
+	defer c.mtx.Unlock()
+
+	path := common.Path(req.Key) // Data mutation!
+
+	memfs.Remove(path) // MemFS implementation
+
+	response := &rpc.RemoveResp{
 		Code: CoreCode_OKAY,
 	}
 	return response, nil

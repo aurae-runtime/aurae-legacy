@@ -25,7 +25,7 @@ service CoreService {
   rpc SetRPC (SetReq) returns (SetResp) {}
   rpc GetRPC (GetReq) returns (GetResp) {}
   rpc ListRPC (ListReq) returns (ListResp) {}
-  rpc RemoveRPC (ListReq) returns (ListResp) {}
+  rpc RemoveRPC (RemoveReq) returns (RemoveResp) {}
 
 }
 

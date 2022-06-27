@@ -25,7 +25,7 @@ type CoreServiceClient interface {
 	SetRPC(ctx context.Context, in *SetReq, opts ...grpc.CallOption) (*SetResp, error)
 	GetRPC(ctx context.Context, in *GetReq, opts ...grpc.CallOption) (*GetResp, error)
 	ListRPC(ctx context.Context, in *ListReq, opts ...grpc.CallOption) (*ListResp, error)
-	RemoveRPC(ctx context.Context, in *ListReq, opts ...grpc.CallOption) (*ListResp, error)
+	RemoveRPC(ctx context.Context, in *RemoveReq, opts ...grpc.CallOption) (*RemoveResp, error)
 }
 
 type coreServiceClient struct {
@@ -63,8 +63,8 @@ func (c *coreServiceClient) ListRPC(ctx context.Context, in *ListReq, opts ...gr
 	return out, nil
 }
 
-func (c *coreServiceClient) RemoveRPC(ctx context.Context, in *ListReq, opts ...grpc.CallOption) (*ListResp, error) {
-	out := new(ListResp)
+func (c *coreServiceClient) RemoveRPC(ctx context.Context, in *RemoveReq, opts ...grpc.CallOption) (*RemoveResp, error) {
+	out := new(RemoveResp)
 	err := c.cc.Invoke(ctx, "/aurae.CoreService/RemoveRPC", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -79,7 +79,7 @@ type CoreServiceServer interface {
 	SetRPC(context.Context, *SetReq) (*SetResp, error)
 	GetRPC(context.Context, *GetReq) (*GetResp, error)
 	ListRPC(context.Context, *ListReq) (*ListResp, error)
-	RemoveRPC(context.Context, *ListReq) (*ListResp, error)
+	RemoveRPC(context.Context, *RemoveReq) (*RemoveResp, error)
 	mustEmbedUnimplementedCoreServiceServer()
 }
 
@@ -96,7 +96,7 @@ func (UnimplementedCoreServiceServer) GetRPC(context.Context, *GetReq) (*GetResp
 func (UnimplementedCoreServiceServer) ListRPC(context.Context, *ListReq) (*ListResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListRPC not implemented")
 }
-func (UnimplementedCoreServiceServer) RemoveRPC(context.Context, *ListReq) (*ListResp, error) {
+func (UnimplementedCoreServiceServer) RemoveRPC(context.Context, *RemoveReq) (*RemoveResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RemoveRPC not implemented")
 }
 func (UnimplementedCoreServiceServer) mustEmbedUnimplementedCoreServiceServer() {}
@@ -167,7 +167,7 @@ func _CoreService_ListRPC_Handler(srv interface{}, ctx context.Context, dec func
 }
 
 func _CoreService_RemoveRPC_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListReq)
+	in := new(RemoveReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -179,7 +179,7 @@ func _CoreService_RemoveRPC_Handler(srv interface{}, ctx context.Context, dec fu
 		FullMethod: "/aurae.CoreService/RemoveRPC",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CoreServiceServer).RemoveRPC(ctx, req.(*ListReq))
+		return srv.(CoreServiceServer).RemoveRPC(ctx, req.(*RemoveReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }

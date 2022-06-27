@@ -43,6 +43,14 @@ func Set(key, value string) {
 	rootNode.AddSubNode(path, value)
 }
 
+func Remove(key string) {
+	mtx.Lock()
+	defer mtx.Unlock()
+	path := common.Path(key) // Data mutation!
+	node := rootNode.GetSubNode(path)
+	node.RemoveRecursive() // This will remove the node itself unless it is root!
+}
+
 func List(key string) map[string]*Node {
 	mtx.Lock()
 	defer mtx.Unlock()
