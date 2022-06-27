@@ -21,6 +21,10 @@ import (
 	"strings"
 )
 
+const (
+	DefaultNodePerm os.FileMode = 0644
+)
+
 // Node represents the vertex in a Graph, or, an Inode in a file system.
 //
 // A Node can represent a directory, or a file.
@@ -58,7 +62,7 @@ type Node struct {
 
 	// file=true The Node is a file (with content)
 	// file=false The Node is a directory (without content)
-	file bool
+	File bool
 }
 
 // AddSubNode is how to introduce a new sub node.
@@ -73,8 +77,9 @@ func (n *Node) AddSubNode(key, value string) *Node {
 	child := &Node{
 		Children: make(map[string]*Node),
 		depth:    n.depth + 1,
-		file:     false,
+		File:     false,
 		parent:   n,
+		perm:     DefaultNodePerm,
 	}
 	spl := strings.Split(key, "/")
 	if len(spl) > 1 {
@@ -83,11 +88,11 @@ func (n *Node) AddSubNode(key, value string) *Node {
 			child = cachedChild
 		}
 		child.Name = spl[0]
-		child.file = false
+		child.File = false
 		child.AddSubNode(strings.Join(spl[1:], "/"), value)
 	} else {
 		child.Name = key
-		child.file = true
+		child.File = true
 		child.Content = []byte(value)
 	}
 	n.Children[child.Name] = child
@@ -100,7 +105,7 @@ func (n *Node) GetSubNode(key string) *Node {
 	if key == "" {
 		return rootNode
 	}
-	if n.Name == key && n.file {
+	if n.Name == key && n.File {
 		return n
 	}
 	spl := strings.Split(key, "/")
@@ -130,12 +135,12 @@ func (n *Node) ListSubNodes(key string) map[string]*Node {
 	if found == nil {
 		return result // Nothing
 	}
-	if found.file {
+	if found.File {
 		result[found.Name] = found
 	}
-	if !found.file {
+	if !found.File {
 		for _, c := range found.Children {
-			if c.file {
+			if c.File {
 				result[c.Name] = c
 			} else {
 				result[c.Name] = nil

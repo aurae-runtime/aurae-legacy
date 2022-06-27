@@ -49,7 +49,12 @@ message ListReq {
   string key = 1;
 }
 
+message Node {
+  string name = 1;
+  bool file = 2;
+}
+
 message ListResp {
-  map<string, string> entries = 1;
+  map<string, Node> entries = 1;
   int32 code = 2;
 }

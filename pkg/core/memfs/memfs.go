@@ -43,18 +43,14 @@ func Set(key, value string) {
 	rootNode.AddSubNode(path, value)
 }
 
-func List(key string) map[string]string {
+func List(key string) map[string]*Node {
 	mtx.Lock()
 	defer mtx.Unlock()
 	base := common.Path(key)
 	lsMap := rootNode.ListSubNodes(base)
-	ret := make(map[string]string)
+	ret := make(map[string]*Node)
 	for file, node := range lsMap {
-		if node == nil {
-			ret[file] = ""
-		} else {
-			ret[file] = string(node.Content)
-		}
+		ret[file] = node
 	}
 	return ret
 }

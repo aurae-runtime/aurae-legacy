@@ -53,9 +53,17 @@ func (c *PathDatabase) ListRPC(ctx context.Context, req *rpc.ListReq) (*rpc.List
 
 	path := common.Path(req.Key) // Data mutation!
 
-	var resp map[string]string
+	var resp map[string]*rpc.Node
 
-	resp = memfs.List(path) // MemFS implementation
+	ls := memfs.List(path) // MemFS implementation
+
+	// Copy the memfs.Node -> rpc.Node // TODO should we simplify this type?
+	for name, node := range ls {
+		resp[name] = &rpc.Node{
+			Name: node.Name,
+			File: node.File,
+		}
+	}
 
 	response := &rpc.ListResp{
 		Entries: resp,

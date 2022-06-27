@@ -51,20 +51,20 @@ func TestAddSubNodeFileCheck(t *testing.T) {
 	if string(child.Content) != "testData" {
 		t.Errorf("Nested child value error. Expected: testData, Actual: %s", child.Name)
 	}
-	if !child.file {
-		t.Errorf("Nested child file error, expected child.file=true")
+	if !child.File {
+		t.Errorf("Nested child file error, expected child.File=true")
 	}
 	baseDir := rootNode.GetSubNode("/test/path/beeps")
-	if baseDir.file {
-		t.Errorf("Base dir file error, expected child.file=false")
+	if baseDir.File {
+		t.Errorf("Base dir file error, expected child.File=false")
 	}
 	baseDir = rootNode.GetSubNode("/test/path")
-	if baseDir.file {
-		t.Errorf("Base dir file error, expected child.file=false")
+	if baseDir.File {
+		t.Errorf("Base dir file error, expected child.File=false")
 	}
 	baseDir = rootNode.GetSubNode("/test")
-	if baseDir.file {
-		t.Errorf("Base dir file error, expected child.file=false")
+	if baseDir.File {
+		t.Errorf("Base dir file error, expected child.File=false")
 	}
 	if len(baseDir.Children) != 1 {
 		t.Errorf("final basedir check children count failed: %d", len(baseDir.Children))
@@ -133,8 +133,8 @@ func TestListFiles(t *testing.T) {
 		t.Errorf("Multiple subfile data lookup error. Expected: testData3, Actual: %s", actual3)
 	}
 	node := rootNode.GetSubNode("/base/path3")
-	if !node.file {
-		t.Errorf("Expecting node.file=true")
+	if !node.File {
+		t.Errorf("Expecting node.File=true")
 	}
 
 	files := List("/base")
@@ -142,22 +142,22 @@ func TestListFiles(t *testing.T) {
 		t.Errorf("List failure. Expecting 3, Actual: %d", len(files))
 	}
 	if actual1, ok := files["path1"]; ok {
-		if actual1 != "testData1" {
-			t.Errorf("Expected: testData1, Actual: %s %v", actual1, files)
+		if string(actual1.Content) != "testData1" {
+			t.Errorf("Expected: testData1, Actual: %s %v", string(actual1.Content), files)
 		}
 	} else {
 		t.Errorf("Unable to find file in list")
 	}
 	if actual2, ok := files["path2"]; ok {
-		if actual2 != "testData2" {
-			t.Errorf("Expected: testData2, Actual: %s %v", actual2, files)
+		if string(actual2.Content) != "testData2" {
+			t.Errorf("Expected: testData2, Actual: %s %v", string(actual2.Content), files)
 		}
 	} else {
 		t.Errorf("Unable to find file in list")
 	}
 	children := rootNode.ListSubNodes("/base")
 	for _, node := range children {
-		if !node.file {
+		if !node.File {
 			t.Errorf("Only expecting files in list")
 		}
 		if node.depth != 3 {
