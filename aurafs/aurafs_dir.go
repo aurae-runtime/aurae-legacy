@@ -20,9 +20,11 @@ import (
 	"context"
 	"github.com/hanwen/go-fuse/v2/fs"
 	"github.com/hanwen/go-fuse/v2/fuse"
+	"github.com/kris-nova/aurae/pkg/core"
 	"github.com/kris-nova/aurae/rpc"
 	"github.com/sirupsen/logrus"
 	"path"
+	"path/filepath"
 	"sync"
 	"syscall"
 )
@@ -32,6 +34,8 @@ var _ fs.NodeGetattrer = &Dir{}
 var _ fs.NodeOnAdder = &Dir{}
 var _ fs.NodeOpendirer = &Dir{}
 var _ fs.NodeReaddirer = &Dir{}
+var _ fs.NodeMkdirer = &Dir{}
+var _ fs.NodeRmdirer = &Dir{}
 
 var _ fs.MemRegularFile
 
@@ -46,6 +50,7 @@ type Dir struct {
 }
 
 func NewDir(path string) *Dir {
+	logrus.Debugf("NewDir: %s", path)
 	var i uint64
 	i = Ino()
 	return &Dir{
@@ -58,11 +63,6 @@ func NewDir(path string) *Dir {
 			Mode: ModeX,
 		}, // Set default attributes here
 	}
-}
-
-func (n *Dir) Open(ctx context.Context, flags uint32) (fh fs.FileHandle, fuseFlags uint32, errno syscall.Errno) {
-	logrus.Debugf("%s -> Open()", n.path)
-	return nil, fuse.FOPEN_KEEP_CACHE, Okay
 }
 
 func (n *Dir) Getattr(ctx context.Context, fh fs.FileHandle, out *fuse.AttrOut) syscall.Errno {
@@ -81,26 +81,15 @@ func (n *Dir) Setattr(ctx context.Context, fh fs.FileHandle, in *fuse.SetAttrIn,
 	return Okay
 }
 
-func (n *Dir) Flush(ctx context.Context, fh fs.FileHandle) syscall.Errno {
-	logrus.Debugf("%s -> Flush()", n.path)
-	return 0
-}
-
-func (n *Dir) Read(ctx context.Context, fh fs.FileHandle, dest []byte, off int64) (fuse.ReadResult, syscall.Errno) {
-	n.mu.Lock()
-	defer n.mu.Unlock()
-	logrus.Debugf("%s -> Read()", n.path)
-	return fuse.ReadResultData([]byte("")), Okay
-}
-
 func (n *Dir) Opendir(ctx context.Context) syscall.Errno {
 	logrus.Debugf("%s -> Opendir()", n.path)
 	return 0
 }
 
 func (n *Dir) Mkdir(ctx context.Context, name string, mode uint32, out *fuse.EntryOut) (*fs.Inode, syscall.Errno) {
-	logrus.Debugf("%s -> Mkdir()", n.path)
-	return nil, 0
+	logrus.Debugf("%s -> Mkdir(%s)", n.path, name)
+	_, dir := n.NewSubDir(ctx, path.Join(n.path, name))
+	return &dir.Inode, 0
 }
 
 func (n *Dir) Readdir(ctx context.Context) (fs.DirStream, syscall.Errno) {
@@ -127,10 +116,10 @@ func (n *Dir) Readdir(ctx context.Context) (fs.DirStream, syscall.Errno) {
 			if err != nil {
 				return fs.NewListDirStream(dirents), 0
 			}
-			ino = n.NewSubFile(ctx, filename, []byte(getResp.Val))
+			ino, _ = n.NewSubFile(ctx, filename, []byte(getResp.Val))
 		} else {
 			mode = fuse.S_IFDIR
-			ino = n.NewSubDir(ctx, filename)
+			ino, _ = n.NewSubDir(ctx, filename)
 		}
 		dirents = append(dirents, fuse.DirEntry{
 			Mode: mode,
@@ -151,24 +140,38 @@ func (n *Dir) OnAdd(ctx context.Context) {
 	// Less is more
 }
 
-func (n *Dir) NewSubFile(ctx context.Context, name string, data []byte) uint64 {
+func (n *Dir) NewSubFile(ctx context.Context, name string, data []byte) (uint64, *File) {
 	i := Ino()
+	file := NewFile(path.Join(n.path, name), data)
 	n.AddChild(name,
-		n.NewInode(ctx, NewFile(path.Join(n.path, name), data),
+		n.NewInode(ctx, file,
 			fs.StableAttr{
 				Ino:  i,
 				Mode: fuse.S_IFREG,
 			}), true)
-	return i
+	return i, file
 }
 
-func (n *Dir) NewSubDir(ctx context.Context, name string) uint64 {
+func (n *Dir) NewSubDir(ctx context.Context, name string) (uint64, *Dir) {
 	i := Ino()
+	setResp, err := c.SetRPC(ctx, &rpc.SetReq{
+		Key: filepath.Join(name, "/"),
+	})
+	if err != nil {
+		logrus.Warningf("Unable to SetRPC on Aurae core daemon: %v", err)
+		return 0, nil
+	}
+	if setResp.Code != core.CoreCode_OKAY {
+		logrus.Warningf("Failure to SetRPC on Aurae core daemon: %v", setResp)
+		return 0, nil
+	}
+
+	dir := NewDir(path.Join(n.path, name))
 	n.AddChild(name,
-		n.NewInode(ctx, NewDir(path.Join(n.path, name)),
+		n.NewInode(ctx, dir,
 			fs.StableAttr{
 				Ino:  i,
 				Mode: fuse.S_IFDIR,
 			}), true)
-	return i
+	return i, dir
 }

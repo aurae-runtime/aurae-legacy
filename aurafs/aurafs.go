@@ -45,15 +45,41 @@ func NewAuraeFS(mountpoint string, establishedClient *client.Client) *AuraeFS {
 	}
 }
 
+// mountOptions are fusermount mount options.
+//
+// These are a combination of mount(8) and fusermount afuse(1)
+// mount options.
+//
+// Most of the generic mount options described in mount are
+// supported (ro, rw, suid, nosuid, dev, nodev, exec, noexec, atime,
+// noatime, sync, async, dirsync). Filesystems are mounted with
+// nodev,nosuid by default, which can only be overridden by a
+// privileged user.
+//
+// More: https://linux.die.net/man/8/mount
+// More: https://www.unix.com/man-page/linux/1/fusermount/
+var mountOptions = []string{
+
+	// -o nonempty 	      allow mounts over non-empty file/dir
+	"nonempty",
+
+	// -o rw 			  mount the filesystem as read/write
+	"rw",
+}
+
 // Mount will mount the FS and return.
 func (a *AuraeFS) Mount() error {
 
 	logrus.Infof("Mountpoint: %s", a.hostMountPath)
 
+	for _, mountOption := range mountOptions {
+		logrus.Debugf("Mount option: %s", mountOption)
+	}
+
 	// Mount root and its children
 	svc, err := fs.Mount(a.hostMountPath, root, &fs.Options{
 		MountOptions: fuse.MountOptions{
-			Options: []string{"nonempty"},
+			Options: mountOptions,
 		},
 	})
 	if err != nil {
@@ -74,9 +100,9 @@ func (a *AuraeFS) Runtime() {
 		<-quitCh
 		err := a.service.Unmount()
 		for err != nil {
-			err = a.service.Unmount()
 			logrus.Warningf("Unable to unmount: %v", err)
 			time.Sleep(time.Second * 2)
+			err = a.service.Unmount()
 		}
 		a.runtime = false
 	}()

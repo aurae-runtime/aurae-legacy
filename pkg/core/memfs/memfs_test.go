@@ -229,3 +229,20 @@ func TestCountChildren(t *testing.T) {
 		t.Errorf("Failed tree children count. Expected: 1, Actual: %d", rootNode.TotalChildren())
 	}
 }
+
+func TestMkdir(t *testing.T) {
+	rootNode.AddSubNode("/test/path/", "")
+	child := rootNode.GetSubNode("/test/path")
+	if child.depth != 2 {
+		t.Errorf("Expected: 2, Actual: %d", child.depth)
+	}
+	if child.Name != "path" {
+		t.Errorf("Nested child name error. Expected: path, Actual: %s", child.Name)
+	}
+	if string(child.Content) != "" {
+		t.Errorf("Nested child value error. Expected: testData, Actual: %s", child.Name)
+	}
+	if child.File {
+		t.Errorf("File created, should be directory.")
+	}
+}

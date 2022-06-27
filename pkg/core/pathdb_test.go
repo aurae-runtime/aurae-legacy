@@ -432,9 +432,49 @@ func TestExerciseIntegrationIO(t *testing.T) {
 	}
 	if dirent, ok := lsResp.Entries["file1"]; !ok {
 		t.Errorf("Expecting %s in list", "file1")
+		t.Errorf("Returned keys: [%s]", strings.Join(listResponseToStrings(lsResp), " "))
+
 	} else {
 		if dirent.Name != "file1" {
 			t.Errorf("Invalid filename. Expecting: %s, Actual: %s", "file1", dirent.Name)
+		}
+	}
+}
+
+func TestMkdir(t *testing.T) {
+
+	db := NewPathDatabase()
+	db.RemoveRPC(context.Background(), &rpc.RemoveReq{
+		Key: "/",
+	})
+
+	// Set
+	var setResp *rpc.SetResp
+	setResp, err := db.SetRPC(context.Background(), &rpc.SetReq{
+		Key: "/dir1/dir2/",
+		Val: "",
+	})
+	if err != nil {
+		t.Errorf("unable to SetRPC: %v", err)
+	}
+	if setResp.Code != CoreCode_OKAY {
+		t.Errorf("Invalid code in integration test. Expected: %d, Actual: %d", CoreCode_OKAY, setResp.Code)
+	}
+
+	// List
+	var lsResp *rpc.ListResp
+	lsResp, err = db.ListRPC(context.Background(), &rpc.ListReq{
+		Key: "/dir1",
+	})
+	if len(lsResp.Entries) != 1 {
+		t.Errorf("Expecting single file in list, Actual: %d", len(lsResp.Entries))
+	}
+	if dirent, ok := lsResp.Entries["dir2"]; !ok {
+		t.Errorf("Expecting %s in list", "dir2")
+		t.Errorf("Returned keys: [%s]", strings.Join(listResponseToStrings(lsResp), " "))
+	} else {
+		if dirent.File {
+			t.Errorf("Mkdir (trailing /) created a file instead of directory.")
 		}
 	}
 }
