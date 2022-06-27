@@ -84,6 +84,7 @@ func main() {
 					},
 				}),
 				Action: func(c *cli.Context) error {
+					Preloader()
 					path := c.Args().Get(0)
 					if path == "" {
 						return fmt.Errorf("usage: auraefs mount <path>")
@@ -124,7 +125,6 @@ func main() {
 	}
 
 	// Arbitrary (non-error) pre load
-	Preloader()
 
 	// Runtime
 	err = app.Run(os.Args)
@@ -154,6 +154,7 @@ func Preloader() {
 	/* Flag parsing */
 	if run.verbose {
 		logrus.SetLevel(logrus.DebugLevel)
+		logrus.Debugf("DEBUG MODE ENABLED")
 	} else {
 		logrus.SetLevel(logrus.InfoLevel)
 	}

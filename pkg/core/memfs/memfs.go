@@ -33,7 +33,11 @@ func Get(key string) string {
 	mtx.Lock()
 	defer mtx.Unlock()
 	path := common.Path(key) // Data mutation!
-	return string(rootNode.GetSubNode(path).Content)
+	sub := rootNode.GetSubNode(path)
+	if sub != nil {
+		return string(sub.Content)
+	}
+	return ""
 }
 
 func Set(key, value string) {

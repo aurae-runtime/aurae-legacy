@@ -60,6 +60,10 @@ func (a *AuraeFS) Mount() error {
 		return err
 	}
 	a.service = svc
+	go func() {
+		logrus.Infof("Starting FUSE loop...")
+		a.service.Wait() // Run this in a Goroutine so we can respond later
+	}()
 	logrus.Infof("AuraeFS Started!")
 	return nil
 }
@@ -67,15 +71,19 @@ func (a *AuraeFS) Mount() error {
 func (a *AuraeFS) Runtime() {
 	quitCh := posix.SignalHandler()
 	go func() {
-		a.runtime = <-quitCh
+		<-quitCh
 		err := a.service.Unmount()
 		for err != nil {
 			err = a.service.Unmount()
 			logrus.Warningf("Unable to unmount: %v", err)
 			time.Sleep(time.Second * 2)
 		}
+		a.runtime = false
 	}()
-	a.service.Wait()
+
+	for a.runtime {
+		// TODO Runtime logic
+	}
 }
 
 var ino uint64 = 1 // 1 is always reserved, and we immediately begin indexing, thus we actually start with 2
