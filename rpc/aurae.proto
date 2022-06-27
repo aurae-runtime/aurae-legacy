@@ -25,6 +25,8 @@ service CoreService {
   rpc SetRPC (SetReq) returns (SetResp) {}
   rpc GetRPC (GetReq) returns (GetResp) {}
   rpc ListRPC (ListReq) returns (ListResp) {}
+  rpc RemoveRPC (ListReq) returns (ListResp) {}
+
 }
 
 message SetReq {
@@ -44,6 +46,15 @@ message GetResp {
   string val = 1;
   int32 code = 2;
 }
+
+message RemoveReq {
+  string key = 1;
+}
+
+message RemoveResp {
+  int32 code = 1;
+}
+
 
 message ListReq {
   string key = 1;
