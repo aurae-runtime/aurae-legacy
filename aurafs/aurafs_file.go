@@ -64,11 +64,23 @@ func NewFile(path string, data []byte) *File {
 	}
 }
 
+// Open is how all files are opened
+//
+//               FOPEN_DIRECT_IO
+//                     Bypass page cache for this open file.
+//
+//              FOPEN_KEEP_CACHE
+//                     Don't invalidate the data cache on open.
+//
+//              FOPEN_NONSEEKABLE
+//                     The file is not seekable.
 func (f *File) Open(ctx context.Context, flags uint32) (fh fs.FileHandle, fuseFlags uint32, errno syscall.Errno) {
-	return nil, fuse.FOPEN_KEEP_CACHE, Okay
+	logrus.Debugf("%s --[f]--> Open()", f.path)
+	return nil, fuse.FOPEN_DIRECT_IO, Okay
 }
 
 func (f *File) Write(ctx context.Context, fh fs.FileHandle, data []byte, off int64) (uint32, syscall.Errno) {
+	logrus.Debugf("%s --[f]--> Write()", f.path)
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	end := int64(len(data)) + off
@@ -84,6 +96,7 @@ func (f *File) Write(ctx context.Context, fh fs.FileHandle, data []byte, off int
 }
 
 func (f *File) Getattr(ctx context.Context, fh fs.FileHandle, out *fuse.AttrOut) syscall.Errno {
+	logrus.Debugf("%s --[f]--> Getattr()", f.path)
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	out.Attr = f.Attr
@@ -92,6 +105,7 @@ func (f *File) Getattr(ctx context.Context, fh fs.FileHandle, out *fuse.AttrOut)
 }
 
 func (f *File) Setattr(ctx context.Context, fh fs.FileHandle, in *fuse.SetAttrIn, out *fuse.AttrOut) syscall.Errno {
+	logrus.Debugf("%s --[f]--> Setattr()", f.path)
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	if sz, ok := in.GetSize(); ok {
@@ -103,12 +117,41 @@ func (f *File) Setattr(ctx context.Context, fh fs.FileHandle, in *fuse.SetAttrIn
 }
 
 func (f *File) Flush(ctx context.Context, fh fs.FileHandle) syscall.Errno {
+	logrus.Debugf("%s --[f]--> Flush()", f.path)
+	setResp, err := c.SetRPC(ctx, &rpc.SetReq{
+		Key: f.path,
+		Val: string(f.Data),
+	})
+	if err != nil {
+		logrus.Warningf("Unable to SetRPC on Aurae core daemon: %v", err)
+		return 1
+	}
+	if setResp.Code != core.CoreCode_OKAY {
+		logrus.Warningf("Failure to SetRPC on Aurae core daemon: %v", setResp)
+		return 1
+	}
+	//f.Data = []byte("") // Reset the file content on Flush() if we need it again we pull it from the server.
 	return 0
 }
 
 func (f *File) Read(ctx context.Context, fh fs.FileHandle, dest []byte, off int64) (fuse.ReadResult, syscall.Errno) {
+	logrus.Debugf("%s --[f]--> Read().Len(%d)", f.path, len(f.Data))
 	f.mu.Lock()
 	defer f.mu.Unlock()
+
+	getResp, err := c.GetRPC(ctx, &rpc.GetReq{
+		Key: f.path,
+	})
+	if err != nil {
+		logrus.Warningf("Unable to GetRPC on Aurae core daemon: %v", err)
+		return fuse.ReadResultData(f.Data), 0
+	}
+	if getResp.Code != core.CoreCode_OKAY {
+		logrus.Warningf("Failure to GetRPC on Aurae core daemon: %v", getResp)
+		return fuse.ReadResultData(f.Data), 0
+	}
+	f.Data = []byte(getResp.Val)
+
 	end := int(off) + len(dest)
 	if end > len(f.Data) {
 		end = len(f.Data)
@@ -117,7 +160,7 @@ func (f *File) Read(ctx context.Context, fh fs.FileHandle, dest []byte, off int6
 }
 
 func (f *File) Unlink(ctx context.Context, name string) syscall.Errno {
-	logrus.Debugf("%s -> Unlink(%s)", f.path, name)
+	logrus.Debugf("%s --[f]--> Unlink(%s)", f.path, name)
 	rmResp, err := c.RemoveRPC(ctx, &rpc.RemoveReq{
 		Key: filepath.Join(f.path, name),
 	})

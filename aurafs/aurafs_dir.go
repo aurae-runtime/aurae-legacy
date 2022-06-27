@@ -50,6 +50,7 @@ type Dir struct {
 	mu   sync.Mutex
 	mode uint32
 	Attr fuse.Attr
+	Data []byte
 }
 
 func NewDir(path string) *Dir {
@@ -69,7 +70,7 @@ func NewDir(path string) *Dir {
 }
 
 func (n *Dir) Getattr(ctx context.Context, fh fs.FileHandle, out *fuse.AttrOut) syscall.Errno {
-	logrus.Debugf("%s -> Getattr()", n.path)
+	logrus.Debugf("%s --[d]--> Getattr()", n.path)
 	n.mu.Lock()
 	defer n.mu.Unlock()
 	out.Mode = n.mode
@@ -80,34 +81,34 @@ func (n *Dir) Getattr(ctx context.Context, fh fs.FileHandle, out *fuse.AttrOut) 
 func (n *Dir) Setattr(ctx context.Context, fh fs.FileHandle, in *fuse.SetAttrIn, out *fuse.AttrOut) syscall.Errno {
 	n.mu.Lock()
 	defer n.mu.Unlock()
-	logrus.Debugf("%s -> Setattr()", n.path)
+	logrus.Debugf("%s --[d]--> Setattr()", n.path)
 	return Okay
 }
 
 func (n *Dir) Opendir(ctx context.Context) syscall.Errno {
-	logrus.Debugf("%s -> Opendir()", n.path)
+	logrus.Debugf("%s --[d]--> Opendir()", n.path)
 	return 0
 }
 
 func (n *Dir) Create(ctx context.Context, name string, flags uint32, mode uint32, out *fuse.EntryOut) (node *fs.Inode, fh fs.FileHandle, fuseFlags uint32, errno syscall.Errno) {
-	logrus.Debugf("%s -> Create(%s)", n.path, name)
+	logrus.Debugf("%s --[d]--> Create(%s)", n.path, name)
 	_, file := n.NewSubFile(ctx, path.Join(n.path, name), []byte("")) // touch
 	return &file.Inode, nil, 0, 0
 }
 
 func (n *Dir) Mkdir(ctx context.Context, name string, mode uint32, out *fuse.EntryOut) (*fs.Inode, syscall.Errno) {
-	logrus.Debugf("%s -> Mkdir(%s)", n.path, name)
+	logrus.Debugf("%s --[d]--> Mkdir(%s)", n.path, name)
 	_, dir := n.NewSubDir(ctx, path.Join(n.path, name))
 	return &dir.Inode, 0
 }
 
 func (n *Dir) Readdir(ctx context.Context) (fs.DirStream, syscall.Errno) {
 	var dirents []fuse.DirEntry
-	logrus.Debugf("%s -> Readdir()", n.path)
+	logrus.Debugf("%s --[d]--> Readdir()", n.path)
 	if c == nil {
 		return fs.NewListDirStream(dirents), 0
 	}
-	logrus.Debugf("dir.Readdir() -> client.ListRPC() path=%s", n.path)
+	logrus.Debugf("dir.Readdir() --[d]--> client.ListRPC() path=%s", n.path)
 	listResp, err := c.ListRPC(ctx, &rpc.ListReq{
 		Key: n.path,
 	})
@@ -140,7 +141,7 @@ func (n *Dir) Readdir(ctx context.Context) (fs.DirStream, syscall.Errno) {
 }
 
 func (n *Dir) Rmdir(ctx context.Context, name string) syscall.Errno {
-	logrus.Debugf("%s -> Rmdir()", n.path)
+	logrus.Debugf("%s --[d]--> Rmdir()", n.path)
 	rmResp, err := c.RemoveRPC(ctx, &rpc.RemoveReq{
 		Key: name,
 	})
@@ -156,7 +157,7 @@ func (n *Dir) Rmdir(ctx context.Context, name string) syscall.Errno {
 }
 
 func (n *Dir) OnAdd(ctx context.Context) {
-	logrus.Debugf("%s -> OnAdd()", n.path)
+	logrus.Debugf("%s --[d]--> OnAdd()", n.path)
 	// Less is more
 }
 
@@ -208,10 +209,10 @@ func (n *Dir) NewSubDir(ctx context.Context, name string) (uint64, *Dir) {
 	return i, dir
 }
 
-func (d *Dir) Unlink(ctx context.Context, name string) syscall.Errno {
-	logrus.Debugf("%s -> Unlink(%s)", d.path, name)
+func (n *Dir) Unlink(ctx context.Context, name string) syscall.Errno {
+	logrus.Debugf("%s --[d]--> Unlink(%s)", n.path, name)
 	rmResp, err := c.RemoveRPC(ctx, &rpc.RemoveReq{
-		Key: filepath.Join(d.path, name),
+		Key: filepath.Join(n.path, name),
 	})
 	if err != nil {
 		logrus.Warningf("Unable to RemoveRPC on Aurae core daemon: %v", err)
