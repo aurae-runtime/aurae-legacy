@@ -199,7 +199,7 @@ func TestBasicListIOHappy(t *testing.T) {
 	}
 }
 
-func TestComplexListIOHappy(t *testing.T) {
+func TestComplexListIOCases(t *testing.T) {
 
 	db := NewPathDatabase()
 
@@ -252,6 +252,20 @@ func TestComplexListIOHappy(t *testing.T) {
 			setVal:           "testVal",
 			listKey:          "/dir1/dir2/file2",
 			expectedListKeys: []string{"fileX"},
+		},
+		{
+			// Sad test to ensure we aren't polluting the data
+			setKeys:          []string{"/dir1/dir2/file1", "dir1/dir2/file2", "dir1/dir2/file2/fileX"},
+			setVal:           "testVal",
+			listKey:          "/bad/path",
+			expectedListKeys: []string{""},
+		},
+		{
+			// Ensure we list sub directories
+			setKeys:          []string{"/dir1/dir2/file1", "dir1/dir2/file2", "dir1/dir2/file2/fileX"},
+			setVal:           "testVal",
+			listKey:          "/dir1",
+			expectedListKeys: []string{"dir1", "dir2"},
 		},
 	}
 
