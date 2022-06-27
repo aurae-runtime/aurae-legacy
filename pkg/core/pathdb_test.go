@@ -265,7 +265,14 @@ func TestComplexListIOCases(t *testing.T) {
 			setKeys:          []string{"/dir1/dir2/file1", "dir1/dir2/file2", "dir1/dir2/file2/fileX"},
 			setVal:           "testVal",
 			listKey:          "/dir1",
-			expectedListKeys: []string{"dir1", "dir2"},
+			expectedListKeys: []string{"dir2"},
+		},
+		{
+			// Ensure we list multiple sub directories
+			setKeys:          []string{"/dir1/dirSub1/file1", "dir1/dirSub2/file1"},
+			setVal:           "testVal",
+			listKey:          "/dir1",
+			expectedListKeys: []string{"dirSub1", "dirSub2"},
 		},
 	}
 
@@ -297,6 +304,9 @@ func TestComplexListIOCases(t *testing.T) {
 			t.Errorf("Invalid response code. Expected: %d, Actual: %d", CoreCode_OKAY, lsResp.Code)
 		}
 		for _, expectedKey := range c.expectedListKeys {
+			if expectedKey == "" {
+				continue
+			}
 			if dirent, ok := lsResp.Entries[expectedKey]; !ok {
 				t.Errorf("Missing %s in list", expectedKey)
 				t.Errorf("Returned keys: %s", strings.Join(listResponseToStrings(lsResp), " "))
