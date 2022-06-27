@@ -18,6 +18,7 @@ package aurafs
 
 import (
 	"context"
+	"fmt"
 	"github.com/hanwen/go-fuse/v2/fs"
 	"github.com/hanwen/go-fuse/v2/fuse"
 	"github.com/kris-nova/aurae/pkg/core"
@@ -36,6 +37,8 @@ var _ fs.NodeOpendirer = &Dir{}
 var _ fs.NodeReaddirer = &Dir{}
 var _ fs.NodeMkdirer = &Dir{}
 var _ fs.NodeRmdirer = &Dir{}
+var _ fs.NodeCreater = &Dir{}
+var _ fs.NodeUnlinker = &Dir{}
 
 var _ fs.MemRegularFile
 
@@ -86,6 +89,12 @@ func (n *Dir) Opendir(ctx context.Context) syscall.Errno {
 	return 0
 }
 
+func (n *Dir) Create(ctx context.Context, name string, flags uint32, mode uint32, out *fuse.EntryOut) (node *fs.Inode, fh fs.FileHandle, fuseFlags uint32, errno syscall.Errno) {
+	logrus.Debugf("%s -> Create(%s)", n.path, name)
+	_, file := n.NewSubFile(ctx, path.Join(n.path, name), []byte("")) // touch
+	return &file.Inode, nil, 0, 0
+}
+
 func (n *Dir) Mkdir(ctx context.Context, name string, mode uint32, out *fuse.EntryOut) (*fs.Inode, syscall.Errno) {
 	logrus.Debugf("%s -> Mkdir(%s)", n.path, name)
 	_, dir := n.NewSubDir(ctx, path.Join(n.path, name))
@@ -132,6 +141,17 @@ func (n *Dir) Readdir(ctx context.Context) (fs.DirStream, syscall.Errno) {
 
 func (n *Dir) Rmdir(ctx context.Context, name string) syscall.Errno {
 	logrus.Debugf("%s -> Rmdir()", n.path)
+	rmResp, err := c.RemoveRPC(ctx, &rpc.RemoveReq{
+		Key: name,
+	})
+	if err != nil {
+		logrus.Warningf("Unable to RemoveRPC on Aurae core daemon: %v", err)
+		return 0
+	}
+	if rmResp.Code != core.CoreCode_OKAY {
+		logrus.Warningf("Failure to RemoveRPC on Aurae core daemon: %v", rmResp)
+		return 0
+	}
 	return 0
 }
 
@@ -142,6 +162,18 @@ func (n *Dir) OnAdd(ctx context.Context) {
 
 func (n *Dir) NewSubFile(ctx context.Context, name string, data []byte) (uint64, *File) {
 	i := Ino()
+	setResp, err := c.SetRPC(ctx, &rpc.SetReq{
+		Key: name, // No trailing slash (file)
+	})
+	if err != nil {
+		logrus.Warningf("Unable to SetRPC on Aurae core daemon: %v", err)
+		return 0, nil
+	}
+	if setResp.Code != core.CoreCode_OKAY {
+		logrus.Warningf("Failure to SetRPC on Aurae core daemon: %v", setResp)
+		return 0, nil
+	}
+
 	file := NewFile(path.Join(n.path, name), data)
 	n.AddChild(name,
 		n.NewInode(ctx, file,
@@ -155,7 +187,7 @@ func (n *Dir) NewSubFile(ctx context.Context, name string, data []byte) (uint64,
 func (n *Dir) NewSubDir(ctx context.Context, name string) (uint64, *Dir) {
 	i := Ino()
 	setResp, err := c.SetRPC(ctx, &rpc.SetReq{
-		Key: filepath.Join(name, "/"),
+		Key: fmt.Sprintf("%s/", name), // Trailing slash (dir)
 	})
 	if err != nil {
 		logrus.Warningf("Unable to SetRPC on Aurae core daemon: %v", err)
@@ -174,4 +206,20 @@ func (n *Dir) NewSubDir(ctx context.Context, name string) (uint64, *Dir) {
 				Mode: fuse.S_IFDIR,
 			}), true)
 	return i, dir
+}
+
+func (d *Dir) Unlink(ctx context.Context, name string) syscall.Errno {
+	logrus.Debugf("%s -> Unlink(%s)", d.path, name)
+	rmResp, err := c.RemoveRPC(ctx, &rpc.RemoveReq{
+		Key: filepath.Join(d.path, name),
+	})
+	if err != nil {
+		logrus.Warningf("Unable to RemoveRPC on Aurae core daemon: %v", err)
+		return 0
+	}
+	if rmResp.Code != core.CoreCode_OKAY {
+		logrus.Warningf("Failure to RemoveRPC on Aurae core daemon: %v", rmResp)
+		return 0
+	}
+	return 0
 }

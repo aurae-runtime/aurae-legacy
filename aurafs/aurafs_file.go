@@ -20,6 +20,10 @@ import (
 	"context"
 	"github.com/hanwen/go-fuse/v2/fs"
 	"github.com/hanwen/go-fuse/v2/fuse"
+	"github.com/kris-nova/aurae/pkg/core"
+	"github.com/kris-nova/aurae/rpc"
+	"github.com/sirupsen/logrus"
+	"path/filepath"
 	"sync"
 	"syscall"
 )
@@ -32,6 +36,7 @@ var _ fs.NodeWriter = &File{}
 var _ fs.NodeSetattrer = &File{}
 var _ fs.NodeFlusher = &File{}
 var _ fs.NodeGetattrer = &File{}
+var _ fs.NodeUnlinker = &File{}
 
 // Model
 var _ fs.MemRegularFile
@@ -109,4 +114,20 @@ func (f *File) Read(ctx context.Context, fh fs.FileHandle, dest []byte, off int6
 		end = len(f.Data)
 	}
 	return fuse.ReadResultData(f.Data[off:end]), Okay
+}
+
+func (f *File) Unlink(ctx context.Context, name string) syscall.Errno {
+	logrus.Debugf("%s -> Unlink(%s)", f.path, name)
+	rmResp, err := c.RemoveRPC(ctx, &rpc.RemoveReq{
+		Key: filepath.Join(f.path, name),
+	})
+	if err != nil {
+		logrus.Warningf("Unable to RemoveRPC on Aurae core daemon: %v", err)
+		return 0
+	}
+	if rmResp.Code != core.CoreCode_OKAY {
+		logrus.Warningf("Failure to RemoveRPC on Aurae core daemon: %v", rmResp)
+		return 0
+	}
+	return 0
 }
