@@ -21,7 +21,6 @@ import (
 	"github.com/kris-nova/aurae/pkg/common"
 	"github.com/kris-nova/aurae/pkg/core/memfs"
 	"github.com/kris-nova/aurae/rpc"
-	"github.com/sirupsen/logrus"
 	"sync"
 )
 
@@ -57,9 +56,7 @@ func (c *PathDatabase) ListRPC(ctx context.Context, req *rpc.ListReq) (*rpc.List
 	resp := make(map[string]*rpc.Node)
 
 	ls := memfs.List(path) // MemFS implementation
-
-	logrus.Infof("%+v", ls)
-
+	
 	// Copy the memfs.Node -> rpc.Node // TODO should we simplify this type?
 	for name, node := range ls {
 		file := false
