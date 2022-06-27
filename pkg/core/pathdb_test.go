@@ -183,7 +183,7 @@ func TestBasicListIOHappy(t *testing.T) {
 		t.Errorf("unable to GetRPC: %v", err)
 	}
 	if lsResp.Code != CoreCode_OKAY {
-		t.Errorf("Invalid response code. Expected: %d, Actual: %d", CoreCode_OKAY, getResp.Code)
+		t.Errorf("Invalid response code. Expected: %d, Actual: %d", CoreCode_OKAY, lsResp.Code)
 	}
 
 	if dirent, ok := lsResp.Entries["testKey"]; !ok {
