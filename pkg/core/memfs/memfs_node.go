@@ -95,6 +95,15 @@ func (n *Node) AddSubNode(key, value string) *Node {
 		child.File = true
 		child.Content = []byte(value)
 	}
+
+	// Check if the node exists
+	if _, ok := n.Children[child.Name]; ok {
+		return n.Children[child.Name]
+	}
+
+	// In some cases we silently add child nodes to a directory, so when
+	// we add a child we also turn file=false
+	n.File = false
 	n.Children[child.Name] = child
 	return child
 }

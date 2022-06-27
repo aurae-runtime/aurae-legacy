@@ -56,7 +56,7 @@ func (c *PathDatabase) ListRPC(ctx context.Context, req *rpc.ListReq) (*rpc.List
 	resp := make(map[string]*rpc.Node)
 
 	ls := memfs.List(path) // MemFS implementation
-	
+
 	// Copy the memfs.Node -> rpc.Node // TODO should we simplify this type?
 	for name, node := range ls {
 		file := false

@@ -19,6 +19,7 @@ package core
 import (
 	"context"
 	"github.com/kris-nova/aurae/rpc"
+	"strings"
 	"testing"
 )
 
@@ -196,7 +197,112 @@ func TestBasicListIOHappy(t *testing.T) {
 			t.Errorf("Expected file=true, Actual file=false")
 		}
 	}
+}
 
+func TestComplexListIOHappy(t *testing.T) {
+
+	db := NewPathDatabase()
+
+	cases := []struct {
+		setKeys          []string
+		setVal           string
+		listKey          string
+		expectedListKeys []string
+	}{
+		{
+			// Set a file called "/test/path" to value "testVal" and ensure
+			// list on "/test" returns the file "path"
+			setKeys:          []string{"test/path"},
+			setVal:           "testVal",
+			listKey:          "test",
+			expectedListKeys: []string{"path"},
+		},
+		{
+			// Check 2 files, one with a leading slash, one without
+			setKeys:          []string{"test/path1", "/test/path2"},
+			setVal:           "testVal",
+			listKey:          "test",
+			expectedListKeys: []string{"path1", "path2"},
+		},
+		{
+			// Ensure only /test returns the expected files by adding bad files
+			setKeys:          []string{"test/path1", "/test/path2", "beeps/boops", "bad/path"},
+			setVal:           "testVal",
+			listKey:          "test",
+			expectedListKeys: []string{"path1", "path2"},
+		},
+		{
+			// Basic nested file test
+			setKeys:          []string{"test/path/file1", "/test/path/file2"},
+			setVal:           "testVal",
+			listKey:          "/test/path",
+			expectedListKeys: []string{"file1", "file2"},
+		},
+		{
+			// Check if a node is added that should already exist we still return
+			// the correct results
+			setKeys:          []string{"test/path/file1", "/test/path/file2", "test", "test/path", "/test/path", "/test"},
+			setVal:           "testVal",
+			listKey:          "/test/path",
+			expectedListKeys: []string{"file1", "file2"},
+		},
+		{
+			// Ensure that files can be changed to dirs as keys are nested under them
+			setKeys:          []string{"/dir1/dir2/file1", "dir1/dir2/file2", "dir1/dir2/file2/fileX"},
+			setVal:           "testVal",
+			listKey:          "/dir1/dir2/file2",
+			expectedListKeys: []string{"fileX"},
+		},
+	}
+
+	for _, c := range cases {
+		// Set
+		for _, setKey := range c.setKeys {
+			var setResp *rpc.SetResp
+			setResp, err := db.SetRPC(context.Background(), &rpc.SetReq{
+				Key: setKey,
+				Val: c.setVal,
+			})
+			if err != nil {
+				t.Errorf("unable to SetRPC: %v", err)
+			}
+			if setResp.Code != CoreCode_OKAY {
+				t.Errorf("Invalid response code. Expected: %d, Actual: %d", CoreCode_OKAY, setResp.Code)
+			}
+		}
+
+		// List
+		var lsResp *rpc.ListResp
+		lsResp, err := db.ListRPC(context.Background(), &rpc.ListReq{
+			Key: c.listKey,
+		})
+		if err != nil {
+			t.Errorf("unable to GetRPC: %v", err)
+		}
+		if lsResp.Code != CoreCode_OKAY {
+			t.Errorf("Invalid response code. Expected: %d, Actual: %d", CoreCode_OKAY, lsResp.Code)
+		}
+		for _, expectedKey := range c.expectedListKeys {
+			if dirent, ok := lsResp.Entries[expectedKey]; !ok {
+				t.Errorf("Missing %s in list", expectedKey)
+				t.Errorf("Returned keys: %s", strings.Join(listResponseToStrings(lsResp), " "))
+			} else {
+				if dirent.Name != expectedKey {
+					t.Errorf("List data IO. Expected: %s, Actual: %s", "testKey", dirent.Name)
+				}
+			}
+		}
+
+	}
+
+}
+
+func listResponseToStrings(lsResp *rpc.ListResp) []string {
+	var ret []string
+	for k, _ := range lsResp.Entries {
+		ret = append(ret, k)
+	}
+	return ret
 }
 
 //func TestTODO(t *testing.T) {
