@@ -35,15 +35,15 @@ func (f *File) Read(ctx context.Context, fh fs.FileHandle, dest []byte, off int6
 	if c == nil {
 		return fuse.ReadResultData(f.Data), 0
 	}
-	getResp, err := c.GetRPC(ctx, &rpc.GetReq{
+	getResp, err := c.Get(ctx, &rpc.GetReq{
 		Key: f.path,
 	})
 	if err != nil {
-		logrus.Warningf("Unable to GetRPC on Aurae core daemon: %v", err)
+		logrus.Warningf("Unable to Get on Aurae core daemon: %v", err)
 		return fuse.ReadResultData(f.Data), 0
 	}
 	if getResp.Code != core.CoreCode_OKAY {
-		logrus.Warningf("Failure to GetRPC on Aurae core daemon: %v", getResp)
+		logrus.Warningf("Failure to Get on Aurae core daemon: %v", getResp)
 		return fuse.ReadResultData(f.Data), 0
 	}
 	f.Data = []byte(getResp.Val)

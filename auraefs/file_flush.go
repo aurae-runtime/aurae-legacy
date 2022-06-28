@@ -32,16 +32,16 @@ func (f *File) Flush(ctx context.Context, fh fs.FileHandle) syscall.Errno {
 	if c == nil {
 		return 0
 	}
-	setResp, err := c.SetRPC(ctx, &rpc.SetReq{
+	setResp, err := c.Set(ctx, &rpc.SetReq{
 		Key: f.path,
 		Val: string(f.Data),
 	})
 	if err != nil {
-		logrus.Warningf("Unable to SetRPC on Aurae core daemon: %v", err)
+		logrus.Warningf("Unable to Set on Aurae core daemon: %v", err)
 		return 1
 	}
 	if setResp.Code != core.CoreCode_OKAY {
-		logrus.Warningf("Failure to SetRPC on Aurae core daemon: %v", setResp)
+		logrus.Warningf("Failure to Set on Aurae core daemon: %v", setResp)
 		return 1
 	}
 	//f.Data = []byte("") // Reset the file content on Flush() if we need it again we pull it from the server.

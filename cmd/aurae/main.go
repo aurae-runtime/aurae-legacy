@@ -105,7 +105,7 @@ func main() {
 					if err != nil {
 						return err
 					}
-					getResp, err := auraeClient.GetRPC(context.Background(), &rpc.GetReq{
+					getResp, err := auraeClient.Get(context.Background(), &rpc.GetReq{
 						Key: key,
 					})
 					if err != nil {
@@ -142,7 +142,7 @@ func main() {
 					if err != nil {
 						return err
 					}
-					_, err = auraeClient.SetRPC(context.Background(), &rpc.SetReq{
+					_, err = auraeClient.Set(context.Background(), &rpc.SetReq{
 						Key: key,
 						Val: val,
 					})
@@ -175,7 +175,7 @@ func main() {
 					if err != nil {
 						return err
 					}
-					listResp, err := auraeClient.ListRPC(context.Background(), &rpc.ListReq{
+					listResp, err := auraeClient.List(context.Background(), &rpc.ListReq{
 						Key: key,
 					})
 					if err != nil {
@@ -207,13 +207,13 @@ func main() {
 			//		}
 			//		client := rpc.NewAuraeFSClient(conn)
 			//
-			//		nodeResp, err := client.GetRPC(context.Background(), &rpc.GetReq{
+			//		nodeResp, err := client.Get(context.Background(), &rpc.GetReq{
 			//			Key: shape.FileEtcNameNode,
 			//		})
 			//		if err != nil {
 			//			return err
 			//		}
-			//		domainResp, err := client.GetRPC(context.Background(), &rpc.GetReq{
+			//		domainResp, err := client.Get(context.Background(), &rpc.GetReq{
 			//			Key: shape.FileEtcNameDomain,
 			//		})
 			//		if err != nil {
@@ -226,7 +226,7 @@ func main() {
 			//
 			//		//return fs.Set()
 			//
-			//		_, err = client.SetRPC(context.Background(), &rpc.SetReq{
+			//		_, err = client.Set(context.Background(), &rpc.SetReq{
 			//			Key: filepath.Join(shape.DirApp, app.Name),
 			//			Val: object.PrettyPrint(app),
 			//		})

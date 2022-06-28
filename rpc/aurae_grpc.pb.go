@@ -18,14 +18,63 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
+// RuntimeClient is the client API for Runtime service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type RuntimeClient interface {
+}
+
+type runtimeClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewRuntimeClient(cc grpc.ClientConnInterface) RuntimeClient {
+	return &runtimeClient{cc}
+}
+
+// RuntimeServer is the server API for Runtime service.
+// All implementations must embed UnimplementedRuntimeServer
+// for forward compatibility
+type RuntimeServer interface {
+	mustEmbedUnimplementedRuntimeServer()
+}
+
+// UnimplementedRuntimeServer must be embedded to have forward compatible implementations.
+type UnimplementedRuntimeServer struct {
+}
+
+func (UnimplementedRuntimeServer) mustEmbedUnimplementedRuntimeServer() {}
+
+// UnsafeRuntimeServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to RuntimeServer will
+// result in compilation errors.
+type UnsafeRuntimeServer interface {
+	mustEmbedUnimplementedRuntimeServer()
+}
+
+func RegisterRuntimeServer(s grpc.ServiceRegistrar, srv RuntimeServer) {
+	s.RegisterService(&Runtime_ServiceDesc, srv)
+}
+
+// Runtime_ServiceDesc is the grpc.ServiceDesc for Runtime service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var Runtime_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "aurae.Runtime",
+	HandlerType: (*RuntimeServer)(nil),
+	Methods:     []grpc.MethodDesc{},
+	Streams:     []grpc.StreamDesc{},
+	Metadata:    "rpc/aurae.proto",
+}
+
 // CoreServiceClient is the client API for CoreService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CoreServiceClient interface {
-	SetRPC(ctx context.Context, in *SetReq, opts ...grpc.CallOption) (*SetResp, error)
-	GetRPC(ctx context.Context, in *GetReq, opts ...grpc.CallOption) (*GetResp, error)
-	ListRPC(ctx context.Context, in *ListReq, opts ...grpc.CallOption) (*ListResp, error)
-	RemoveRPC(ctx context.Context, in *RemoveReq, opts ...grpc.CallOption) (*RemoveResp, error)
+	Set(ctx context.Context, in *SetReq, opts ...grpc.CallOption) (*SetResp, error)
+	Get(ctx context.Context, in *GetReq, opts ...grpc.CallOption) (*GetResp, error)
+	List(ctx context.Context, in *ListReq, opts ...grpc.CallOption) (*ListResp, error)
+	Remove(ctx context.Context, in *RemoveReq, opts ...grpc.CallOption) (*RemoveResp, error)
 }
 
 type coreServiceClient struct {
@@ -36,36 +85,36 @@ func NewCoreServiceClient(cc grpc.ClientConnInterface) CoreServiceClient {
 	return &coreServiceClient{cc}
 }
 
-func (c *coreServiceClient) SetRPC(ctx context.Context, in *SetReq, opts ...grpc.CallOption) (*SetResp, error) {
+func (c *coreServiceClient) Set(ctx context.Context, in *SetReq, opts ...grpc.CallOption) (*SetResp, error) {
 	out := new(SetResp)
-	err := c.cc.Invoke(ctx, "/aurae.CoreService/SetRPC", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/aurae.CoreService/Set", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *coreServiceClient) GetRPC(ctx context.Context, in *GetReq, opts ...grpc.CallOption) (*GetResp, error) {
+func (c *coreServiceClient) Get(ctx context.Context, in *GetReq, opts ...grpc.CallOption) (*GetResp, error) {
 	out := new(GetResp)
-	err := c.cc.Invoke(ctx, "/aurae.CoreService/GetRPC", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/aurae.CoreService/Get", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *coreServiceClient) ListRPC(ctx context.Context, in *ListReq, opts ...grpc.CallOption) (*ListResp, error) {
+func (c *coreServiceClient) List(ctx context.Context, in *ListReq, opts ...grpc.CallOption) (*ListResp, error) {
 	out := new(ListResp)
-	err := c.cc.Invoke(ctx, "/aurae.CoreService/ListRPC", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/aurae.CoreService/List", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *coreServiceClient) RemoveRPC(ctx context.Context, in *RemoveReq, opts ...grpc.CallOption) (*RemoveResp, error) {
+func (c *coreServiceClient) Remove(ctx context.Context, in *RemoveReq, opts ...grpc.CallOption) (*RemoveResp, error) {
 	out := new(RemoveResp)
-	err := c.cc.Invoke(ctx, "/aurae.CoreService/RemoveRPC", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/aurae.CoreService/Remove", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -76,10 +125,10 @@ func (c *coreServiceClient) RemoveRPC(ctx context.Context, in *RemoveReq, opts .
 // All implementations must embed UnimplementedCoreServiceServer
 // for forward compatibility
 type CoreServiceServer interface {
-	SetRPC(context.Context, *SetReq) (*SetResp, error)
-	GetRPC(context.Context, *GetReq) (*GetResp, error)
-	ListRPC(context.Context, *ListReq) (*ListResp, error)
-	RemoveRPC(context.Context, *RemoveReq) (*RemoveResp, error)
+	Set(context.Context, *SetReq) (*SetResp, error)
+	Get(context.Context, *GetReq) (*GetResp, error)
+	List(context.Context, *ListReq) (*ListResp, error)
+	Remove(context.Context, *RemoveReq) (*RemoveResp, error)
 	mustEmbedUnimplementedCoreServiceServer()
 }
 
@@ -87,17 +136,17 @@ type CoreServiceServer interface {
 type UnimplementedCoreServiceServer struct {
 }
 
-func (UnimplementedCoreServiceServer) SetRPC(context.Context, *SetReq) (*SetResp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SetRPC not implemented")
+func (UnimplementedCoreServiceServer) Set(context.Context, *SetReq) (*SetResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Set not implemented")
 }
-func (UnimplementedCoreServiceServer) GetRPC(context.Context, *GetReq) (*GetResp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetRPC not implemented")
+func (UnimplementedCoreServiceServer) Get(context.Context, *GetReq) (*GetResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
 }
-func (UnimplementedCoreServiceServer) ListRPC(context.Context, *ListReq) (*ListResp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListRPC not implemented")
+func (UnimplementedCoreServiceServer) List(context.Context, *ListReq) (*ListResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method List not implemented")
 }
-func (UnimplementedCoreServiceServer) RemoveRPC(context.Context, *RemoveReq) (*RemoveResp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RemoveRPC not implemented")
+func (UnimplementedCoreServiceServer) Remove(context.Context, *RemoveReq) (*RemoveResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Remove not implemented")
 }
 func (UnimplementedCoreServiceServer) mustEmbedUnimplementedCoreServiceServer() {}
 
@@ -112,74 +161,74 @@ func RegisterCoreServiceServer(s grpc.ServiceRegistrar, srv CoreServiceServer) {
 	s.RegisterService(&CoreService_ServiceDesc, srv)
 }
 
-func _CoreService_SetRPC_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _CoreService_Set_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(SetReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CoreServiceServer).SetRPC(ctx, in)
+		return srv.(CoreServiceServer).Set(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/aurae.CoreService/SetRPC",
+		FullMethod: "/aurae.CoreService/Set",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CoreServiceServer).SetRPC(ctx, req.(*SetReq))
+		return srv.(CoreServiceServer).Set(ctx, req.(*SetReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _CoreService_GetRPC_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _CoreService_Get_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CoreServiceServer).GetRPC(ctx, in)
+		return srv.(CoreServiceServer).Get(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/aurae.CoreService/GetRPC",
+		FullMethod: "/aurae.CoreService/Get",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CoreServiceServer).GetRPC(ctx, req.(*GetReq))
+		return srv.(CoreServiceServer).Get(ctx, req.(*GetReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _CoreService_ListRPC_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _CoreService_List_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ListReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CoreServiceServer).ListRPC(ctx, in)
+		return srv.(CoreServiceServer).List(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/aurae.CoreService/ListRPC",
+		FullMethod: "/aurae.CoreService/List",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CoreServiceServer).ListRPC(ctx, req.(*ListReq))
+		return srv.(CoreServiceServer).List(ctx, req.(*ListReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _CoreService_RemoveRPC_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _CoreService_Remove_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(RemoveReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CoreServiceServer).RemoveRPC(ctx, in)
+		return srv.(CoreServiceServer).Remove(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/aurae.CoreService/RemoveRPC",
+		FullMethod: "/aurae.CoreService/Remove",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CoreServiceServer).RemoveRPC(ctx, req.(*RemoveReq))
+		return srv.(CoreServiceServer).Remove(ctx, req.(*RemoveReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -192,20 +241,20 @@ var CoreService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*CoreServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "SetRPC",
-			Handler:    _CoreService_SetRPC_Handler,
+			MethodName: "Set",
+			Handler:    _CoreService_Set_Handler,
 		},
 		{
-			MethodName: "GetRPC",
-			Handler:    _CoreService_GetRPC_Handler,
+			MethodName: "Get",
+			Handler:    _CoreService_Get_Handler,
 		},
 		{
-			MethodName: "ListRPC",
-			Handler:    _CoreService_ListRPC_Handler,
+			MethodName: "List",
+			Handler:    _CoreService_List_Handler,
 		},
 		{
-			MethodName: "RemoveRPC",
-			Handler:    _CoreService_RemoveRPC_Handler,
+			MethodName: "Remove",
+			Handler:    _CoreService_Remove_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

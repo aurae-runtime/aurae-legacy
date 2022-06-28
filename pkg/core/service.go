@@ -46,7 +46,7 @@ type Service struct {
 	store CoreServicer
 }
 
-func (c *Service) ListRPC(ctx context.Context, req *rpc.ListReq) (*rpc.ListResp, error) {
+func (c *Service) List(ctx context.Context, req *rpc.ListReq) (*rpc.ListResp, error) {
 	c.mtx.Lock()
 	defer c.mtx.Unlock()
 
@@ -78,8 +78,8 @@ func (c *Service) ListRPC(ctx context.Context, req *rpc.ListReq) (*rpc.ListResp,
 	return response, nil
 }
 
-// SetRPC is liable to mutate data!
-func (c *Service) SetRPC(ctx context.Context, req *rpc.SetReq) (*rpc.SetResp, error) {
+// Set is liable to mutate data!
+func (c *Service) Set(ctx context.Context, req *rpc.SetReq) (*rpc.SetResp, error) {
 	c.mtx.Lock()
 	defer c.mtx.Unlock()
 
@@ -101,10 +101,10 @@ func (c *Service) SetRPC(ctx context.Context, req *rpc.SetReq) (*rpc.SetResp, er
 	return response, nil
 }
 
-// RemoveRPC is irreversible!
+// Remove is irreversible!
 //
 // To empty the database pass "/"
-func (c *Service) RemoveRPC(ctx context.Context, req *rpc.RemoveReq) (*rpc.RemoveResp, error) {
+func (c *Service) Remove(ctx context.Context, req *rpc.RemoveReq) (*rpc.RemoveResp, error) {
 	c.mtx.Lock()
 	defer c.mtx.Unlock()
 
@@ -118,7 +118,7 @@ func (c *Service) RemoveRPC(ctx context.Context, req *rpc.RemoveReq) (*rpc.Remov
 	return response, nil
 }
 
-func (c *Service) GetRPC(ctx context.Context, req *rpc.GetReq) (*rpc.GetResp, error) {
+func (c *Service) Get(ctx context.Context, req *rpc.GetReq) (*rpc.GetResp, error) {
 	c.mtx.Lock()
 	defer c.mtx.Unlock()
 

@@ -20,6 +20,10 @@ option go_package = "github.com/kris-nova/aurae/rpc";
 
 package aurae;
 
+service Runtime {
+
+}
+
 // CoreService is the most core interface for Aurae data interactions.
 //
 // All of these methods are a simplified version of the POSIX filesystem
@@ -33,10 +37,10 @@ package aurae;
 // a variety of data storage mechanisms, each with their own features and
 // guarantees.
 service CoreService {
-  rpc SetRPC (SetReq) returns (SetResp) {}
-  rpc GetRPC (GetReq) returns (GetResp) {}
-  rpc ListRPC (ListReq) returns (ListResp) {}
-  rpc RemoveRPC (RemoveReq) returns (RemoveResp) {}
+  rpc Set (SetReq) returns (SetResp) {}
+  rpc Get (GetReq) returns (GetResp) {}
+  rpc List (ListReq) returns (ListResp) {}
+  rpc Remove (RemoveReq) returns (RemoveResp) {}
 }
 
 message SetReq {

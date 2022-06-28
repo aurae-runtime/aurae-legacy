@@ -33,15 +33,15 @@ func (f *File) Unlink(ctx context.Context, name string) syscall.Errno {
 	if c == nil {
 		return 0
 	}
-	rmResp, err := c.RemoveRPC(ctx, &rpc.RemoveReq{
+	rmResp, err := c.Remove(ctx, &rpc.RemoveReq{
 		Key: filepath.Join(f.path, name),
 	})
 	if err != nil {
-		logrus.Warningf("Unable to RemoveRPC on Aurae core daemon: %v", err)
+		logrus.Warningf("Unable to Remove on Aurae core daemon: %v", err)
 		return 0
 	}
 	if rmResp.Code != core.CoreCode_OKAY {
-		logrus.Warningf("Failure to RemoveRPC on Aurae core daemon: %v", rmResp)
+		logrus.Warningf("Failure to Remove on Aurae core daemon: %v", rmResp)
 		return 0
 	}
 	return 0

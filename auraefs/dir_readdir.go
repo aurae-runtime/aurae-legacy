@@ -33,8 +33,8 @@ func (n *Dir) Readdir(ctx context.Context) (fs.DirStream, syscall.Errno) {
 	if c == nil {
 		return fs.NewListDirStream(dirents), 0
 	}
-	logrus.Debugf("dir.Readdir() --[d]--> client.ListRPC() path=%s", n.path)
-	listResp, err := c.ListRPC(ctx, &rpc.ListReq{
+	logrus.Debugf("dir.Readdir() --[d]--> client.List() path=%s", n.path)
+	listResp, err := c.List(ctx, &rpc.ListReq{
 		Key: n.path,
 	})
 	if err != nil {
@@ -45,7 +45,7 @@ func (n *Dir) Readdir(ctx context.Context) (fs.DirStream, syscall.Errno) {
 		var ino uint64
 		if node.GetFile() {
 			mode = fuse.S_IFREG
-			getResp, err := c.GetRPC(ctx, &rpc.GetReq{
+			getResp, err := c.Get(ctx, &rpc.GetReq{
 				Key: filename,
 			})
 			if err != nil {

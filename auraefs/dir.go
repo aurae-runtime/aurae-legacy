@@ -59,15 +59,15 @@ func (n *Dir) NewSubFile(ctx context.Context, name string, data []byte) (uint64,
 	if c == nil {
 		return 0, nil
 	}
-	setResp, err := c.SetRPC(ctx, &rpc.SetReq{
+	setResp, err := c.Set(ctx, &rpc.SetReq{
 		Key: name, // No trailing slash (file)
 	})
 	if err != nil {
-		logrus.Warningf("Unable to SetRPC on Aurae core daemon: %v", err)
+		logrus.Warningf("Unable to Set on Aurae core daemon: %v", err)
 		return 0, nil
 	}
 	if setResp.Code != core.CoreCode_OKAY {
-		logrus.Warningf("Failure to SetRPC on Aurae core daemon: %v", setResp)
+		logrus.Warningf("Failure to Set on Aurae core daemon: %v", setResp)
 		return 0, nil
 	}
 
@@ -86,15 +86,15 @@ func (n *Dir) NewSubDir(ctx context.Context, name string) (uint64, *Dir) {
 	if c == nil {
 		return 0, nil
 	}
-	setResp, err := c.SetRPC(ctx, &rpc.SetReq{
+	setResp, err := c.Set(ctx, &rpc.SetReq{
 		Key: fmt.Sprintf("%s/", name), // Trailing slash (dir)
 	})
 	if err != nil {
-		logrus.Warningf("Unable to SetRPC on Aurae core daemon: %v", err)
+		logrus.Warningf("Unable to Set on Aurae core daemon: %v", err)
 		return 0, nil
 	}
 	if setResp.Code != core.CoreCode_OKAY {
-		logrus.Warningf("Failure to SetRPC on Aurae core daemon: %v", setResp)
+		logrus.Warningf("Failure to Set on Aurae core daemon: %v", setResp)
 		return 0, nil
 	}
 

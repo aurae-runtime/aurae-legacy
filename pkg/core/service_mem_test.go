@@ -31,12 +31,12 @@ func TestBasicIOSad(t *testing.T) {
 
 	// Set
 	var setResp *rpc.SetResp
-	setResp, err := db.SetRPC(context.Background(), &rpc.SetReq{
+	setResp, err := db.Set(context.Background(), &rpc.SetReq{
 		Key: "",
 		Val: "testBadData",
 	})
 	if err != nil {
-		t.Errorf("unable to SetRPC: %v", err)
+		t.Errorf("unable to Set: %v", err)
 	}
 	if setResp.Code != CoreCode_EMPTY {
 		t.Errorf("Invalid response code. Expected: %d, Actual: %d", CoreCode_OKAY, setResp.Code)
@@ -51,12 +51,12 @@ func TestBasicIOHappy(t *testing.T) {
 
 	// Set
 	var setResp *rpc.SetResp
-	setResp, err := db.SetRPC(context.Background(), &rpc.SetReq{
+	setResp, err := db.Set(context.Background(), &rpc.SetReq{
 		Key: "testKey",
 		Val: "testVal",
 	})
 	if err != nil {
-		t.Errorf("unable to SetRPC: %v", err)
+		t.Errorf("unable to Set: %v", err)
 	}
 	if setResp.Code != CoreCode_OKAY {
 		t.Errorf("Invalid response code. Expected: %d, Actual: %d", CoreCode_OKAY, setResp.Code)
@@ -64,11 +64,11 @@ func TestBasicIOHappy(t *testing.T) {
 
 	// Get
 	var getResp *rpc.GetResp
-	getResp, err = db.GetRPC(context.Background(), &rpc.GetReq{
+	getResp, err = db.Get(context.Background(), &rpc.GetReq{
 		Key: "testKey",
 	})
 	if err != nil {
-		t.Errorf("unable to GetRPC: %v", err)
+		t.Errorf("unable to Get: %v", err)
 	}
 	if getResp.Val != "testVal" {
 		t.Errorf("Database IO inconsistency. Expected: %s, Actual: %s", "testVal", getResp.Val)
@@ -137,7 +137,7 @@ func TestIOCases(t *testing.T) {
 	for _, c := range cases {
 		// Set
 		var setResp *rpc.SetResp
-		setResp, err := db.SetRPC(context.Background(), &rpc.SetReq{
+		setResp, err := db.Set(context.Background(), &rpc.SetReq{
 			Key: c.setKey,
 			Val: c.setVal,
 		})
@@ -145,15 +145,15 @@ func TestIOCases(t *testing.T) {
 			t.Errorf("Assumed OKAY. Actual: %d", setResp.Code)
 		}
 		if err != nil {
-			t.Errorf("unable to SetRPC: %v", err)
+			t.Errorf("unable to Set: %v", err)
 		}
 		// Get
 		var getResp *rpc.GetResp
-		getResp, err = db.GetRPC(context.Background(), &rpc.GetReq{
+		getResp, err = db.Get(context.Background(), &rpc.GetReq{
 			Key: c.getKey,
 		})
 		if err != nil {
-			t.Errorf("unable to GetRPC: %v", err)
+			t.Errorf("unable to Get: %v", err)
 		}
 		if getResp.Val != c.expected {
 			t.Errorf("Unexpected data IO: Expected: %s, Actual: %s", c.expected, getResp.Val)
@@ -172,12 +172,12 @@ func TestBasicListIOHappy(t *testing.T) {
 
 	// Set
 	var setResp *rpc.SetResp
-	setResp, err := db.SetRPC(context.Background(), &rpc.SetReq{
+	setResp, err := db.Set(context.Background(), &rpc.SetReq{
 		Key: "testKey",
 		Val: "testVal",
 	})
 	if err != nil {
-		t.Errorf("unable to SetRPC: %v", err)
+		t.Errorf("unable to Set: %v", err)
 	}
 	if setResp.Code != CoreCode_OKAY {
 		t.Errorf("Invalid response code. Expected: %d, Actual: %d", CoreCode_OKAY, setResp.Code)
@@ -185,11 +185,11 @@ func TestBasicListIOHappy(t *testing.T) {
 
 	// List
 	var lsResp *rpc.ListResp
-	lsResp, err = db.ListRPC(context.Background(), &rpc.ListReq{
+	lsResp, err = db.List(context.Background(), &rpc.ListReq{
 		Key: "testKey",
 	})
 	if err != nil {
-		t.Errorf("unable to GetRPC: %v", err)
+		t.Errorf("unable to Get: %v", err)
 	}
 	if lsResp.Code != CoreCode_OKAY {
 		t.Errorf("Invalid response code. Expected: %d, Actual: %d", CoreCode_OKAY, lsResp.Code)
@@ -212,7 +212,7 @@ func TestComplexListIOCases(t *testing.T) {
 
 	stateStore := empty.NewState()
 	db := NewService(stateStore)
-	db.RemoveRPC(context.Background(), &rpc.RemoveReq{
+	db.Remove(context.Background(), &rpc.RemoveReq{
 		Key: "/",
 	})
 
@@ -301,12 +301,12 @@ func TestComplexListIOCases(t *testing.T) {
 		// Set
 		for _, setKey := range c.setKeys {
 			var setResp *rpc.SetResp
-			setResp, err := db.SetRPC(context.Background(), &rpc.SetReq{
+			setResp, err := db.Set(context.Background(), &rpc.SetReq{
 				Key: setKey,
 				Val: c.setVal,
 			})
 			if err != nil {
-				t.Errorf("unable to SetRPC: %v", err)
+				t.Errorf("unable to Set: %v", err)
 			}
 			if setResp.Code != CoreCode_OKAY {
 				t.Errorf("Invalid response code. Expected: %d, Actual: %d", CoreCode_OKAY, setResp.Code)
@@ -315,11 +315,11 @@ func TestComplexListIOCases(t *testing.T) {
 
 		// List
 		var lsResp *rpc.ListResp
-		lsResp, err := db.ListRPC(context.Background(), &rpc.ListReq{
+		lsResp, err := db.List(context.Background(), &rpc.ListReq{
 			Key: c.listKey,
 		})
 		if err != nil {
-			t.Errorf("unable to GetRPC: %v", err)
+			t.Errorf("unable to Get: %v", err)
 		}
 		if lsResp.Code != CoreCode_OKAY {
 			t.Errorf("Invalid response code. Expected: %d, Actual: %d", CoreCode_OKAY, lsResp.Code)
@@ -356,18 +356,18 @@ func TestSingleRootFile(t *testing.T) {
 	stateStore := empty.NewState()
 	db := NewService(stateStore)
 
-	db.RemoveRPC(context.Background(), &rpc.RemoveReq{
+	db.Remove(context.Background(), &rpc.RemoveReq{
 		Key: "/",
 	})
 
 	// Set Sad
 	var setResp *rpc.SetResp
-	setResp, err := db.SetRPC(context.Background(), &rpc.SetReq{
+	setResp, err := db.Set(context.Background(), &rpc.SetReq{
 		Key: "/singleRootFile",
 		Val: "data",
 	})
 	if err != nil {
-		t.Errorf("unable to SetRPC: %v", err)
+		t.Errorf("unable to Set: %v", err)
 	}
 	if setResp.Code != CoreCode_OKAY {
 		t.Errorf("Invalid code in integration test. Expected: %d, Actual: %d", CoreCode_OKAY, setResp.Code)
@@ -376,7 +376,7 @@ func TestSingleRootFile(t *testing.T) {
 	// List
 
 	var lsResp *rpc.ListResp
-	lsResp, err = db.ListRPC(context.Background(), &rpc.ListReq{
+	lsResp, err = db.List(context.Background(), &rpc.ListReq{
 		Key: "/",
 	})
 	if len(lsResp.Entries) != 1 {
@@ -399,29 +399,29 @@ func TestExerciseIntegrationIO(t *testing.T) {
 	stateStore := empty.NewState()
 	db := NewService(stateStore)
 
-	db.RemoveRPC(context.Background(), &rpc.RemoveReq{
+	db.Remove(context.Background(), &rpc.RemoveReq{
 		Key: "/",
 	})
 
 	// Set Sad
 	var setResp *rpc.SetResp
-	setResp, err := db.SetRPC(context.Background(), &rpc.SetReq{
+	setResp, err := db.Set(context.Background(), &rpc.SetReq{
 		Key: "/dir1/file1",
 		Val: "badData", // This should overwritten below
 	})
 	if err != nil {
-		t.Errorf("unable to SetRPC: %v", err)
+		t.Errorf("unable to Set: %v", err)
 	}
 	if setResp.Code != CoreCode_OKAY {
 		t.Errorf("Invalid code in integration test. Expected: %d, Actual: %d", CoreCode_OKAY, setResp.Code)
 	}
 
-	setResp, err = db.SetRPC(context.Background(), &rpc.SetReq{
+	setResp, err = db.Set(context.Background(), &rpc.SetReq{
 		Key: "/dir1/file1",
 		Val: "-testData-", // Overwrite here
 	})
 	if err != nil {
-		t.Errorf("unable to SetRPC: %v", err)
+		t.Errorf("unable to Set: %v", err)
 	}
 	if setResp.Code != CoreCode_OKAY {
 		t.Errorf("Invalid code in integration test. Expected: %d, Actual: %d", CoreCode_OKAY, setResp.Code)
@@ -429,11 +429,11 @@ func TestExerciseIntegrationIO(t *testing.T) {
 
 	// Get
 	var getResp *rpc.GetResp
-	getResp, err = db.GetRPC(context.Background(), &rpc.GetReq{
+	getResp, err = db.Get(context.Background(), &rpc.GetReq{
 		Key: "/dir1/file1",
 	})
 	if err != nil {
-		t.Errorf("unable to GetRPC: %v", err)
+		t.Errorf("unable to Get: %v", err)
 	}
 
 	// Check for overwritten data
@@ -443,7 +443,7 @@ func TestExerciseIntegrationIO(t *testing.T) {
 
 	// List
 	var lsResp *rpc.ListResp
-	lsResp, err = db.ListRPC(context.Background(), &rpc.ListReq{
+	lsResp, err = db.List(context.Background(), &rpc.ListReq{
 		Key: "/dir1",
 	})
 	if len(lsResp.Entries) != 1 {
@@ -466,18 +466,18 @@ func TestMkdir(t *testing.T) {
 	stateStore := empty.NewState()
 	db := NewService(stateStore)
 
-	db.RemoveRPC(context.Background(), &rpc.RemoveReq{
+	db.Remove(context.Background(), &rpc.RemoveReq{
 		Key: "/",
 	})
 
 	// Set
 	var setResp *rpc.SetResp
-	setResp, err := db.SetRPC(context.Background(), &rpc.SetReq{
+	setResp, err := db.Set(context.Background(), &rpc.SetReq{
 		Key: "/dir1/dir2/",
 		Val: "",
 	})
 	if err != nil {
-		t.Errorf("unable to SetRPC: %v", err)
+		t.Errorf("unable to Set: %v", err)
 	}
 	if setResp.Code != CoreCode_OKAY {
 		t.Errorf("Invalid code in integration test. Expected: %d, Actual: %d", CoreCode_OKAY, setResp.Code)
@@ -485,7 +485,7 @@ func TestMkdir(t *testing.T) {
 
 	// List
 	var lsResp *rpc.ListResp
-	lsResp, err = db.ListRPC(context.Background(), &rpc.ListReq{
+	lsResp, err = db.List(context.Background(), &rpc.ListReq{
 		Key: "/dir1",
 	})
 	if len(lsResp.Entries) != 1 {
@@ -508,14 +508,14 @@ func TestMkdir(t *testing.T) {
 //
 //	// Set
 //	var setResp *rpc.SetResp
-//	setResp, err := db.SetRPC(context.Background(), &rpc.SetReq{})
+//	setResp, err := db.Set(context.Background(), &rpc.SetReq{})
 //	if err != nil {
 //
 //	}
 //
 //	// Get
 //	var getResp *rpc.GetResp
-//	getResp, err = db.GetRPC(context.Background(), &rpc.GetReq{})
+//	getResp, err = db.Get(context.Background(), &rpc.GetReq{})
 //	if err != nil {
 //
 //	}
