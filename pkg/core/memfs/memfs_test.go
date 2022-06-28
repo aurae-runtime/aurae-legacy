@@ -85,20 +85,20 @@ func TestFuzzCases(t *testing.T) {
 		expected string
 	}{
 		{
-			key:      "boops",
-			expected: "/boops",
+			key:      "boops-test1",
+			expected: "/boops-test1",
 		},
 		{
-			key:      "boops///",
-			expected: "/boops",
+			key:      "boops///-test2",
+			expected: "/boops-test2",
 		},
 		{
-			key:      "//boops",
-			expected: "/boops",
+			key:      "//boops-test3",
+			expected: "/boops-test3",
 		},
 		{
-			key:      "//\\/\\/\\//\\/\\//boops",
-			expected: "/boops",
+			key:      "//\\/\\/\\//\\/\\//boops-test4",
+			expected: "/boops-test4",
 		},
 		{
 			key:      "beeps/boops/  zeeps",

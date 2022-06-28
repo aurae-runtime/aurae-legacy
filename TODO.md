@@ -1,12 +1,9 @@
 # (aurae) Client 
 
- - [ ] Build tree 
 
 # (auraefs) Filesystem
 
- - [ ] The shutdown mechanism can hang if somebody is inside one of the mounted dirs
- - [ ] We need to manage the `client.Client` better
- - [ ] Refactor the filesystem now that we understand what we are doing! The filesystem should "watch" the client!
+ - [ ] We need to manage the `client.Client` better. We need an audit system, and to manage nil clients/reconnects.
 
 # (auraed) Daemon
 

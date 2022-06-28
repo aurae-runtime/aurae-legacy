@@ -83,7 +83,12 @@ generate: ## Will generate Go code from auraefs .proto files
 .PHONY: test
 test: compile ## 🤓 Run go tests
 	@echo "Testing..."
-	go test -v ./...
+	go test -v $(shell go list ./... | grep -v auraefs)
+
+.PHONY: test-auraefs
+test-auraefs:
+	@echo "Testing auraefs..."
+	go test -v ./auraefs
 
 clean: ## Clean your artifacts 🧼
 	@echo "Cleaning..."
