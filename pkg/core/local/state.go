@@ -17,9 +17,11 @@
 package local
 
 import (
+	"fmt"
 	"github.com/sirupsen/logrus"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 const (
@@ -53,7 +55,12 @@ func (s *State) Get(key string) string {
 }
 
 func (s *State) Set(key, value string) {
-	key = filepath.Join(s.base, key)
+	if strings.HasSuffix(key, "/") {
+		key = filepath.Join(s.base, key)
+		key = fmt.Sprintf("%s/", key)
+	} else {
+		key = filepath.Join(s.base, key)
+	}
 	err := os.MkdirAll(filepath.Dir(key), DefaultStateDirPermission)
 	if err != nil {
 		logrus.Errorf("Set %s: Failure:  %v", key, err)
