@@ -18,243 +18,243 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
-// RuntimeClient is the client API for Runtime service.
+// CapabilityServiceClient is the client API for CapabilityService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type RuntimeClient interface {
+type CapabilityServiceClient interface {
 }
 
-type runtimeClient struct {
+type capabilityServiceClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewRuntimeClient(cc grpc.ClientConnInterface) RuntimeClient {
-	return &runtimeClient{cc}
+func NewCapabilityServiceClient(cc grpc.ClientConnInterface) CapabilityServiceClient {
+	return &capabilityServiceClient{cc}
 }
 
-// RuntimeServer is the server API for Runtime service.
-// All implementations must embed UnimplementedRuntimeServer
+// CapabilityServiceServer is the server API for CapabilityService service.
+// All implementations must embed UnimplementedCapabilityServiceServer
 // for forward compatibility
-type RuntimeServer interface {
-	mustEmbedUnimplementedRuntimeServer()
+type CapabilityServiceServer interface {
+	mustEmbedUnimplementedCapabilityServiceServer()
 }
 
-// UnimplementedRuntimeServer must be embedded to have forward compatible implementations.
-type UnimplementedRuntimeServer struct {
+// UnimplementedCapabilityServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedCapabilityServiceServer struct {
 }
 
-func (UnimplementedRuntimeServer) mustEmbedUnimplementedRuntimeServer() {}
+func (UnimplementedCapabilityServiceServer) mustEmbedUnimplementedCapabilityServiceServer() {}
 
-// UnsafeRuntimeServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to RuntimeServer will
+// UnsafeCapabilityServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to CapabilityServiceServer will
 // result in compilation errors.
-type UnsafeRuntimeServer interface {
-	mustEmbedUnimplementedRuntimeServer()
+type UnsafeCapabilityServiceServer interface {
+	mustEmbedUnimplementedCapabilityServiceServer()
 }
 
-func RegisterRuntimeServer(s grpc.ServiceRegistrar, srv RuntimeServer) {
-	s.RegisterService(&Runtime_ServiceDesc, srv)
+func RegisterCapabilityServiceServer(s grpc.ServiceRegistrar, srv CapabilityServiceServer) {
+	s.RegisterService(&CapabilityService_ServiceDesc, srv)
 }
 
-// Runtime_ServiceDesc is the grpc.ServiceDesc for Runtime service.
+// CapabilityService_ServiceDesc is the grpc.ServiceDesc for CapabilityService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var Runtime_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "aurae.Runtime",
-	HandlerType: (*RuntimeServer)(nil),
+var CapabilityService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "aurae.CapabilityService",
+	HandlerType: (*CapabilityServiceServer)(nil),
 	Methods:     []grpc.MethodDesc{},
 	Streams:     []grpc.StreamDesc{},
 	Metadata:    "rpc/core.proto",
 }
 
-// CoreServiceClient is the client API for CoreService service.
+// CoreClient is the client API for Core service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type CoreServiceClient interface {
+type CoreClient interface {
 	Set(ctx context.Context, in *SetReq, opts ...grpc.CallOption) (*SetResp, error)
 	Get(ctx context.Context, in *GetReq, opts ...grpc.CallOption) (*GetResp, error)
 	List(ctx context.Context, in *ListReq, opts ...grpc.CallOption) (*ListResp, error)
 	Remove(ctx context.Context, in *RemoveReq, opts ...grpc.CallOption) (*RemoveResp, error)
 }
 
-type coreServiceClient struct {
+type coreClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewCoreServiceClient(cc grpc.ClientConnInterface) CoreServiceClient {
-	return &coreServiceClient{cc}
+func NewCoreClient(cc grpc.ClientConnInterface) CoreClient {
+	return &coreClient{cc}
 }
 
-func (c *coreServiceClient) Set(ctx context.Context, in *SetReq, opts ...grpc.CallOption) (*SetResp, error) {
+func (c *coreClient) Set(ctx context.Context, in *SetReq, opts ...grpc.CallOption) (*SetResp, error) {
 	out := new(SetResp)
-	err := c.cc.Invoke(ctx, "/aurae.CoreService/Set", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/aurae.Core/Set", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *coreServiceClient) Get(ctx context.Context, in *GetReq, opts ...grpc.CallOption) (*GetResp, error) {
+func (c *coreClient) Get(ctx context.Context, in *GetReq, opts ...grpc.CallOption) (*GetResp, error) {
 	out := new(GetResp)
-	err := c.cc.Invoke(ctx, "/aurae.CoreService/Get", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/aurae.Core/Get", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *coreServiceClient) List(ctx context.Context, in *ListReq, opts ...grpc.CallOption) (*ListResp, error) {
+func (c *coreClient) List(ctx context.Context, in *ListReq, opts ...grpc.CallOption) (*ListResp, error) {
 	out := new(ListResp)
-	err := c.cc.Invoke(ctx, "/aurae.CoreService/List", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/aurae.Core/List", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *coreServiceClient) Remove(ctx context.Context, in *RemoveReq, opts ...grpc.CallOption) (*RemoveResp, error) {
+func (c *coreClient) Remove(ctx context.Context, in *RemoveReq, opts ...grpc.CallOption) (*RemoveResp, error) {
 	out := new(RemoveResp)
-	err := c.cc.Invoke(ctx, "/aurae.CoreService/Remove", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/aurae.Core/Remove", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// CoreServiceServer is the server API for CoreService service.
-// All implementations must embed UnimplementedCoreServiceServer
+// CoreServer is the server API for Core service.
+// All implementations must embed UnimplementedCoreServer
 // for forward compatibility
-type CoreServiceServer interface {
+type CoreServer interface {
 	Set(context.Context, *SetReq) (*SetResp, error)
 	Get(context.Context, *GetReq) (*GetResp, error)
 	List(context.Context, *ListReq) (*ListResp, error)
 	Remove(context.Context, *RemoveReq) (*RemoveResp, error)
-	mustEmbedUnimplementedCoreServiceServer()
+	mustEmbedUnimplementedCoreServer()
 }
 
-// UnimplementedCoreServiceServer must be embedded to have forward compatible implementations.
-type UnimplementedCoreServiceServer struct {
+// UnimplementedCoreServer must be embedded to have forward compatible implementations.
+type UnimplementedCoreServer struct {
 }
 
-func (UnimplementedCoreServiceServer) Set(context.Context, *SetReq) (*SetResp, error) {
+func (UnimplementedCoreServer) Set(context.Context, *SetReq) (*SetResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Set not implemented")
 }
-func (UnimplementedCoreServiceServer) Get(context.Context, *GetReq) (*GetResp, error) {
+func (UnimplementedCoreServer) Get(context.Context, *GetReq) (*GetResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
 }
-func (UnimplementedCoreServiceServer) List(context.Context, *ListReq) (*ListResp, error) {
+func (UnimplementedCoreServer) List(context.Context, *ListReq) (*ListResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method List not implemented")
 }
-func (UnimplementedCoreServiceServer) Remove(context.Context, *RemoveReq) (*RemoveResp, error) {
+func (UnimplementedCoreServer) Remove(context.Context, *RemoveReq) (*RemoveResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Remove not implemented")
 }
-func (UnimplementedCoreServiceServer) mustEmbedUnimplementedCoreServiceServer() {}
+func (UnimplementedCoreServer) mustEmbedUnimplementedCoreServer() {}
 
-// UnsafeCoreServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to CoreServiceServer will
+// UnsafeCoreServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to CoreServer will
 // result in compilation errors.
-type UnsafeCoreServiceServer interface {
-	mustEmbedUnimplementedCoreServiceServer()
+type UnsafeCoreServer interface {
+	mustEmbedUnimplementedCoreServer()
 }
 
-func RegisterCoreServiceServer(s grpc.ServiceRegistrar, srv CoreServiceServer) {
-	s.RegisterService(&CoreService_ServiceDesc, srv)
+func RegisterCoreServer(s grpc.ServiceRegistrar, srv CoreServer) {
+	s.RegisterService(&Core_ServiceDesc, srv)
 }
 
-func _CoreService_Set_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Core_Set_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(SetReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CoreServiceServer).Set(ctx, in)
+		return srv.(CoreServer).Set(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/aurae.CoreService/Set",
+		FullMethod: "/aurae.Core/Set",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CoreServiceServer).Set(ctx, req.(*SetReq))
+		return srv.(CoreServer).Set(ctx, req.(*SetReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _CoreService_Get_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Core_Get_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CoreServiceServer).Get(ctx, in)
+		return srv.(CoreServer).Get(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/aurae.CoreService/Get",
+		FullMethod: "/aurae.Core/Get",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CoreServiceServer).Get(ctx, req.(*GetReq))
+		return srv.(CoreServer).Get(ctx, req.(*GetReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _CoreService_List_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Core_List_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ListReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CoreServiceServer).List(ctx, in)
+		return srv.(CoreServer).List(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/aurae.CoreService/List",
+		FullMethod: "/aurae.Core/List",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CoreServiceServer).List(ctx, req.(*ListReq))
+		return srv.(CoreServer).List(ctx, req.(*ListReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _CoreService_Remove_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Core_Remove_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(RemoveReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CoreServiceServer).Remove(ctx, in)
+		return srv.(CoreServer).Remove(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/aurae.CoreService/Remove",
+		FullMethod: "/aurae.Core/Remove",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CoreServiceServer).Remove(ctx, req.(*RemoveReq))
+		return srv.(CoreServer).Remove(ctx, req.(*RemoveReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// CoreService_ServiceDesc is the grpc.ServiceDesc for CoreService service.
+// Core_ServiceDesc is the grpc.ServiceDesc for Core service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var CoreService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "aurae.CoreService",
-	HandlerType: (*CoreServiceServer)(nil),
+var Core_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "aurae.Core",
+	HandlerType: (*CoreServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "Set",
-			Handler:    _CoreService_Set_Handler,
+			Handler:    _Core_Set_Handler,
 		},
 		{
 			MethodName: "Get",
-			Handler:    _CoreService_Get_Handler,
+			Handler:    _Core_Get_Handler,
 		},
 		{
 			MethodName: "List",
-			Handler:    _CoreService_List_Handler,
+			Handler:    _Core_List_Handler,
 		},
 		{
 			MethodName: "Remove",
-			Handler:    _CoreService_Remove_Handler,
+			Handler:    _Core_Remove_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

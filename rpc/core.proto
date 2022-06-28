@@ -20,11 +20,11 @@ option go_package = "github.com/kris-nova/aurae/rpc";
 
 package aurae;
 
-service Runtime {
+service CapabilityService {
 
 }
 
-// CoreService is the most core interface for Aurae data interactions.
+// Core is the most core interface for Aurae data interactions.
 //
 // All of these methods are a simplified version of the POSIX filesystem
 // interface.
@@ -33,10 +33,10 @@ service Runtime {
 // POSIX compliant filesystems, as well as very quickly interact with a
 // basic key/value data store.
 //
-// The CoreService interface is modular in nature, and can be backed by
+// The Core interface is modular in nature, and can be backed by
 // a variety of data storage mechanisms, each with their own features and
 // guarantees.
-service CoreService {
+service Core {
   rpc Set (SetReq) returns (SetResp) {}
   rpc Get (GetReq) returns (GetResp) {}
   rpc List (ListReq) returns (ListResp) {}

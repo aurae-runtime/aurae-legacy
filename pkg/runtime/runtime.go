@@ -109,7 +109,7 @@ func (d *Daemon) Run() error {
 	coreSvc.SetGetFromMemory(false)
 
 	// Step 5. Register the core database to the initialized server
-	rpc.RegisterCoreServiceServer(server, coreSvc)
+	rpc.RegisterCoreServer(server, coreSvc)
 	logrus.Infof("Registering Core Database.")
 
 	// Step 6. Begin the empty loop by running a small go routine with an emergency cancel

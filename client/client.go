@@ -8,7 +8,7 @@ import (
 )
 
 type Client struct {
-	rpc.CoreServiceClient
+	rpc.CoreClient
 	socket string
 }
 
@@ -23,7 +23,7 @@ func (c *Client) Connect() error {
 	if err != nil {
 		return err
 	}
-	client := rpc.NewCoreServiceClient(conn)
-	c.CoreServiceClient = client
+	client := rpc.NewCoreClient(conn)
+	c.CoreClient = client
 	return nil
 }
