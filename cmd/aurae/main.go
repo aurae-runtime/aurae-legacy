@@ -20,7 +20,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/kris-nova/aurae/client"
-	"github.com/kris-nova/aurae/pkg/runtime"
+	"github.com/kris-nova/aurae/pkg/auraed"
 	"github.com/kris-nova/aurae/rpc"
 	"os"
 	"time"
@@ -91,7 +91,7 @@ func main() {
 						Name:        "socket",
 						Aliases:     []string{"sock"},
 						Destination: &run.socket,
-						Value:       runtime.DefaultSocketLocationLinux,
+						Value:       auraed.DefaultSocketLocationLinux,
 					},
 				}),
 				Action: func(c *cli.Context) error {
@@ -124,7 +124,7 @@ func main() {
 						Name:        "socket",
 						Aliases:     []string{"sock"},
 						Destination: &run.socket,
-						Value:       runtime.DefaultSocketLocationLinux,
+						Value:       auraed.DefaultSocketLocationLinux,
 					},
 				}),
 				Action: func(c *cli.Context) error {
@@ -161,7 +161,7 @@ func main() {
 						Name:        "socket",
 						Aliases:     []string{"sock"},
 						Destination: &run.socket,
-						Value:       runtime.DefaultSocketLocationLinux,
+						Value:       auraed.DefaultSocketLocationLinux,
 					},
 				}),
 				Action: func(c *cli.Context) error {
@@ -194,7 +194,7 @@ func main() {
 			//{
 			//	Name:      "run",
 			//	Usage:     "Run an Application.",
-			//	UsageText: `aurae <options> runtime`,
+			//	UsageText: `aurae <options> auraed`,
 			//	Flags:     GlobalFlags([]cli.Flag{}),
 			//	Action: func(c *cli.Context) error {
 			//		image := c.Args().Get(0)
@@ -236,8 +236,8 @@ func main() {
 			//},
 			//{
 			//	Name:      "daemon",
-			//	Usage:     "Run aurae as a runtime daemon.",
-			//	UsageText: `aurae <options> runtime`,
+			//	Usage:     "Run aurae as a auraed daemon.",
+			//	UsageText: `aurae <options> auraed`,
 			//	Flags: GlobalFlags([]cli.Flag{
 			//		&cli.StringFlag{
 			//			Name:        "mountpoint",
@@ -253,7 +253,7 @@ func main() {
 			//		},
 			//	}),
 			//	Action: func(c *cli.Context) error {
-			//		daemon := runtime.New(run.mountpoint, run.socket)
+			//		daemon := auraed.New(run.mountpoint, run.socket)
 			//		return daemon.Run()
 			//	},
 			//},
@@ -355,7 +355,7 @@ func GlobalFlags(c []cli.Flag) []cli.Flag {
 }
 
 // Preloader will run for ALL commands, and is used
-// to system the runtime environments of the program.
+// to system the auraed environments of the program.
 func Preloader() {
 	/* Flag parsing */
 	if run.verbose {

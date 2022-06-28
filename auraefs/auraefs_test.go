@@ -18,7 +18,7 @@ package auraefs
 
 import (
 	"github.com/kris-nova/aurae/client"
-	"github.com/kris-nova/aurae/pkg/runtime"
+	"github.com/kris-nova/aurae/pkg/auraed"
 	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"os"
@@ -39,7 +39,7 @@ func TestMain(m *testing.M) {
 	}()
 
 	// Start a daemon
-	d := runtime.New("/run/aurae.test.sock")
+	d := auraed.New("/run/aurae.test.sock")
 	ch := make(chan bool)
 	go func() {
 		ch <- true

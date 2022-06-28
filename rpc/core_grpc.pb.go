@@ -18,50 +18,50 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
-// CapabilityServiceClient is the client API for CapabilityService service.
+// RuntimeClient is the client API for Runtime service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type CapabilityServiceClient interface {
+type RuntimeClient interface {
 }
 
-type capabilityServiceClient struct {
+type runtimeClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewCapabilityServiceClient(cc grpc.ClientConnInterface) CapabilityServiceClient {
-	return &capabilityServiceClient{cc}
+func NewRuntimeClient(cc grpc.ClientConnInterface) RuntimeClient {
+	return &runtimeClient{cc}
 }
 
-// CapabilityServiceServer is the server API for CapabilityService service.
-// All implementations must embed UnimplementedCapabilityServiceServer
+// RuntimeServer is the server API for Runtime service.
+// All implementations must embed UnimplementedRuntimeServer
 // for forward compatibility
-type CapabilityServiceServer interface {
-	mustEmbedUnimplementedCapabilityServiceServer()
+type RuntimeServer interface {
+	mustEmbedUnimplementedRuntimeServer()
 }
 
-// UnimplementedCapabilityServiceServer must be embedded to have forward compatible implementations.
-type UnimplementedCapabilityServiceServer struct {
+// UnimplementedRuntimeServer must be embedded to have forward compatible implementations.
+type UnimplementedRuntimeServer struct {
 }
 
-func (UnimplementedCapabilityServiceServer) mustEmbedUnimplementedCapabilityServiceServer() {}
+func (UnimplementedRuntimeServer) mustEmbedUnimplementedRuntimeServer() {}
 
-// UnsafeCapabilityServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to CapabilityServiceServer will
+// UnsafeRuntimeServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to RuntimeServer will
 // result in compilation errors.
-type UnsafeCapabilityServiceServer interface {
-	mustEmbedUnimplementedCapabilityServiceServer()
+type UnsafeRuntimeServer interface {
+	mustEmbedUnimplementedRuntimeServer()
 }
 
-func RegisterCapabilityServiceServer(s grpc.ServiceRegistrar, srv CapabilityServiceServer) {
-	s.RegisterService(&CapabilityService_ServiceDesc, srv)
+func RegisterRuntimeServer(s grpc.ServiceRegistrar, srv RuntimeServer) {
+	s.RegisterService(&Runtime_ServiceDesc, srv)
 }
 
-// CapabilityService_ServiceDesc is the grpc.ServiceDesc for CapabilityService service.
+// Runtime_ServiceDesc is the grpc.ServiceDesc for Runtime service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var CapabilityService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "aurae.CapabilityService",
-	HandlerType: (*CapabilityServiceServer)(nil),
+var Runtime_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "aurae.Runtime",
+	HandlerType: (*RuntimeServer)(nil),
 	Methods:     []grpc.MethodDesc{},
 	Streams:     []grpc.StreamDesc{},
 	Metadata:    "rpc/core.proto",

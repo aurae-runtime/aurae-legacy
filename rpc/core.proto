@@ -20,7 +20,7 @@ option go_package = "github.com/kris-nova/aurae/rpc";
 
 package aurae;
 
-service CapabilityService {
+service Runtime {
 
 }
 
