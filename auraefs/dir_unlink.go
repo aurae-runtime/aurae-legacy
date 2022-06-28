@@ -30,6 +30,9 @@ var _ fs.NodeUnlinker = &Dir{}
 
 func (n *Dir) Unlink(ctx context.Context, name string) syscall.Errno {
 	logrus.Debugf("%s --[d]--> Unlink(%s)", n.path, name)
+	if c == nil {
+		return 0
+	}
 	rmResp, err := c.RemoveRPC(ctx, &rpc.RemoveReq{
 		Key: filepath.Join(n.path, name),
 	})

@@ -56,6 +56,9 @@ func NewDir(path string) *Dir {
 
 func (n *Dir) NewSubFile(ctx context.Context, name string, data []byte) (uint64, *File) {
 	i := Ino()
+	if c == nil {
+		return 0, nil
+	}
 	setResp, err := c.SetRPC(ctx, &rpc.SetReq{
 		Key: name, // No trailing slash (file)
 	})
@@ -80,6 +83,9 @@ func (n *Dir) NewSubFile(ctx context.Context, name string, data []byte) (uint64,
 
 func (n *Dir) NewSubDir(ctx context.Context, name string) (uint64, *Dir) {
 	i := Ino()
+	if c == nil {
+		return 0, nil
+	}
 	setResp, err := c.SetRPC(ctx, &rpc.SetReq{
 		Key: fmt.Sprintf("%s/", name), // Trailing slash (dir)
 	})

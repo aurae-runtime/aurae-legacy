@@ -35,8 +35,6 @@ func (f *File) Write(ctx context.Context, fh fs.FileHandle, data []byte, off int
 		copy(n, f.Data)
 		f.Data = n
 	}
-
 	copy(f.Data[off:off+int64(len(data))], data)
-
 	return uint32(len(data)), 0
 }

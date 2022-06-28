@@ -30,6 +30,9 @@ var _ fs.NodeFlusher = &File{}
 
 func (f *File) Unlink(ctx context.Context, name string) syscall.Errno {
 	logrus.Debugf("%s --[f]--> Unlink(%s)", f.path, name)
+	if c == nil {
+		return 0
+	}
 	rmResp, err := c.RemoveRPC(ctx, &rpc.RemoveReq{
 		Key: filepath.Join(f.path, name),
 	})

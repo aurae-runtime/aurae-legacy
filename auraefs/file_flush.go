@@ -29,6 +29,9 @@ var _ fs.NodeFlusher = &File{}
 
 func (f *File) Flush(ctx context.Context, fh fs.FileHandle) syscall.Errno {
 	logrus.Debugf("%s --[f]--> Flush()", f.path)
+	if c == nil {
+		return 0
+	}
 	setResp, err := c.SetRPC(ctx, &rpc.SetReq{
 		Key: f.path,
 		Val: string(f.Data),

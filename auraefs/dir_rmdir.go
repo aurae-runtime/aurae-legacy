@@ -29,6 +29,9 @@ var _ fs.NodeRmdirer = &Dir{}
 
 func (n *Dir) Rmdir(ctx context.Context, name string) syscall.Errno {
 	logrus.Debugf("%s --[d]--> Rmdir()", n.path)
+	if c == nil {
+		return 0
+	}
 	rmResp, err := c.RemoveRPC(ctx, &rpc.RemoveReq{
 		Key: name,
 	})

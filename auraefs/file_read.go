@@ -32,7 +32,9 @@ func (f *File) Read(ctx context.Context, fh fs.FileHandle, dest []byte, off int6
 	logrus.Debugf("%s --[f]--> Read().Len(%d)", f.path, len(f.Data))
 	f.mu.Lock()
 	defer f.mu.Unlock()
-
+	if c == nil {
+		return fuse.ReadResultData(f.Data), 0
+	}
 	getResp, err := c.GetRPC(ctx, &rpc.GetReq{
 		Key: f.path,
 	})
