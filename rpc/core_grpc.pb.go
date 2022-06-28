@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             v3.21.1
-// source: rpc/aurae.proto
+// source: rpc/core.proto
 
 package rpc
 
@@ -64,7 +64,7 @@ var Runtime_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*RuntimeServer)(nil),
 	Methods:     []grpc.MethodDesc{},
 	Streams:     []grpc.StreamDesc{},
-	Metadata:    "rpc/aurae.proto",
+	Metadata:    "rpc/core.proto",
 }
 
 // CoreServiceClient is the client API for CoreService service.
@@ -258,5 +258,5 @@ var CoreService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "rpc/aurae.proto",
+	Metadata: "rpc/core.proto",
 }
