@@ -17,7 +17,7 @@
 package main
 
 import (
-	"github.com/kris-nova/aurae/pkg/auraed"
+	"github.com/kris-nova/aurae/pkg/daemon"
 	"os"
 	"time"
 
@@ -77,13 +77,13 @@ func main() {
 				Name:        "socket",
 				Aliases:     []string{"sock"},
 				Destination: &run.socket,
-				Value:       auraed.DefaultSocketLocationLinux,
+				Value:       daemon.DefaultSocketLocationLinux,
 			},
 			&cli.StringFlag{
 				Name:        "local",
 				Aliases:     []string{"store"},
 				Destination: &run.localStore,
-				Value:       auraed.DefaultLocalStateLocationLinux,
+				Value:       daemon.DefaultLocalStateLocationLinux,
 			},
 		}),
 		EnableBashCompletion: true,
@@ -91,7 +91,7 @@ func main() {
 		HideVersion:          false,
 
 		Action: func(c *cli.Context) error {
-			d := auraed.New(run.socket, run.localStore)
+			d := daemon.New(run.socket, run.localStore)
 			return d.Run()
 		},
 	}
@@ -131,7 +131,7 @@ func GlobalFlags(c []cli.Flag) []cli.Flag {
 }
 
 // Preloader will run for ALL commands, and is used
-// to system the auraed environments of the program.
+// to system the daemon environments of the program.
 func Preloader() {
 	/* Flag parsing */
 	if run.verbose {

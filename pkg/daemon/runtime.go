@@ -14,7 +14,7 @@
  *                                                                           *
 \*===========================================================================*/
 
-package auraed
+package daemon
 
 import (
 	"fmt"
@@ -64,11 +64,11 @@ func (d *Daemon) Run() error {
 
 	// Step 1. Establish context in the logs.
 
-	logrus.Infof("Aurae auraed daemon. Version: %s", aurae.Version)
+	logrus.Infof("Aurae daemon daemon. Version: %s", aurae.Version)
 	logrus.Infof("Aurae Socket [%s]", d.socket)
 	logrus.Infof("Aurae Local  [%s]", d.localStore)
 
-	// Step 2. Establish auraed safety
+	// Step 2. Establish daemon safety
 
 	quitCh := posix.SignalHandler()
 	go func() {
@@ -130,17 +130,17 @@ func (d *Daemon) Run() error {
 	//if err != nil {
 	//	logrus.Errorf("Dispatch failure: %v", err)
 	//	logrus.Errorf("Shutting down.")
-	//	d.auraed = false
+	//	d.daemon = false
 	//}
 
-	// Step 7. Begin the auraed loop.
+	// Step 7. Begin the daemon loop.
 
 	for d.runtime {
 		select {
 		case err := <-serveCancel:
 			if err != nil {
 				logrus.Errorf("Auarae core serving error: %v", err)
-				d.runtime = false // Cancel the auraed during a core serving error
+				d.runtime = false // Cancel the daemon during a core serving error
 			}
 		default:
 			// pass
