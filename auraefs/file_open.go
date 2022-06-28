@@ -17,30 +17,26 @@
 package auraefs
 
 import (
+	"context"
 	"github.com/hanwen/go-fuse/v2/fs"
 	"github.com/hanwen/go-fuse/v2/fuse"
-	"sync"
+	"github.com/sirupsen/logrus"
+	"syscall"
 )
 
-type File struct {
-	fs.Inode
+var _ fs.NodeOpener = &File{}
 
-	path string // Absolute path
-
-	mu   sync.Mutex
-	Data []byte
-	Attr fuse.Attr
-}
-
-func NewFile(path string, data []byte) *File {
-	return &File{
-		Inode: fs.Inode{},
-		path:  path,
-		mu:    sync.Mutex{},
-		Data:  data,
-		Attr: fuse.Attr{
-			Ino:  Ino(),
-			Mode: ModeRWOnly,
-		}, // Set default attributes here
-	}
+// Open is how all files are opened
+//
+//               FOPEN_DIRECT_IO
+//                     Bypass page cache for this open file.
+//
+//              FOPEN_KEEP_CACHE
+//                     Don't invalidate the data cache on open.
+//
+//              FOPEN_NONSEEKABLE
+//                     The file is not seekable.
+func (f *File) Open(ctx context.Context, flags uint32) (fh fs.FileHandle, fuseFlags uint32, errno syscall.Errno) {
+	logrus.Debugf("%s --[f]--> Open()", f.path)
+	return nil, fuse.FOPEN_DIRECT_IO, Okay
 }

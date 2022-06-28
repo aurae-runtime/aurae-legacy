@@ -17,30 +17,20 @@
 package auraefs
 
 import (
+	"context"
 	"github.com/hanwen/go-fuse/v2/fs"
 	"github.com/hanwen/go-fuse/v2/fuse"
-	"sync"
+	"github.com/sirupsen/logrus"
+	"syscall"
 )
 
-type File struct {
-	fs.Inode
+var _ fs.NodeGetattrer = &File{}
 
-	path string // Absolute path
-
-	mu   sync.Mutex
-	Data []byte
-	Attr fuse.Attr
-}
-
-func NewFile(path string, data []byte) *File {
-	return &File{
-		Inode: fs.Inode{},
-		path:  path,
-		mu:    sync.Mutex{},
-		Data:  data,
-		Attr: fuse.Attr{
-			Ino:  Ino(),
-			Mode: ModeRWOnly,
-		}, // Set default attributes here
-	}
+func (f *File) Getattr(ctx context.Context, fh fs.FileHandle, out *fuse.AttrOut) syscall.Errno {
+	logrus.Debugf("%s --[f]--> Getattr()", f.path)
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	out.Attr = f.Attr
+	out.Attr.Size = uint64(len(f.Data))
+	return Okay
 }
