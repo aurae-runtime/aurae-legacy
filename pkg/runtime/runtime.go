@@ -66,6 +66,7 @@ func (d *Daemon) Run() error {
 
 	logrus.Infof("Aurae runtime daemon. Version: %s", aurae.Version)
 	logrus.Infof("Aurae Socket [%s]", d.socket)
+	logrus.Infof("Aurae Local  [%s]", d.localStore)
 
 	// Step 2. Establish runtime safety
 
@@ -104,13 +105,14 @@ func (d *Daemon) Run() error {
 	localStateStore := local.NewState(d.localStore)
 	coreSvc := core.NewService(localStateStore)
 
-	// Step 4. Register the core database to the initialized server
+	// Default to getFromMemory=false we can change this later
+	coreSvc.SetGetFromMemory(false)
 
+	// Step 5. Register the core database to the initialized server
 	rpc.RegisterCoreServiceServer(server, coreSvc)
 	logrus.Infof("Registering Core Database.")
 
-	// Step 5. Begin the empty loop by running a small go routine with an emergency cancel
-
+	// Step 6. Begin the empty loop by running a small go routine with an emergency cancel
 	serveCancel := make(chan error)
 	go func() {
 		err = server.Serve(conn)
@@ -121,7 +123,7 @@ func (d *Daemon) Run() error {
 
 	logrus.Infof("Listening.")
 
-	// Step 6. Dispatch events from the filesystem
+	// Step 7. Dispatch events from the filesystem
 
 	// need to configure events directories/paths
 	//err := d.Dispatch()

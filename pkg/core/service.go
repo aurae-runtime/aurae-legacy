@@ -21,6 +21,7 @@ import (
 	"github.com/kris-nova/aurae/pkg/common"
 	"github.com/kris-nova/aurae/pkg/core/memfs"
 	"github.com/kris-nova/aurae/rpc"
+	"github.com/sirupsen/logrus"
 	"sync"
 )
 
@@ -155,4 +156,11 @@ func NewService(store CoreServicer) *Service {
 		store: store,
 		mtx:   sync.Mutex{},
 	}
+}
+
+func (c *Service) SetGetFromMemory(x bool) {
+	c.mtx.Lock()
+	defer c.mtx.Unlock()
+	getFromMemory = x
+	logrus.Infof("GetFromMemory: %t", x)
 }
