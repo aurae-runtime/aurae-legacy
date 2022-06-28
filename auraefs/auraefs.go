@@ -60,11 +60,17 @@ func NewAuraeFS(mountpoint string, establishedClient *client.Client) *AuraeFS {
 // More: https://www.unix.com/man-page/linux/1/fusermount/
 var mountOptions = []string{
 
-	// -o nonempty 	      allow mounts over non-empty file/dir
+	// -o nonempty	allow mounts over non-empty file/dir
 	"nonempty",
 
-	// -o rw 			  mount the filesystem as read/write
+	// -o rw		mount the filesystem as read/write
 	"rw",
+
+	// -o nosuid	Do not allow set-user-identifier or set-group-identifier bits to take effect.
+	"nosuid",
+
+	// -o nodev		Do not interpret character or block special devices on the file system.
+	"nodev",
 }
 
 // Mount will mount the FS and return.
