@@ -18,7 +18,7 @@ package main
 
 import (
 	"fmt"
-	aurfs "github.com/kris-nova/aurae/aurafs"
+	aurfs "github.com/kris-nova/aurae/auraefs"
 	"github.com/kris-nova/aurae/client"
 	"github.com/kris-nova/aurae/pkg/runtime"
 	"os"

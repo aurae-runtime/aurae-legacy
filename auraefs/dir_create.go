@@ -14,38 +14,21 @@
  *                                                                           *
 \*===========================================================================*/
 
-package aurafs
+package auraefs
 
 import (
 	"context"
 	"github.com/hanwen/go-fuse/v2/fs"
 	"github.com/hanwen/go-fuse/v2/fuse"
+	"github.com/sirupsen/logrus"
+	"path"
 	"syscall"
 )
 
-var _ fs.NodeReadlinker = &SymLink{}
-var _ fs.NodeGetattrer = &SymLink{}
+var _ fs.NodeCreater = &Dir{}
 
-type SymLink struct {
-	fs.Inode
-
-	Attr fuse.Attr
-	Data []byte
-}
-
-func NewSymLink(attr fuse.Attr, data []byte) *SymLink {
-	return &SymLink{
-		Inode: fs.Inode{},
-		Attr:  attr,
-		Data:  data,
-	}
-}
-
-func (l *SymLink) Readlink(ctx context.Context) ([]byte, syscall.Errno) {
-	return l.Data, Okay
-}
-
-func (l *SymLink) Getattr(ctx context.Context, fh fs.FileHandle, out *fuse.AttrOut) syscall.Errno {
-	out.Attr = l.Attr
-	return Okay
+func (n *Dir) Create(ctx context.Context, name string, flags uint32, mode uint32, out *fuse.EntryOut) (node *fs.Inode, fh fs.FileHandle, fuseFlags uint32, errno syscall.Errno) {
+	logrus.Debugf("%s --[d]--> Create(%s)", n.path, name)
+	_, file := n.NewSubFile(ctx, path.Join(n.path, name), []byte("")) // touch
+	return &file.Inode, nil, 0, 0
 }

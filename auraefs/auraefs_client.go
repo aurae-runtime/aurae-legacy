@@ -14,14 +14,8 @@
  *                                                                           *
 \*===========================================================================*/
 
-package aurafs
+package auraefs
 
-import "syscall"
+import "github.com/kris-nova/aurae/client"
 
-var Okay = syscall.Errno(0)
-
-const (
-	ModeX       uint32 = 0755
-	ModeRWOnly  uint32 = 0644
-	DefaultMode uint32 = ModeRWOnly
-)
+var c *client.Client

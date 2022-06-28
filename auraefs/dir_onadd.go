@@ -14,6 +14,17 @@
  *                                                                           *
 \*===========================================================================*/
 
-package aurafs
+package auraefs
 
-var root = NewDir("/")
+import (
+	"context"
+	"github.com/hanwen/go-fuse/v2/fs"
+	"github.com/sirupsen/logrus"
+)
+
+var _ fs.NodeOnAdder = &Dir{}
+
+func (n *Dir) OnAdd(ctx context.Context) {
+	logrus.Debugf("%s --[d]--> OnAdd()", n.path)
+	// Less is more
+}

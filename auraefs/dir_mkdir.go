@@ -14,8 +14,21 @@
  *                                                                           *
 \*===========================================================================*/
 
-package aurafs
+package auraefs
 
-import "github.com/kris-nova/aurae/client"
+import (
+	"context"
+	"github.com/hanwen/go-fuse/v2/fs"
+	"github.com/hanwen/go-fuse/v2/fuse"
+	"github.com/sirupsen/logrus"
+	"path"
+	"syscall"
+)
 
-var c *client.Client
+var _ fs.NodeMkdirer = &Dir{}
+
+func (n *Dir) Mkdir(ctx context.Context, name string, mode uint32, out *fuse.EntryOut) (*fs.Inode, syscall.Errno) {
+	logrus.Debugf("%s --[d]--> Mkdir(%s)", n.path, name)
+	_, dir := n.NewSubDir(ctx, path.Join(n.path, name))
+	return &dir.Inode, 0
+}
