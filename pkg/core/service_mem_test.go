@@ -25,7 +25,7 @@ import (
 )
 
 func TestBasicIOSad(t *testing.T) {
-
+	getFromMemory = true
 	stateStore := empty.NewState()
 	db := NewService(stateStore)
 
@@ -44,6 +44,7 @@ func TestBasicIOSad(t *testing.T) {
 }
 
 func TestBasicIOHappy(t *testing.T) {
+	getFromMemory = true
 
 	stateStore := empty.NewState()
 	db := NewService(stateStore)
@@ -79,6 +80,7 @@ func TestBasicIOHappy(t *testing.T) {
 }
 
 func TestIOCases(t *testing.T) {
+	getFromMemory = true
 
 	stateStore := empty.NewState()
 	db := NewService(stateStore)
@@ -163,6 +165,7 @@ func TestIOCases(t *testing.T) {
 }
 
 func TestBasicListIOHappy(t *testing.T) {
+	getFromMemory = true
 
 	stateStore := empty.NewState()
 	db := NewService(stateStore)
@@ -205,6 +208,7 @@ func TestBasicListIOHappy(t *testing.T) {
 }
 
 func TestComplexListIOCases(t *testing.T) {
+	getFromMemory = true
 
 	stateStore := empty.NewState()
 	db := NewService(stateStore)
@@ -347,6 +351,7 @@ func listResponseToStrings(lsResp *rpc.ListResp) []string {
 }
 
 func TestSingleRootFile(t *testing.T) {
+	getFromMemory = true
 
 	stateStore := empty.NewState()
 	db := NewService(stateStore)
@@ -389,6 +394,7 @@ func TestSingleRootFile(t *testing.T) {
 }
 
 func TestExerciseIntegrationIO(t *testing.T) {
+	getFromMemory = true
 
 	stateStore := empty.NewState()
 	db := NewService(stateStore)
@@ -455,6 +461,7 @@ func TestExerciseIntegrationIO(t *testing.T) {
 }
 
 func TestMkdir(t *testing.T) {
+	getFromMemory = true
 
 	stateStore := empty.NewState()
 	db := NewService(stateStore)

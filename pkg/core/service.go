@@ -21,7 +21,6 @@ import (
 	"github.com/kris-nova/aurae/pkg/common"
 	"github.com/kris-nova/aurae/pkg/core/memfs"
 	"github.com/kris-nova/aurae/rpc"
-	"github.com/sirupsen/logrus"
 	"sync"
 )
 
@@ -32,8 +31,11 @@ const (
 	CoreCode_ERROR  int32 = 1
 	CoreCode_EMPTY  int32 = 2
 	CoreCode_REJECT int32 = 3
+)
 
-	GetFromMemory = true
+var (
+	// getFromMemory controls if we allow Aurae to get from memory ONLY.
+	getFromMemory bool = true
 )
 
 type Service struct {
@@ -55,7 +57,7 @@ func (c *Service) ListRPC(ctx context.Context, req *rpc.ListReq) (*rpc.ListResp,
 	respMem := memfs.List(path)     // MemFS implementation
 	respState := c.store.List(path) // LocalState implementation
 
-	if GetFromMemory {
+	if getFromMemory {
 		resp = respMem
 	} else {
 		resp = respState
@@ -125,7 +127,7 @@ func (c *Service) GetRPC(ctx context.Context, req *rpc.GetReq) (*rpc.GetResp, er
 	respMem := memfs.Get(path)     // MemFS implementation
 	respState := c.store.Get(path) // LocalState implementation
 
-	if GetFromMemory {
+	if getFromMemory {
 		resp = respMem
 	} else {
 		resp = respState
@@ -134,7 +136,7 @@ func (c *Service) GetRPC(ctx context.Context, req *rpc.GetReq) (*rpc.GetResp, er
 	// Check for corruption.
 	if respState != respMem {
 		// TODO We need to talk through the implications of this and handle corruption.
-		logrus.Warnf("State corruption detected. Local != Memory.")
+		//logrus.Warnf("State corruption detected. Local != Memory.")
 	}
 
 	response := &rpc.GetResp{
