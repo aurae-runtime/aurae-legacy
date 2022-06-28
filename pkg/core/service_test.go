@@ -18,6 +18,7 @@ package core
 
 import (
 	"context"
+	"github.com/kris-nova/aurae/pkg/core/empty"
 	"github.com/kris-nova/aurae/rpc"
 	"strings"
 	"testing"
@@ -25,7 +26,8 @@ import (
 
 func TestBasicIOSad(t *testing.T) {
 
-	db := NewPathDatabase()
+	stateStore := empty.NewState()
+	db := NewService(stateStore)
 
 	// Set
 	var setResp *rpc.SetResp
@@ -43,7 +45,8 @@ func TestBasicIOSad(t *testing.T) {
 
 func TestBasicIOHappy(t *testing.T) {
 
-	db := NewPathDatabase()
+	stateStore := empty.NewState()
+	db := NewService(stateStore)
 
 	// Set
 	var setResp *rpc.SetResp
@@ -77,7 +80,8 @@ func TestBasicIOHappy(t *testing.T) {
 
 func TestIOCases(t *testing.T) {
 
-	db := NewPathDatabase()
+	stateStore := empty.NewState()
+	db := NewService(stateStore)
 
 	cases := []struct {
 		getKey       string
@@ -160,7 +164,8 @@ func TestIOCases(t *testing.T) {
 
 func TestBasicListIOHappy(t *testing.T) {
 
-	db := NewPathDatabase()
+	stateStore := empty.NewState()
+	db := NewService(stateStore)
 
 	// Set
 	var setResp *rpc.SetResp
@@ -201,7 +206,11 @@ func TestBasicListIOHappy(t *testing.T) {
 
 func TestComplexListIOCases(t *testing.T) {
 
-	db := NewPathDatabase()
+	stateStore := empty.NewState()
+	db := NewService(stateStore)
+	db.RemoveRPC(context.Background(), &rpc.RemoveReq{
+		Key: "/",
+	})
 
 	cases := []struct {
 		message          string // TODO set and log messages in the test output
@@ -339,7 +348,9 @@ func listResponseToStrings(lsResp *rpc.ListResp) []string {
 
 func TestSingleRootFile(t *testing.T) {
 
-	db := NewPathDatabase()
+	stateStore := empty.NewState()
+	db := NewService(stateStore)
+
 	db.RemoveRPC(context.Background(), &rpc.RemoveReq{
 		Key: "/",
 	})
@@ -379,7 +390,9 @@ func TestSingleRootFile(t *testing.T) {
 
 func TestExerciseIntegrationIO(t *testing.T) {
 
-	db := NewPathDatabase()
+	stateStore := empty.NewState()
+	db := NewService(stateStore)
+
 	db.RemoveRPC(context.Background(), &rpc.RemoveReq{
 		Key: "/",
 	})
@@ -443,7 +456,9 @@ func TestExerciseIntegrationIO(t *testing.T) {
 
 func TestMkdir(t *testing.T) {
 
-	db := NewPathDatabase()
+	stateStore := empty.NewState()
+	db := NewService(stateStore)
+
 	db.RemoveRPC(context.Background(), &rpc.RemoveReq{
 		Key: "/",
 	})
@@ -481,7 +496,8 @@ func TestMkdir(t *testing.T) {
 
 //func TestTODO(t *testing.T) {
 //
-//	db := NewPathDatabase()
+//	stateStore := empty.NewState()
+//	db := NewService(stateStore)
 //
 //	// Set
 //	var setResp *rpc.SetResp

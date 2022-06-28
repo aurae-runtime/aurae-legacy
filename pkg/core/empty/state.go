@@ -14,21 +14,26 @@
  *                                                                           *
 \*===========================================================================*/
 
-package core
+package empty
 
-// Getters and Setters should (by design) not return an error.
-// The agreement between these interfaces and the calling code
-// is that the implementation will do everything it can to manage
-// an error, or will otherwise crash.
-
-type Getter interface {
-	Get(key string) string
+type State struct {
 }
 
-type Setter interface {
-	Set(key, value string)
+func NewState() *State {
+	return &State{}
 }
 
-type Lister interface {
-	List(key string) map[string]string
+func (s *State) Get(key string) string {
+	return ""
+}
+
+func (s *State) Set(key, value string) {
+}
+
+func (s *State) List(key string) map[string]bool {
+	ret := make(map[string]bool)
+	return ret
+}
+
+func (s *State) Remove(key string) {
 }

@@ -21,64 +21,62 @@ import (
 	"github.com/kris-nova/aurae/pkg/common"
 	"github.com/kris-nova/aurae/pkg/core/memfs"
 	"github.com/kris-nova/aurae/rpc"
+	"github.com/sirupsen/logrus"
 	"sync"
 )
 
-var _ rpc.CoreServiceServer = &PathDatabase{}
+var _ rpc.CoreServiceServer = &Service{}
 
 const (
 	CoreCode_OKAY   int32 = 0
 	CoreCode_ERROR  int32 = 1
 	CoreCode_EMPTY  int32 = 2
 	CoreCode_REJECT int32 = 3
+
+	GetFromMemory = true
 )
 
-// PathDatabase is the core data store structure for Aurae.
-//
-// This structure couples the concepts of "path" filesystem to a
-// key value store.
-//
-// If you store "boops" it becomes "/boops"
-// If you store "beeps/boops" it becomes "/beeps/boops"
-//
-// The path paradigm allows for a less effecient but more queryable data set.
-// This also allows us to expose the database as a mountable system over the socket.
-type PathDatabase struct {
+type Service struct {
 	mtx sync.Mutex
 	rpc.UnimplementedCoreServiceServer
+
+	store CoreServicer
 }
 
-func (c *PathDatabase) ListRPC(ctx context.Context, req *rpc.ListReq) (*rpc.ListResp, error) {
+func (c *Service) ListRPC(ctx context.Context, req *rpc.ListReq) (*rpc.ListResp, error) {
 	c.mtx.Lock()
 	defer c.mtx.Unlock()
 
 	path := common.Path(req.Key) // Data mutation!
 
-	resp := make(map[string]*rpc.Node)
+	resp := make(map[string]bool)
+	rpcResp := make(map[string]*rpc.Node)
 
-	ls := memfs.List(path) // MemFS implementation
+	respMem := memfs.List(path)     // MemFS implementation
+	respState := c.store.List(path) // LocalState implementation
 
-	// Copy the memfs.Node -> rpc.Node // TODO should we simplify this type?
-	for name, node := range ls {
-		file := false
-		if node != nil {
-			file = node.File
-		}
-		resp[name] = &rpc.Node{
+	if GetFromMemory {
+		resp = respMem
+	} else {
+		resp = respState
+	}
+
+	for name, isFile := range resp {
+		rpcResp[name] = &rpc.Node{
 			Name: name,
-			File: file,
+			File: isFile,
 		}
 	}
 
 	response := &rpc.ListResp{
-		Entries: resp,
+		Entries: rpcResp,
 		Code:    CoreCode_OKAY,
 	}
 	return response, nil
 }
 
 // SetRPC is liable to mutate data!
-func (c *PathDatabase) SetRPC(ctx context.Context, req *rpc.SetReq) (*rpc.SetResp, error) {
+func (c *Service) SetRPC(ctx context.Context, req *rpc.SetReq) (*rpc.SetResp, error) {
 	c.mtx.Lock()
 	defer c.mtx.Unlock()
 
@@ -91,7 +89,8 @@ func (c *PathDatabase) SetRPC(ctx context.Context, req *rpc.SetReq) (*rpc.SetRes
 		}, nil
 	}
 
-	memfs.Set(path, req.Val) // MemFS implementation
+	memfs.Set(path, req.Val)      // MemFS implementation
+	go c.store.Set(path, req.Val) // LocalState implementation
 
 	response := &rpc.SetResp{
 		Code: CoreCode_OKAY,
@@ -102,13 +101,13 @@ func (c *PathDatabase) SetRPC(ctx context.Context, req *rpc.SetReq) (*rpc.SetRes
 // RemoveRPC is irreversible!
 //
 // To empty the database pass "/"
-func (c *PathDatabase) RemoveRPC(ctx context.Context, req *rpc.RemoveReq) (*rpc.RemoveResp, error) {
+func (c *Service) RemoveRPC(ctx context.Context, req *rpc.RemoveReq) (*rpc.RemoveResp, error) {
 	c.mtx.Lock()
 	defer c.mtx.Unlock()
 
 	path := common.Path(req.Key) // Data mutation!
-
-	memfs.Remove(path) // MemFS implementation
+	memfs.Remove(path)           // MemFS implementation
+	go c.store.Remove(path)      // LocalState implementation
 
 	response := &rpc.RemoveResp{
 		Code: CoreCode_OKAY,
@@ -116,13 +115,27 @@ func (c *PathDatabase) RemoveRPC(ctx context.Context, req *rpc.RemoveReq) (*rpc.
 	return response, nil
 }
 
-func (c *PathDatabase) GetRPC(ctx context.Context, req *rpc.GetReq) (*rpc.GetResp, error) {
+func (c *Service) GetRPC(ctx context.Context, req *rpc.GetReq) (*rpc.GetResp, error) {
 	c.mtx.Lock()
 	defer c.mtx.Unlock()
 
-	path := common.Path(req.Key) // Data mutation!
+	var resp string
 
-	resp := memfs.Get(path) // MemFS implementation
+	path := common.Path(req.Key)   // Data mutation!
+	respMem := memfs.Get(path)     // MemFS implementation
+	respState := c.store.Get(path) // LocalState implementation
+
+	if GetFromMemory {
+		resp = respMem
+	} else {
+		resp = respState
+	}
+
+	// Check for corruption.
+	if respState != respMem {
+		// TODO We need to talk through the implications of this and handle corruption.
+		logrus.Warnf("State corruption detected. Local != Memory.")
+	}
 
 	response := &rpc.GetResp{
 		Val:  resp,
@@ -131,9 +144,13 @@ func (c *PathDatabase) GetRPC(ctx context.Context, req *rpc.GetReq) (*rpc.GetRes
 	return response, nil
 }
 
-// NewPathDatabase will create a new PathDatabase, and always initialize an in-memory cache.
-func NewPathDatabase() *PathDatabase {
-	return &PathDatabase{
-		mtx: sync.Mutex{},
+// NewService will create a new Service, and always initialize an in-memory cache.
+//
+// NewService depends on a CoreServicer which is a persistent datastore. The simplest
+// datastore is merely local.State which is basic disk IO on a given path.
+func NewService(store CoreServicer) *Service {
+	return &Service{
+		store: store,
+		mtx:   sync.Mutex{},
 	}
 }

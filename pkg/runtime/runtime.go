@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"github.com/kris-nova/aurae"
 	"github.com/kris-nova/aurae/pkg/core"
+	"github.com/kris-nova/aurae/pkg/core/local"
 	"github.com/kris-nova/aurae/pkg/posix"
 	"github.com/kris-nova/aurae/rpc"
 	"github.com/sirupsen/logrus"
@@ -30,7 +31,8 @@ import (
 )
 
 const (
-	DefaultSocketLocationLinux string = "/run/aurae.sock"
+	DefaultSocketLocationLinux     string = "/run/aurae.sock"
+	DefaultLocalStateLocationLinux string = "/var/aurae"
 )
 
 // Daemon is an aurae systemd style daemon.
@@ -45,14 +47,16 @@ const (
 // feature.
 //
 type Daemon struct {
-	runtime bool
-	socket  string
+	runtime    bool
+	socket     string
+	localStore string
 }
 
-func New(socket string) *Daemon {
+func New(socket, localStore string) *Daemon {
 	return &Daemon{
-		runtime: true,
-		socket:  socket,
+		runtime:    true,
+		socket:     socket,
+		localStore: localStore,
 	}
 }
 
@@ -96,11 +100,13 @@ func (d *Daemon) Run() error {
 	server := grpc.NewServer()
 	logrus.Infof("Starting gRPC Server.")
 
+	// Step 4. Setup the local persistent state.
+	localStateStore := local.NewState(d.localStore)
+	coreSvc := core.NewService(localStateStore)
+
 	// Step 4. Register the core database to the initialized server
 
-	coreDB := core.NewPathDatabase()
-	// TODO We need modular (but opinionated) store backing
-	rpc.RegisterCoreServiceServer(server, coreDB)
+	rpc.RegisterCoreServiceServer(server, coreSvc)
 	logrus.Infof("Registering Core Database.")
 
 	// Step 5. Begin the empty loop by running a small go routine with an emergency cancel

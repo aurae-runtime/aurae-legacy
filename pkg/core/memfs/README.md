@@ -2,21 +2,14 @@
 
 This is a stateless in-memory filesystem that (by design) will never persist past the current execution context.
 
-This filesystem should be extremely simplified compared to the POSIX filesystem implementations. The only caveat
-to this filesystem is that a directory can also have content. 
-
-For example imagine a structure 
+The filesystem is simple, is not opinionated and does not store POSIX filesystem meta values such as file attributes, inode details, permissions, users, or groups.
 
 ``` 
-tree
-├── beeps
-│     └── meeps
-└── boops
+root
+├── dir1
+│     └── file1
+└── file0
 ```
-
-All nodes can have file content.
-
-The "node" `beeps` can contain file content even though it is a directory, as well as the "nodes" `meeps` and `boops`.
 
 ### Package State 
 

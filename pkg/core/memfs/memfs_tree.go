@@ -155,11 +155,7 @@ func (n *Node) ListSubNodes(key string) map[string]*Node {
 	}
 	if !found.File {
 		for _, c := range found.Children {
-			if c.File {
-				result[c.Name] = c
-			} else {
-				result[c.Name] = nil
-			}
+			result[c.Name] = c
 		}
 	}
 	return result

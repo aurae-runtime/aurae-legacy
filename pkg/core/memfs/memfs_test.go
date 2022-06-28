@@ -137,7 +137,7 @@ func TestListFiles(t *testing.T) {
 		t.Errorf("Expecting node.File=true")
 	}
 
-	files := List("/base")
+	files := ListNode("/base")
 	if len(files) != 3 {
 		t.Errorf("List failure. Expecting 3, Actual: %d", len(files))
 	}

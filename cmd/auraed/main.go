@@ -33,6 +33,7 @@ type RuntimeOptions struct {
 	verbose    bool
 	mountpoint string
 	socket     string
+	localStore string
 }
 
 func main() {
@@ -78,13 +79,19 @@ func main() {
 				Destination: &run.socket,
 				Value:       runtime.DefaultSocketLocationLinux,
 			},
+			&cli.StringFlag{
+				Name:        "local",
+				Aliases:     []string{"store"},
+				Destination: &run.localStore,
+				Value:       runtime.DefaultLocalStateLocationLinux,
+			},
 		}),
 		EnableBashCompletion: true,
 		HideHelp:             false,
 		HideVersion:          false,
 
 		Action: func(c *cli.Context) error {
-			d := runtime.New(run.socket)
+			d := runtime.New(run.socket, run.localStore)
 			return d.Run()
 		},
 	}
