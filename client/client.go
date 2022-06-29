@@ -28,7 +28,7 @@ type Client struct {
 // After a local client has been authenticated the functionality to leverage
 // the internal Aurae peering and routing mechanisms are now available.
 //
-// An authenticated client can use PeerConnect() to connect to a peer in the
+// An authenticated client can use PeerConnect() to connect to a proxy in the
 // network.
 //
 // Both Connect() and PeerConnect() return unique instances of the same client
@@ -67,14 +67,14 @@ func (c *Client) Connect() error {
 	return nil
 }
 
-func (c *Client) NewPeer(hostname string) (*Client, error) {
-	logrus.Infof("Creating new peer: %s", hostname)
+func (c *Client) NewPeer(service string) (*Client, error) {
+	logrus.Infof("Creating new proxy: %s", service)
 	proxyResp, err := c.LocalProxy(context.Background(), &rpc.LocalProxyReq{})
 	if err != nil {
-		return nil, fmt.Errorf("unable to peer: %v", err)
+		return nil, fmt.Errorf("unable to proxy: %v", err)
 	}
 	if proxyResp.Code != core.CoreCode_OKAY {
-		return nil, fmt.Errorf("unable to create peer socket: %s", proxyResp.Message)
+		return nil, fmt.Errorf("unable to create proxy socket: %s", proxyResp.Message)
 	}
 	return NewClient(proxyResp.Socket), nil
 }

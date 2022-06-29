@@ -14,4 +14,12 @@
  *                                                                           *
 \*===========================================================================*/
 
-package router
+package schedule
+
+import "github.com/kris-nova/aurae/rpc"
+
+var _ rpc.ScheduleServer = &Service{}
+
+type Service struct {
+	rpc.UnimplementedScheduleServer
+}

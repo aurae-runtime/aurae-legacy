@@ -41,7 +41,7 @@ Identify the peering token on a `aurae` node (Emily).
 ```bash
 # Will return your peering token if no token is passed
 # Hostname: Emily
-$ aurae peer
+$ aurae proxy
 <token>
 ```
 
@@ -50,7 +50,7 @@ You can peer your node to another node using `aurae peer`.
 ```bash
 # When a token is passed, aurae attempts to join Alice -> Emily
 # Hostname: Alice
-$ aurae peer <token>
+$ aurae proxy <token>
 ```
 
 Peering creates bidirectional executive trust.
@@ -111,7 +111,7 @@ $ ash # No arguments assumes localhost (Alice)
 
 # Now running ash on Alice
 $ ls /aurae # Show Alice state
-$ ash /peer/emily
+$ ash /proxy/emily
 
 # Now running ash on Emily
 $ ls /aurae # Show Emily state
