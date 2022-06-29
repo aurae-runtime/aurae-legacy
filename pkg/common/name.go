@@ -21,6 +21,20 @@ import (
 	"strings"
 )
 
+func PathSplit(query string) (string, string, string) {
+	spl := strings.Split(query, "@")
+	if len(spl) == 1 {
+		return spl[0], "", ""
+	}
+	if len(spl) == 2 {
+		return spl[0], spl[1], ""
+	}
+	if len(spl) == 3 {
+		return spl[0], spl[1], spl[2]
+	}
+	return "", "", ""
+}
+
 // ParseRawName will parse a raw name and provide its fully qualified domain
 // name in return.
 func ParseRawName(raw, node, domain string) string {

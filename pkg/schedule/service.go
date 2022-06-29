@@ -23,3 +23,7 @@ var _ rpc.ScheduleServer = &Service{}
 type Service struct {
 	rpc.UnimplementedScheduleServer
 }
+
+func NewService() *Service {
+	return &Service{}
+}

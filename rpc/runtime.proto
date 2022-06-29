@@ -45,10 +45,12 @@ message Process {
 }
 
 message StatusReq {
-  string Field = 1;
-  map<string, Process> ProcessTable = 2;
+
 }
 
 message StatusResp {
-  int32 code = 1;
+  string Field = 1;
+  map<string, Process> ProcessTable = 2;
+  int32 code = 3;
+  string message = 4;
 }

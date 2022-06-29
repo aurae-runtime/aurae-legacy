@@ -31,3 +31,7 @@ func (s *Service) LocalProxy(context.Context, *rpc.LocalProxyReq) (*rpc.LocalPro
 	var ret *rpc.LocalProxyResp
 	return ret, nil
 }
+
+func NewService() *Service {
+	return &Service{}
+}

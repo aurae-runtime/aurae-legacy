@@ -22,6 +22,9 @@ import (
 	"github.com/kris-nova/aurae/pkg/core"
 	"github.com/kris-nova/aurae/pkg/core/local"
 	"github.com/kris-nova/aurae/pkg/posix"
+	"github.com/kris-nova/aurae/pkg/proxy"
+	"github.com/kris-nova/aurae/pkg/runtime"
+	"github.com/kris-nova/aurae/pkg/schedule"
 	"github.com/kris-nova/aurae/rpc"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
@@ -108,9 +111,14 @@ func (d *Daemon) Run() error {
 	// Default to getFromMemory=false we can change this later
 	coreSvc.SetGetFromMemory(false)
 
-	// Step 5. Register the core database to the initialized server
+	// Step 5. Register
 	rpc.RegisterCoreServer(server, coreSvc)
-	logrus.Infof("Registering Core Database.")
+
+	rpc.RegisterProxyServer(server, proxy.NewService())
+	rpc.RegisterRuntimeServer(server, runtime.NewService())
+	rpc.RegisterScheduleServer(server, schedule.NewService())
+
+	logrus.Infof("Registering Core Services.")
 
 	// Step 6. Begin the empty loop by running a small go routine with an emergency cancel
 	serveCancel := make(chan error)

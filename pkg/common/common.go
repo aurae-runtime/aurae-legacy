@@ -21,6 +21,11 @@ import (
 	"strings"
 )
 
+const (
+	Self      string = "self"
+	Localhost string = Self
+)
+
 // HomeDir will return the current user's home directory or empty string
 // on error.
 func HomeDir() string {
