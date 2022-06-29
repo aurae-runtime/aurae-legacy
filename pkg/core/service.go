@@ -137,7 +137,7 @@ func (c *Service) Get(ctx context.Context, req *rpc.GetReq) (*rpc.GetResp, error
 	// Check for corruption.
 	if respState != respMem {
 		// TODO We need to talk through the implications of this and handle corruption.
-		//logrus.Warnf("State corruption detected. Local != Memory.")
+		// logrus.Warnf("State corruption detected. Local != Memory.")
 	}
 
 	response := &rpc.GetResp{

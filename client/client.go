@@ -1,7 +1,9 @@
 package client
 
 import (
+	"context"
 	"fmt"
+	"github.com/kris-nova/aurae/pkg/core"
 	"github.com/kris-nova/aurae/rpc"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
@@ -10,7 +12,12 @@ import (
 
 type Client struct {
 	rpc.CoreClient
-	socket string
+	rpc.RuntimeClient
+	rpc.ScheduleClient
+	rpc.ProxyClient
+
+	socket    string
+	connected bool
 }
 
 // NewClient will  only be able to authenticate with a local socket.
@@ -30,7 +37,8 @@ type Client struct {
 // Clients can be chained together to navigate the Aurae mesh.
 func NewClient(socket string) *Client {
 	return &Client{
-		socket: socket,
+		socket:    socket,
+		connected: false,
 	}
 }
 
@@ -47,13 +55,26 @@ func (c *Client) Connect() error {
 	if err != nil {
 		return err
 	}
-	client := rpc.NewCoreClient(conn)
-	c.CoreClient = client
+	core := rpc.NewCoreClient(conn)
+	c.CoreClient = core
+	runtime := rpc.NewRuntimeClient(conn)
+	c.RuntimeClient = runtime
+	schedule := rpc.NewScheduleClient(conn)
+	c.ScheduleClient = schedule
+	proxy := rpc.NewProxyClient(conn)
+	c.ProxyClient = proxy
+	c.connected = true
 	return nil
 }
 
-func (c *Client) PeerConnect(hostname string) (*Client, error) {
-	logrus.Infof("Peer connection: %s", hostname)
-	logrus.Warnf("peer connection unsupported. returning local aurae client")
-	return c, nil
+func (c *Client) NewPeer(hostname string) (*Client, error) {
+	logrus.Infof("Creating new peer: %s", hostname)
+	proxyResp, err := c.LocalProxy(context.Background(), &rpc.LocalProxyReq{})
+	if err != nil {
+		return nil, fmt.Errorf("unable to peer: %v", err)
+	}
+	if proxyResp.Code != core.CoreCode_OKAY {
+		return nil, fmt.Errorf("unable to create peer socket: %s", proxyResp.Message)
+	}
+	return NewClient(proxyResp.Socket), nil
 }
