@@ -17,6 +17,7 @@
 package main
 
 import (
+	"github.com/kris-nova/aurae/pkg/daemon"
 	"os"
 	"time"
 
@@ -53,9 +54,11 @@ func main() {
 		Usage:     "Simple, secure distributed system for application teams.",
 		UsageText: `aurae <options> <command>`,
 		Commands: []*cli.Command{
-			Get(),
-			Set(),
-			Ls(),
+			//Get(),
+			//Set(),
+			//List(),
+			//Remove(),
+			Status(),
 		},
 		Flags:                GlobalFlags([]cli.Flag{}),
 		EnableBashCompletion: true,
@@ -94,6 +97,12 @@ func GlobalFlags(c []cli.Flag) []cli.Flag {
 			Name:        "verbose",
 			Aliases:     []string{"v"},
 			Destination: &run.verbose,
+		},
+		&cli.StringFlag{
+			Name:        "socket",
+			Aliases:     []string{"sock"},
+			Destination: &run.socket,
+			Value:       daemon.DefaultSocketLocationLinux,
 		},
 	}
 	for _, gf := range g {

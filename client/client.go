@@ -1,10 +1,8 @@
 package client
 
 import (
-	"fmt"
 	"github.com/kris-nova/aurae/rpc"
-	"google.golang.org/grpc"
-	"time"
+	p2p "github.com/libp2p/go-libp2p"
 )
 
 type Client struct {
@@ -19,11 +17,19 @@ func NewClient(socket string) *Client {
 }
 
 func (c *Client) Connect() error {
-	conn, err := grpc.Dial(fmt.Sprintf("passthrough:///unix://%s", c.socket), grpc.WithInsecure(), grpc.WithTimeout(time.Second*3))
+	_, err := p2p.New()
 	if err != nil {
 		return err
 	}
-	client := rpc.NewCoreClient(conn)
-	c.CoreClient = client
 	return nil
 }
+
+//func (c *Client) Connect() error {
+//	conn, err := grpc.Dial(fmt.Sprintf("passthrough:///unix://%s", c.socket), grpc.WithInsecure(), grpc.WithTimeout(time.Second*3))
+//	if err != nil {
+//		return err
+//	}
+//	client := rpc.NewCoreClient(conn)
+//	c.CoreClient = client
+//	return nil
+//}
