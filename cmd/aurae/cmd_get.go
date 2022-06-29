@@ -17,98 +17,46 @@
 package main
 
 import (
-	"os"
-	"time"
-
-	"github.com/kris-nova/aurae"
-	"github.com/sirupsen/logrus"
+	"context"
+	"fmt"
+	"github.com/kris-nova/aurae/client"
+	"github.com/kris-nova/aurae/pkg/daemon"
+	"github.com/kris-nova/aurae/rpc"
 	"github.com/urfave/cli/v2"
 )
 
-var run = &RuntimeOptions{}
-
-type RuntimeOptions struct {
-	verbose bool
-	socket  string
-}
-
-func main() {
-	cli.VersionFlag = &cli.BoolFlag{
-		Name:    "version",
-		Aliases: []string{"V"},
-		Usage:   "Show the version.",
-	}
-	app := &cli.App{
-		Name:     aurae.Name,
-		Version:  aurae.Version,
-		Compiled: time.Now(),
-		Authors: []*cli.Author{
-			{
-				Name:  aurae.AuthorName,
-				Email: aurae.AuthorEmail,
+func Get() *cli.Command {
+	return &cli.Command{
+		Name:      "get",
+		Usage:     "Get aurae values.",
+		UsageText: `aurae get <key>`,
+		Flags: GlobalFlags([]cli.Flag{
+			&cli.StringFlag{
+				Name:        "socket",
+				Aliases:     []string{"sock"},
+				Destination: &run.socket,
+				Value:       daemon.DefaultSocketLocationLinux,
 			},
-		},
-		Copyright: aurae.Copyright,
-		HelpName:  aurae.Copyright,
-		Usage:     "Simple, secure distributed system for application teams.",
-		UsageText: `aurae <options> <command>`,
-		Commands: []*cli.Command{
-			Get(),
-			Set(),
-			Ls(),
-		},
-		Flags:                GlobalFlags([]cli.Flag{}),
-		EnableBashCompletion: true,
-		HideHelp:             false,
-		HideVersion:          false,
-
+		}),
 		Action: func(c *cli.Context) error {
-			cli.ShowAppHelp(c)
+			key := c.Args().Get(0)
+			if key == "" {
+				return fmt.Errorf("usage: aurae get <key>")
+			}
+
+			auraeClient := client.NewClient(run.socket)
+			err := auraeClient.Connect()
+			if err != nil {
+				return err
+			}
+			getResp, err := auraeClient.Get(context.Background(), &rpc.GetReq{
+				Key: key,
+			})
+			if err != nil {
+				return err
+			}
+			fmt.Println(getResp.Val)
 			return nil
 		},
-	}
-
-	var err error
-
-	// Load environment variables
-	err = Environment()
-	if err != nil {
-		logrus.Error(err)
-		os.Exit(99)
-	}
-
-	// Arbitrary (non-error) pre load
-	Preloader()
-
-	// Runtime
-	err = app.Run(os.Args)
-	if err != nil {
-		logrus.Errorf(err.Error())
-		os.Exit(-1)
-	}
-}
-
-func GlobalFlags(c []cli.Flag) []cli.Flag {
-	g := []cli.Flag{
-		&cli.BoolFlag{
-			Name:        "verbose",
-			Aliases:     []string{"v"},
-			Destination: &run.verbose,
-		},
-	}
-	for _, gf := range g {
-		c = append(c, gf)
-	}
-	return c
-}
-
-// Preloader will run for ALL commands, and is used
-// to system the daemon environments of the program.
-func Preloader() {
-	/* Flag parsing */
-	if run.verbose {
-		logrus.SetLevel(logrus.DebugLevel)
-	} else {
-		logrus.SetLevel(logrus.InfoLevel)
 	}
 }
