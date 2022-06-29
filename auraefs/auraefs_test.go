@@ -39,7 +39,8 @@ func TestMain(m *testing.M) {
 	}()
 
 	// Start a daemon
-	d := daemon.New("/run/aurae.test.sock")
+
+	d := daemon.New("/run/aurae.test.sock", "/tmp/aurae.test")
 	ch := make(chan bool)
 	go func() {
 		ch <- true
