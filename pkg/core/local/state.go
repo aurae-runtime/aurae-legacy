@@ -38,6 +38,7 @@ type State struct {
 }
 
 func NewState(base string) *State {
+	go os.MkdirAll(base, 0755) // Lazy ensure the directory exists
 	return &State{
 		base: base,
 	}

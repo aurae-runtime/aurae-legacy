@@ -20,6 +20,54 @@ option go_package = "github.com/kris-nova/aurae/rpc";
 
 package aurae;
 
+// Schedule is a higher level abstraction on top of Runtime.
+//
+// Schedule is how intended state is declared.
+//
+// Interact with the Schedule methods to change the definition
+// of what a system is intended to do.
+//
+// Interacting with the Schedule methods accomplishes tasks similiar
+// to scheduling workloads with systemd, or Kubernetes.
+service Schedule {
+
+
+}
+
+// Runtime is where the magic happens.
+//
+// All of the runtime methods that are exposed to the client live here.
+//
+// Runtime assumes the scope of a single Aurae stack. Runtime methods
+// are ways of directly interfacing with runtime processes managed with
+// Aurae.
+service Runtime {
+
+  // These will mostly likely resemble systemctl
+
+  // rpc Start (StartReq) returns (StartResp) {}
+  // rpc Stop (StopReq) returns (StopResp) {}
+  rpc Status(StatusReq) returns (StatusResp) {}
+}
+
+// Process is the most basic object in the system.
+// Process is similar to a Pod in Kubernetes, or a
+// Linux process and its subsequent thread pool.
+message Process {
+  string name = 1;
+  string status = 2;
+}
+
+message StatusReq {
+  string Field = 1;
+  map<string, Process> ProcessTable = 2;
+}
+
+message StatusResp {
+  int32 code = 1;
+}
+
+
 // Core is the most core interface for Aurae data interactions.
 //
 // All of these methods are a simplified version of the POSIX filesystem
@@ -40,8 +88,8 @@ service Core {
 }
 
 message SetReq {
-  string key = 2;
-  string val = 3;
+  string key = 1;
+  string val = 2;
 }
 
 message SetResp {
@@ -78,8 +126,4 @@ message Node {
 message ListResp {
   map<string, Node> entries = 1;
   int32 code = 2;
-}
-
-message RoutableAddress {
-  string address = 1;
 }

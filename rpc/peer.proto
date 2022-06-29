@@ -1,0 +1,39 @@
+/*===========================================================================*\
+ *           MIT License Copyright (c) 2022 Kris Nóva <kris@nivenly.com>     *
+ *                                                                           *
+ *                ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓                *
+ *                ┃   ███╗   ██╗ ██████╗ ██╗   ██╗ █████╗   ┃                *
+ *                ┃   ████╗  ██║██╔═████╗██║   ██║██╔══██╗  ┃                *
+ *                ┃   ██╔██╗ ██║██║██╔██║██║   ██║███████║  ┃                *
+ *                ┃   ██║╚██╗██║████╔╝██║╚██╗ ██╔╝██╔══██║  ┃                *
+ *                ┃   ██║ ╚████║╚██████╔╝ ╚████╔╝ ██║  ██║  ┃                *
+ *                ┃   ╚═╝  ╚═══╝ ╚═════╝   ╚═══╝  ╚═╝  ╚═╝  ┃                *
+ *                ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛                *
+ *                                                                           *
+ *                       This machine kills fascists.                        *
+ *                                                                           *
+\*===========================================================================*/
+
+syntax = "proto3";
+
+option go_package = "github.com/kris-nova/aurae/rpc";
+
+package aurae;
+
+service Proxy {
+  rpc LocalProxy (LocalProxyReq) returns (LocalProxyResp) {}
+}
+
+message LocalProxyReq {
+  string hostname = 1;
+}
+message LocalProxyResp {
+  string hostname = 1;
+  string socket = 2;
+  string message = 3;
+  int32 code = 4;
+}
+
+message NameServiceReq {
+  string hostname = 1;
+}

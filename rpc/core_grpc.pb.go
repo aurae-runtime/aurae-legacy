@@ -18,10 +18,62 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
+// ScheduleClient is the client API for Schedule service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type ScheduleClient interface {
+}
+
+type scheduleClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewScheduleClient(cc grpc.ClientConnInterface) ScheduleClient {
+	return &scheduleClient{cc}
+}
+
+// ScheduleServer is the server API for Schedule service.
+// All implementations must embed UnimplementedScheduleServer
+// for forward compatibility
+type ScheduleServer interface {
+	mustEmbedUnimplementedScheduleServer()
+}
+
+// UnimplementedScheduleServer must be embedded to have forward compatible implementations.
+type UnimplementedScheduleServer struct {
+}
+
+func (UnimplementedScheduleServer) mustEmbedUnimplementedScheduleServer() {}
+
+// UnsafeScheduleServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to ScheduleServer will
+// result in compilation errors.
+type UnsafeScheduleServer interface {
+	mustEmbedUnimplementedScheduleServer()
+}
+
+func RegisterScheduleServer(s grpc.ServiceRegistrar, srv ScheduleServer) {
+	s.RegisterService(&Schedule_ServiceDesc, srv)
+}
+
+// Schedule_ServiceDesc is the grpc.ServiceDesc for Schedule service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var Schedule_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "aurae.Schedule",
+	HandlerType: (*ScheduleServer)(nil),
+	Methods:     []grpc.MethodDesc{},
+	Streams:     []grpc.StreamDesc{},
+	Metadata:    "rpc/core.proto",
+}
+
 // RuntimeClient is the client API for Runtime service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type RuntimeClient interface {
+	// rpc Start (StartReq) returns (StartResp) {}
+	// rpc Stop (StopReq) returns (StopResp) {}
+	Status(ctx context.Context, in *StatusReq, opts ...grpc.CallOption) (*StatusResp, error)
 }
 
 type runtimeClient struct {
@@ -32,10 +84,22 @@ func NewRuntimeClient(cc grpc.ClientConnInterface) RuntimeClient {
 	return &runtimeClient{cc}
 }
 
+func (c *runtimeClient) Status(ctx context.Context, in *StatusReq, opts ...grpc.CallOption) (*StatusResp, error) {
+	out := new(StatusResp)
+	err := c.cc.Invoke(ctx, "/aurae.Runtime/Status", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // RuntimeServer is the server API for Runtime service.
 // All implementations must embed UnimplementedRuntimeServer
 // for forward compatibility
 type RuntimeServer interface {
+	// rpc Start (StartReq) returns (StartResp) {}
+	// rpc Stop (StopReq) returns (StopResp) {}
+	Status(context.Context, *StatusReq) (*StatusResp, error)
 	mustEmbedUnimplementedRuntimeServer()
 }
 
@@ -43,6 +107,9 @@ type RuntimeServer interface {
 type UnimplementedRuntimeServer struct {
 }
 
+func (UnimplementedRuntimeServer) Status(context.Context, *StatusReq) (*StatusResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Status not implemented")
+}
 func (UnimplementedRuntimeServer) mustEmbedUnimplementedRuntimeServer() {}
 
 // UnsafeRuntimeServer may be embedded to opt out of forward compatibility for this service.
@@ -56,15 +123,38 @@ func RegisterRuntimeServer(s grpc.ServiceRegistrar, srv RuntimeServer) {
 	s.RegisterService(&Runtime_ServiceDesc, srv)
 }
 
+func _Runtime_Status_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(StatusReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RuntimeServer).Status(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/aurae.Runtime/Status",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RuntimeServer).Status(ctx, req.(*StatusReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Runtime_ServiceDesc is the grpc.ServiceDesc for Runtime service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var Runtime_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "aurae.Runtime",
 	HandlerType: (*RuntimeServer)(nil),
-	Methods:     []grpc.MethodDesc{},
-	Streams:     []grpc.StreamDesc{},
-	Metadata:    "rpc/core.proto",
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "Status",
+			Handler:    _Runtime_Status_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "rpc/core.proto",
 }
 
 // CoreClient is the client API for Core service.

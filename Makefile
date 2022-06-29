@@ -78,7 +78,7 @@ generate: ## Will generate Go code from auraefs .proto files
 	--go_opt=paths=source_relative \
 	--go-grpc_out=. \
 	--go-grpc_opt=paths=source_relative \
-	rpc/core.proto
+	rpc/*.proto
 
 .PHONY: test
 test: compile ## 🤓 Run go tests

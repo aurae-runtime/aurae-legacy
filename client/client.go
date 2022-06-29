@@ -13,6 +13,21 @@ type Client struct {
 	socket string
 }
 
+// NewClient will  only be able to authenticate with a local socket.
+//
+// This mechanism and simple guarantee is what will enable the system to
+// operate securely will offline and on the edge.
+//
+// After a local client has been authenticated the functionality to leverage
+// the internal Aurae peering and routing mechanisms are now available.
+//
+// An authenticated client can use PeerConnect() to connect to a peer in the
+// network.
+//
+// Both Connect() and PeerConnect() return unique instances of the same client
+// to the user (if successful).
+//
+// Clients can be chained together to navigate the Aurae mesh.
 func NewClient(socket string) *Client {
 	return &Client{
 		socket: socket,
@@ -35,4 +50,10 @@ func (c *Client) Connect() error {
 	client := rpc.NewCoreClient(conn)
 	c.CoreClient = client
 	return nil
+}
+
+func (c *Client) PeerConnect(hostname string) (*Client, error) {
+	logrus.Infof("Peer connection: %s", hostname)
+	logrus.Warnf("peer connection unsupported. returning local aurae client")
+	return c, nil
 }
