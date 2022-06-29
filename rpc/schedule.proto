@@ -20,62 +20,16 @@ option go_package = "github.com/kris-nova/aurae/rpc";
 
 package aurae;
 
-// Core is the most core interface for Aurae data interactions.
+// Schedule is a higher level abstraction on top of Runtime.
 //
-// All of these methods are a simplified version of the POSIX filesystem
-// interface.
+// Schedule is how intended state is declared.
 //
-// Using these basic methods, and a few guarantees we are able to build
-// POSIX compliant filesystems, as well as very quickly interact with a
-// basic key/value data store.
+// Interact with the Schedule methods to change the definition
+// of what a system is intended to do.
 //
-// The Core interface is modular in nature, and can be backed by
-// a variety of data storage mechanisms, each with their own features and
-// guarantees.
-service Core {
-  rpc Set (SetReq) returns (SetResp) {}
-  rpc Get (GetReq) returns (GetResp) {}
-  rpc List (ListReq) returns (ListResp) {}
-  rpc Remove (RemoveReq) returns (RemoveResp) {}
-}
-
-message SetReq {
-  string key = 1;
-  string val = 2;
-}
-
-message SetResp {
-  int32 code = 1;
-}
-
-message GetReq {
-  string key = 1;
-}
-
-message GetResp {
-  string val = 1;
-  int32 code = 2;
-}
-
-message RemoveReq {
-  string key = 1;
-}
-
-message RemoveResp {
-  int32 code = 1;
-}
+// Interacting with the Schedule methods accomplishes tasks similiar
+// to scheduling workloads with systemd, or Kubernetes.
+service Schedule {
 
 
-message ListReq {
-  string key = 1;
-}
-
-message Node {
-  string name = 1;
-  bool file = 2;
-}
-
-message ListResp {
-  map<string, Node> entries = 1;
-  int32 code = 2;
 }

@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             v3.21.1
-// source: rpc/proxy.proto
+// source: rpc/peer.proto
 
 package rpc
 
@@ -101,5 +101,5 @@ var Proxy_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "rpc/proxy.proto",
+	Metadata: "rpc/peer.proto",
 }

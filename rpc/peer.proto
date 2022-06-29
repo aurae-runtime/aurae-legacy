@@ -33,7 +33,3 @@ message LocalProxyResp {
   string message = 3;
   int32 code = 4;
 }
-
-message NameServiceReq {
-  string hostname = 1;
-}

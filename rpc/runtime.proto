@@ -20,62 +20,35 @@ option go_package = "github.com/kris-nova/aurae/rpc";
 
 package aurae;
 
-// Core is the most core interface for Aurae data interactions.
+// Runtime is where the magic happens.
 //
-// All of these methods are a simplified version of the POSIX filesystem
-// interface.
+// All of the runtime methods that are exposed to the client live here.
 //
-// Using these basic methods, and a few guarantees we are able to build
-// POSIX compliant filesystems, as well as very quickly interact with a
-// basic key/value data store.
-//
-// The Core interface is modular in nature, and can be backed by
-// a variety of data storage mechanisms, each with their own features and
-// guarantees.
-service Core {
-  rpc Set (SetReq) returns (SetResp) {}
-  rpc Get (GetReq) returns (GetResp) {}
-  rpc List (ListReq) returns (ListResp) {}
-  rpc Remove (RemoveReq) returns (RemoveResp) {}
+// Runtime assumes the scope of a single Aurae stack. Runtime methods
+// are ways of directly interfacing with runtime processes managed with
+// Aurae.
+service Runtime {
+
+  // These will mostly likely resemble systemctl
+
+  // rpc Start (StartReq) returns (StartResp) {}
+  // rpc Stop (StopReq) returns (StopResp) {}
+  rpc Status(StatusReq) returns (StatusResp) {}
 }
 
-message SetReq {
-  string key = 1;
-  string val = 2;
-}
-
-message SetResp {
-  int32 code = 1;
-}
-
-message GetReq {
-  string key = 1;
-}
-
-message GetResp {
-  string val = 1;
-  int32 code = 2;
-}
-
-message RemoveReq {
-  string key = 1;
-}
-
-message RemoveResp {
-  int32 code = 1;
-}
-
-
-message ListReq {
-  string key = 1;
-}
-
-message Node {
+// Process is the most basic object in the system.
+// Process is similar to a Pod in Kubernetes, or a
+// Linux process and its subsequent thread pool.
+message Process {
   string name = 1;
-  bool file = 2;
+  string status = 2;
 }
 
-message ListResp {
-  map<string, Node> entries = 1;
-  int32 code = 2;
+message StatusReq {
+  string Field = 1;
+  map<string, Process> ProcessTable = 2;
+}
+
+message StatusResp {
+  int32 code = 1;
 }
