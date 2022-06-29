@@ -20,10 +20,6 @@ option go_package = "github.com/kris-nova/aurae/rpc";
 
 package aurae;
 
-service Runtime {
-
-}
-
 // Core is the most core interface for Aurae data interactions.
 //
 // All of these methods are a simplified version of the POSIX filesystem
@@ -44,8 +40,8 @@ service Core {
 }
 
 message SetReq {
-  string key = 1;
-  string val = 2;
+  string key = 2;
+  string val = 3;
 }
 
 message SetResp {
@@ -82,4 +78,8 @@ message Node {
 message ListResp {
   map<string, Node> entries = 1;
   int32 code = 2;
+}
+
+message RoutableAddress {
+  string address = 1;
 }

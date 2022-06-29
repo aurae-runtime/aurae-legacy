@@ -1,8 +1,11 @@
 package client
 
 import (
+	"fmt"
 	"github.com/kris-nova/aurae/rpc"
-	p2p "github.com/libp2p/go-libp2p"
+	"github.com/sirupsen/logrus"
+	"google.golang.org/grpc"
+	"time"
 )
 
 type Client struct {
@@ -16,20 +19,20 @@ func NewClient(socket string) *Client {
 	}
 }
 
+// Connect solves identity authorization.
+//
+// Connect will read authorization certificate material
+// on the local filesystem (if it exists) and attempt to
+// authenticate with a local unix domain socket.
+//
+// TODO manage cert material and fix auth
 func (c *Client) Connect() error {
-	_, err := p2p.New()
+	logrus.Warnf("mTLS disabled. running insecure.")
+	conn, err := grpc.Dial(fmt.Sprintf("passthrough:///unix://%s", c.socket), grpc.WithInsecure(), grpc.WithTimeout(time.Second*3))
 	if err != nil {
 		return err
 	}
+	client := rpc.NewCoreClient(conn)
+	c.CoreClient = client
 	return nil
 }
-
-//func (c *Client) Connect() error {
-//	conn, err := grpc.Dial(fmt.Sprintf("passthrough:///unix://%s", c.socket), grpc.WithInsecure(), grpc.WithTimeout(time.Second*3))
-//	if err != nil {
-//		return err
-//	}
-//	client := rpc.NewCoreClient(conn)
-//	c.CoreClient = client
-//	return nil
-//}
