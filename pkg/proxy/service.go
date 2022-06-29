@@ -16,10 +16,18 @@
 
 package proxy
 
-import "github.com/kris-nova/aurae/rpc"
+import (
+	"context"
+	"github.com/kris-nova/aurae/rpc"
+)
 
 var _ rpc.ProxyServer = &Service{}
 
 type Service struct {
 	rpc.UnimplementedProxyServer
+}
+
+func (s *Service) LocalProxy(context.Context, *rpc.LocalProxyReq) (*rpc.LocalProxyResp, error) {
+	var ret *rpc.LocalProxyResp
+	return ret, nil
 }
