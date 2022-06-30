@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"github.com/kris-nova/aurae"
 	"github.com/kris-nova/aurae/pkg/core"
+	"github.com/kris-nova/aurae/pkg/peer"
 	"github.com/kris-nova/aurae/rpc"
 	p2p "github.com/libp2p/go-libp2p"
 	"github.com/libp2p/go-libp2p-core/crypto"
@@ -82,7 +83,7 @@ func (s *Service) PeerRequest(ctx context.Context, in *rpc.PeerRequestReq) (*rpc
 
 	// Set the stream handler
 	logrus.Infof("Setting handler: %s", "HandlePeerConnectStream")
-	host.SetStreamHandler(protocolID, HandlePeerConnectStream)
+	host.SetStreamHandler(protocolID, peer.HandlePeerConnectStream)
 
 	return &rpc.PeerRequestResp{
 		Token: token,
