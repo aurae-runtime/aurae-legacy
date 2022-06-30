@@ -23,6 +23,8 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ProxyClient interface {
 	LocalProxy(ctx context.Context, in *LocalProxyReq, opts ...grpc.CallOption) (*LocalProxyResp, error)
+	// Request for the local Aurae daemon to enter peering mode.
+	PeerRequest(ctx context.Context, in *PeerRequestReq, opts ...grpc.CallOption) (*PeerRequestResp, error)
 }
 
 type proxyClient struct {
@@ -42,11 +44,22 @@ func (c *proxyClient) LocalProxy(ctx context.Context, in *LocalProxyReq, opts ..
 	return out, nil
 }
 
+func (c *proxyClient) PeerRequest(ctx context.Context, in *PeerRequestReq, opts ...grpc.CallOption) (*PeerRequestResp, error) {
+	out := new(PeerRequestResp)
+	err := c.cc.Invoke(ctx, "/aurae.Proxy/PeerRequest", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ProxyServer is the server API for Proxy service.
 // All implementations must embed UnimplementedProxyServer
 // for forward compatibility
 type ProxyServer interface {
 	LocalProxy(context.Context, *LocalProxyReq) (*LocalProxyResp, error)
+	// Request for the local Aurae daemon to enter peering mode.
+	PeerRequest(context.Context, *PeerRequestReq) (*PeerRequestResp, error)
 	mustEmbedUnimplementedProxyServer()
 }
 
@@ -56,6 +69,9 @@ type UnimplementedProxyServer struct {
 
 func (UnimplementedProxyServer) LocalProxy(context.Context, *LocalProxyReq) (*LocalProxyResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method LocalProxy not implemented")
+}
+func (UnimplementedProxyServer) PeerRequest(context.Context, *PeerRequestReq) (*PeerRequestResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PeerRequest not implemented")
 }
 func (UnimplementedProxyServer) mustEmbedUnimplementedProxyServer() {}
 
@@ -88,6 +104,24 @@ func _Proxy_LocalProxy_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Proxy_PeerRequest_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PeerRequestReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProxyServer).PeerRequest(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/aurae.Proxy/PeerRequest",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProxyServer).PeerRequest(ctx, req.(*PeerRequestReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Proxy_ServiceDesc is the grpc.ServiceDesc for Proxy service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -98,6 +132,10 @@ var Proxy_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "LocalProxy",
 			Handler:    _Proxy_LocalProxy_Handler,
+		},
+		{
+			MethodName: "PeerRequest",
+			Handler:    _Proxy_PeerRequest_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

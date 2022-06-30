@@ -14,34 +14,20 @@
  *                                                                           *
 \*===========================================================================*/
 
-syntax = "proto3";
+package proxy
 
-option go_package = "github.com/kris-nova/aurae/rpc";
+import (
+	"github.com/libp2p/go-libp2p-core/network"
+	"github.com/sirupsen/logrus"
+	"io/ioutil"
+)
 
-package aurae;
-
-service Proxy {
-  rpc LocalProxy (LocalProxyReq) returns (LocalProxyResp) {}
-
-  // Request for the local Aurae daemon to enter peering mode.
-  rpc PeerRequest (PeerRequestReq) returns (PeerRequestResp) {}
-}
-
-message PeerRequestReq {
-}
-
-message PeerRequestResp {
-  string token = 1;
-}
-
-message LocalProxyReq {
-  // TODO We need to understand the minimal parameters here
-  string hostname = 1;
-  string token = 2;
-}
-message LocalProxyResp {
-  string hostname = 1;
-  string socket = 2;
-  string message = 3;
-  int32 code = 4;
+func HandlePeerConnectStream(s network.Stream) {
+	logrus.Infof("Received new stream. Protocol: %s", s.Protocol())
+	data, err := ioutil.ReadAll(s)
+	if err != nil {
+		logrus.Warnf("Unable to read network stream: %v", err)
+	}
+	logrus.Infof("Raw stream:")
+	logrus.Infof("%v", data)
 }

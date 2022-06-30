@@ -14,34 +14,53 @@
  *                                                                           *
 \*===========================================================================*/
 
-syntax = "proto3";
+package main
 
-option go_package = "github.com/kris-nova/aurae/rpc";
+import (
+	"context"
+	"fmt"
+	"github.com/kris-nova/aurae/client"
+	"github.com/kris-nova/aurae/rpc"
+	"github.com/urfave/cli/v2"
+)
 
-package aurae;
+func Peer() *cli.Command {
+	return &cli.Command{
+		Name:      "peer",
+		Usage:     "Peer aurae with other aurae instances.",
+		UsageText: `aurae peer <optional-token>`,
+		Flags:     GlobalFlags([]cli.Flag{}),
+		Action: func(c *cli.Context) error {
+			token := c.Args().Get(0)
+			rootClient := client.NewClient(run.socket)
+			err := rootClient.Connect()
+			if err != nil {
+				return err
+			}
+			if token != "" {
+				// Client mode
+				proxyResp, err := rootClient.LocalProxy(context.Background(), &rpc.LocalProxyReq{
+					Hostname: "TODO",
+					Token:    token,
+				})
+				if err != nil {
+					return err
+				}
+				fmt.Println(proxyResp.Hostname)
+				fmt.Println(proxyResp.Socket)
+				fmt.Println(proxyResp.Message)
+				fmt.Println(proxyResp.Code)
+			} else {
+				// Server mode
+				peerResp, err := rootClient.PeerRequest(context.Background(), &rpc.PeerRequestReq{})
+				if err != nil {
+					return err
+				}
 
-service Proxy {
-  rpc LocalProxy (LocalProxyReq) returns (LocalProxyResp) {}
-
-  // Request for the local Aurae daemon to enter peering mode.
-  rpc PeerRequest (PeerRequestReq) returns (PeerRequestResp) {}
-}
-
-message PeerRequestReq {
-}
-
-message PeerRequestResp {
-  string token = 1;
-}
-
-message LocalProxyReq {
-  // TODO We need to understand the minimal parameters here
-  string hostname = 1;
-  string token = 2;
-}
-message LocalProxyResp {
-  string hostname = 1;
-  string socket = 2;
-  string message = 3;
-  int32 code = 4;
+				fmt.Println("Token:")
+				fmt.Println(peerResp.Token)
+			}
+			return nil
+		},
+	}
 }

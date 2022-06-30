@@ -58,6 +58,7 @@ func main() {
 			//Set(),
 			//List(),
 			//Remove(),
+			Peer(),
 			Status(),
 		},
 		Flags:                GlobalFlags([]cli.Flag{}),
