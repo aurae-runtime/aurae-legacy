@@ -59,7 +59,7 @@ func CalculateHamiltonianPathPeer(root *Peer) HamiltonianPathPeer {
 
 // recursiveCycle will assert a single root against a graph
 func (h HamiltonianPathPeer) recursiveCycle(graph *Peer, pos int) bool {
-	
+
 	// Base case. Set the current position to the current *Peer in the graph.
 	h[pos] = graph
 

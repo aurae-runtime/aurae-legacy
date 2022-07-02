@@ -25,12 +25,40 @@ import (
 	"testing"
 )
 
-func TestGraph(t *testing.T) {
+func TestGraph1to1(t *testing.T) {
 	expected := AssertHamPathHostname{
 		0: "a",
 		1: "b",
 	}
 	graph := graph1to1()
+	actual := CalculateHamiltonianPathHostname(graph)
+	if !AssertHamPath(actual, expected) {
+		t.Errorf("Unable to find Ham path. Actual: %v, Expected: %v", actual, expected)
+	}
+}
+
+func TestGraph3Cycle(t *testing.T) {
+	expected := AssertHamPathHostname{
+		0: "a",
+		1: "b",
+		2: "c",
+	}
+	graph := graph3cycle()
+	actual := CalculateHamiltonianPathHostname(graph)
+	if !AssertHamPath(actual, expected) {
+		t.Errorf("Unable to find Ham path. Actual: %v, Expected: %v", actual, expected)
+	}
+}
+
+func TestGraph5OuterCycle(t *testing.T) {
+	expected := AssertHamPathHostname{
+		0: "a",
+		1: "b",
+		2: "c",
+		3: "d",
+		4: "e",
+	}
+	graph := graph5cycleOuter()
 	actual := CalculateHamiltonianPathHostname(graph)
 	if !AssertHamPath(actual, expected) {
 		t.Errorf("Unable to find Ham path. Actual: %v, Expected: %v", actual, expected)
@@ -68,6 +96,21 @@ func graph3cycle() *Peer {
 	b := root.ToPeer("b")
 	c := b.ToPeer("c")
 	c.AddPeer(root)
+	return root
+}
+
+// a ----- b
+// |       |
+// e       c
+//  \     /
+//     d
+func graph5cycleOuter() *Peer {
+	root := NewPeer("a")
+	b := root.ToPeer("b")
+	c := b.ToPeer("c")
+	d := c.ToPeer("d")
+	e := d.ToPeer("e")
+	e.AddPeer(root)
 	return root
 }
 
