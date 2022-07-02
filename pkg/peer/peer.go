@@ -28,9 +28,14 @@ import (
 	"github.com/libp2p/go-libp2p-core/network"
 	"github.com/libp2p/go-libp2p-core/peer"
 	"github.com/libp2p/go-libp2p-core/peerstore"
+	"github.com/libp2p/go-libp2p-core/protocol"
 	"github.com/multiformats/go-multiaddr"
 	"github.com/sirupsen/logrus"
 	"net"
+)
+
+const (
+	AuraeStream protocol.ID = "/aurae" // The official stream endpoint for Aurae
 )
 
 // Peer represents a single peer in the mesh.
@@ -99,7 +104,7 @@ func (p *Peer) Connect() (host.Host, error) {
 		return nil, fmt.Errorf("unable to initialize peer-to-peer host: %v", err)
 	}
 	p.Host = host
-	p.Host.SetStreamHandler("/aurae", func(s network.Stream) {
+	p.Host.SetStreamHandler(AuraeStream, func(s network.Stream) {
 		logrus.Infof("Received stream: %v", s.ID())
 	})
 	return host, nil
@@ -149,7 +154,7 @@ func (p *Peer) DialID(id string) error {
 	logrus.Infof("Adding to Peer store. PeerID: %s, Target Addr: %s,", peerID, targetAddr)
 	p.Host.Peerstore().AddAddr(peerID, targetAddr, peerstore.PermanentAddrTTL)
 
-	stream, err := p.Host.NewStream(context.Background(), peerID, "/aurae")
+	stream, err := p.Host.NewStream(context.Background(), peerID, AuraeStream)
 	if err != nil {
 		return fmt.Errorf("unable to connect to stream: %v", err)
 	}
