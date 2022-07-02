@@ -57,6 +57,12 @@ type Peer struct {
 	// Host is the peer instance of this peer.
 	Host host.Host
 
+	// peerID is the ID used to index on in the distributed hash table.
+	peerID peer.ID
+
+	// peerAddr is this unique address in the mesh
+	peerAddr multiaddr.Multiaddr
+
 	// runtimeID is a UUID generated at runtime
 	// that exists for this specific reference
 	// to the Peer in the network.
@@ -98,15 +104,17 @@ func (p *Peer) ToPeer(h *hostname.Hostname) *Peer {
 // this peer. After a Connect() is successful this peer can now
 // accept connections from clients.
 func (p *Peer) Connect() (host.Host, error) {
-	host, err := p2p.New(DefaultOptions(p.Key)...)
+	h, err := p2p.New(DefaultOptions(p.Key)...)
 	if err != nil {
 		return nil, fmt.Errorf("unable to initialize peer-to-peer host: %v", err)
 	}
-	p.Host = host
+	p.Host = h
 	p.Host.SetStreamHandler(AuraeStream, func(s network.Stream) {
 		logrus.Infof("Received stream: %v", s.ID())
 	})
-	return host, nil
+	p.GetID()
+	defer p.GetAddr()
+	return h, nil
 }
 
 // NewSafeConnection will return a new net.Conn
@@ -114,53 +122,60 @@ func (p *Peer) Connect() (host.Host, error) {
 //
 // These connections MUST be safe to use while adhering
 // the scope of the Aurae project.
-func (p *Peer) NewSafeConnection() *net.Conn {
-
-	return nil
+func (p *Peer) NewSafeConnection() (*net.Conn, error) {
+	stream, err := p.Host.NewStream(context.Background(), p.peerID, AuraeStream)
+	if err != nil {
+		return nil, fmt.Errorf("unable to connect to stream: %v", err)
+	}
+	if conn, ok := stream.Conn().(net.Conn); ok {
+		return &conn, nil
+	}
+	return nil, fmt.Errorf("unable to convert to *net.Conn")
 }
 
-func (p *Peer) AddPeer(newPeer *Peer) *net.Conn {
+func (p *Peer) AddPeer(newPeer *Peer) {
 	p.Peers[newPeer.Hostname.String()] = newPeer
-	return nil
 }
 
 func (p *Peer) GetID() string {
 	if p.Host == nil {
 		return ""
 	}
-	hostAddr, _ := multiaddr.NewMultiaddr(fmt.Sprintf("/ipfs/%s", p.Host.ID().Pretty()))
-	addr := p.Host.Addrs()[0]
-	return addr.Encapsulate(hostAddr).String()
+	if p.peerID.String() == "" {
+		hostAddr, _ := multiaddr.NewMultiaddr(fmt.Sprintf("/ipfs/%s", p.Host.ID().Pretty()))
+		addr := p.Host.Addrs()[0]
+		peerIDStr := addr.Encapsulate(hostAddr).String()
+		peerID, err := peer.Decode(peerIDStr)
+		if err != nil {
+			return ""
+		}
+		p.peerID = peerID
+	}
+	return p.peerID.String()
 }
 
-func (p *Peer) DialID(id string) error {
-	hostAddr, err := multiaddr.NewMultiaddr(id)
-	if err != nil {
-		return fmt.Errorf("unable to calculate multi address: %v", err)
-	}
-	pid, err := hostAddr.ValueForProtocol(multiaddr.P_IPFS)
-	if err != nil {
-		return fmt.Errorf("unable to calculate protocol id: %v", err)
-	}
-	peerID, err := peer.Decode(pid)
-	if err != nil {
-		return fmt.Errorf("unable to decode peer id: %v", err)
-	}
-	targetPeerAddr, _ := multiaddr.NewMultiaddr(fmt.Sprintf("/ipfs/%s", pid))
-	targetAddr := hostAddr.Decapsulate(targetPeerAddr)
+func (p *Peer) GetAddr() (multiaddr.Multiaddr, error) {
+	if p.peerAddr == nil {
+		hostAddr, err := multiaddr.NewMultiaddr(p.peerID.String())
+		if err != nil {
+			return nil, fmt.Errorf("unable to calculate multi address: %v", err)
+		}
+		pid, err := hostAddr.ValueForProtocol(multiaddr.P_IPFS)
+		if err != nil {
+			return nil, fmt.Errorf("unable to calculate protocol id: %v", err)
+		}
+		peerID, err := peer.Decode(pid)
+		if err != nil {
+			return nil, fmt.Errorf("unable to decode peer id: %v", err)
+		}
+		targetPeerAddr, _ := multiaddr.NewMultiaddr(fmt.Sprintf("/ipfs/%s", pid))
+		targetAddr := hostAddr.Decapsulate(targetPeerAddr)
 
-	// TODO Understand the peer store more
-	logrus.Infof("Adding to Peer store. PeerID: %s, Target Addr: %s,", peerID, targetAddr)
-	p.Host.Peerstore().AddAddr(peerID, targetAddr, peerstore.PermanentAddrTTL)
-
-	stream, err := p.Host.NewStream(context.Background(), peerID, AuraeStream)
-	if err != nil {
-		return fmt.Errorf("unable to connect to stream: %v", err)
+		logrus.Infof("Adding to Peer store. PeerID: %s, Target Addr: %s,", peerID, targetAddr)
+		p.Host.Peerstore().AddAddr(peerID, targetAddr, peerstore.PermanentAddrTTL)
+		p.peerAddr = targetAddr
 	}
-
-	stream.Conn() // TODO manage net conn :)
-
-	return nil
+	return p.peerAddr, nil
 }
 
 // NewPeer will initialize a new *Peer without connecting.
