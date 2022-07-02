@@ -95,6 +95,21 @@ func TestGraph5FullInnerLink(t *testing.T) {
 	}
 }
 
+func TestGraphSuperNode(t *testing.T) {
+	expected := AssertHamPathHostname{
+		0: "a",
+		1: "b",
+		2: "c",
+		3: "d",
+		4: "e",
+	}
+	graph := graphSuperNode()
+	actual := CalculateHamiltonianPathHostname(graph)
+	if AssertHamPath(actual, expected) {
+		t.Errorf("Expected failure. Actual: %v, Expected: %v", actual, expected)
+	}
+}
+
 type AssertHamPathHostname map[int]string
 
 func AssertHamPath(h HamiltonianPathHostname, a AssertHamPathHostname) bool {
@@ -186,7 +201,43 @@ func graph5cycleFullInnerLink() *Peer {
 	return root
 }
 
-// 	peerNames := []string{"a", "b", "c", "1", "2", "3"}
-//	for _, hostname := range peerNames {
-//		root.ToPeer(hostname)
-//	}
+//   y
+// / | \
+// x---z
+// \ | /
+//   a ----- b
+//   |   X   |
+//   e ----- c
+//    \     /
+//       d
+//
+func graphSuperNode() *Peer {
+	root := NewPeer("a")
+	b := root.ToPeer("b")
+	c := b.ToPeer("c")
+	d := c.ToPeer("d")
+	e := d.ToPeer("e")
+
+	c.AddPeer(e)
+	e.AddPeer(c)
+
+	root.AddPeer(c)
+	root.AddPeer(e)
+	b.AddPeer(e)
+	e.AddPeer(b)
+
+	e.AddPeer(root)
+
+	// Create a sub graph that cycles
+	x := root.ToPeer("x")
+	y := root.ToPeer("y")
+	z := root.ToPeer("z")
+	x.AddPeer(y)
+	y.AddPeer(x)
+	y.AddPeer(z)
+	z.AddPeer(y)
+	z.AddPeer(x)
+	x.AddPeer(z)
+
+	return root
+}

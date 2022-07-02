@@ -63,14 +63,10 @@ func CalculateHamiltonianPathPeer(root *Peer) HamiltonianPathPeer {
 func (h HamiltonianPathPeer) recursiveCycle(graph *Peer, pos int) bool {
 
 	// Check if this peer already exists in the graph
-	existsInGraph := false
 	for _, x := range h {
 		if x.runtimeID == graph.runtimeID {
-			existsInGraph = true
+			return true
 		}
-	}
-	if existsInGraph {
-		return true
 	}
 
 	// Base case. Set the current position to the current *Peer in the graph.
