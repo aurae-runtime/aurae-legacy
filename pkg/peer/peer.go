@@ -17,7 +17,6 @@
 package peer
 
 import (
-	"context"
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/kris-nova/aurae/pkg/common"
@@ -27,12 +26,10 @@ import (
 	"github.com/libp2p/go-libp2p-core/host"
 	"github.com/libp2p/go-libp2p-core/network"
 	"github.com/libp2p/go-libp2p-core/peer"
-	"github.com/libp2p/go-libp2p-core/peerstore"
 	"github.com/libp2p/go-libp2p-core/protocol"
 	"github.com/multiformats/go-multiaddr"
 	"github.com/sirupsen/logrus"
 	"io/ioutil"
-	"net"
 )
 
 const (
@@ -113,85 +110,11 @@ func (p *Peer) Connect() (host.Host, error) {
 		logrus.Infof("Received stream: %v", s.ID())
 	})
 	logrus.Infof("Connected. Listening on: %v", h.Network().ListenAddresses())
-	id := p.GetID()
-	if id == "" {
-		return nil, fmt.Errorf("unable to get id")
-	}
-	addr, err := p.GetAddr()
-	if err != nil {
-		return nil, fmt.Errorf("unable to get addr: %v", err)
-	}
-	logrus.Infof("Local addr: %v", addr.String())
-
 	return h, nil
-}
-
-// NewSafeConnection will return a new net.Conn
-// from the Go standard library for the new peer.
-//
-// These connections MUST be safe to use while adhering
-// the scope of the Aurae project.
-func (p *Peer) NewSafeConnection() (*net.Conn, error) {
-	stream, err := p.Host.NewStream(context.Background(), p.peerID, AuraeStream)
-	if err != nil {
-		return nil, fmt.Errorf("unable to connect to stream: %v", err)
-	}
-
-	logrus.Infof("Local Address: %s", stream.Conn().LocalMultiaddr().String())
-
-	if conn, ok := stream.Conn().(net.Conn); ok {
-		return &conn, nil
-	}
-
-	return nil, fmt.Errorf("unable to convert to *net.Conn")
 }
 
 func (p *Peer) AddPeer(newPeer *Peer) {
 	p.Peers[newPeer.Hostname.String()] = newPeer
-}
-
-func (p *Peer) GetID() string {
-	if p.Host == nil {
-		logrus.Warnf("Unable to get ID")
-		return ""
-	}
-	if p.peerID.String() == "" {
-		hostAddr, _ := multiaddr.NewMultiaddr(fmt.Sprintf("/ipfs/%s", p.Host.ID().Pretty()))
-		addr := p.Host.Addrs()[0]
-		peerIDStr := addr.Encapsulate(hostAddr).String()
-		peerID, err := peer.Decode(peerIDStr)
-		if err != nil {
-			return ""
-		}
-		p.peerID = peerID
-		logrus.Infof("Setting peer ID: %s", p.peerID)
-	}
-	return p.peerID.String()
-}
-
-func (p *Peer) GetAddr() (multiaddr.Multiaddr, error) {
-	if p.peerAddr == nil {
-		hostAddr, err := multiaddr.NewMultiaddr(p.peerID.String())
-		if err != nil {
-			return nil, fmt.Errorf("unable to calculate multi address: %v", err)
-		}
-		pid, err := hostAddr.ValueForProtocol(multiaddr.P_IPFS)
-		if err != nil {
-			return nil, fmt.Errorf("unable to calculate protocol id: %v", err)
-		}
-		peerID, err := peer.Decode(pid)
-		if err != nil {
-			return nil, fmt.Errorf("unable to decode peer id: %v", err)
-		}
-		targetPeerAddr, _ := multiaddr.NewMultiaddr(fmt.Sprintf("/ipfs/%s", pid))
-		targetAddr := hostAddr.Decapsulate(targetPeerAddr)
-
-		logrus.Infof("Adding to Peer store. PeerID: %s, Target Addr: %s,", peerID, targetAddr)
-		p.Host.Peerstore().AddAddr(peerID, targetAddr, peerstore.PermanentAddrTTL)
-		p.peerAddr = targetAddr
-	}
-	p.NewSafeConnection()
-	return p.peerAddr, nil
 }
 
 // NewPeer will initialize a new *Peer without connecting.

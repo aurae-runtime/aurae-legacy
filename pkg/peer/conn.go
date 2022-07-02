@@ -17,33 +17,59 @@
 package peer
 
 import (
-	p2p "github.com/libp2p/go-libp2p"
-	"github.com/libp2p/go-libp2p-core/crypto"
-	"github.com/multiformats/go-multiaddr"
+	"github.com/libp2p/go-libp2p-core/network"
+	"net"
+	"time"
 )
 
-// DefaultOptions are the default p2p options for Aurae
-func DefaultOptions(key crypto.PrivKey) []p2p.Option {
+var _ net.Conn = &Conn{}
 
-	return []p2p.Option{
+type Conn struct {
+	std net.Conn
+	p2p network.Conn
+}
 
-		// We MUST use a key in order to adhere to our guarantee that all
-		// connections can be fundamentally achieved with only a single
-		// encryption key.
-		p2p.Identity(key),
-
-		// EnableAutoRelay for performance reasons in the circuit.
-		p2p.EnableAutoRelay(),
-
-		p2p.ListenAddrs(
-			// Listen on ipv4, choose an available port
-			//multiaddr.StringCast("/ip4/0.0.0.0/tcp/0")),
-
-			// Listen on the default p2p-circuit
-			//multiaddr.StringCast("/p2p-circuit"),
-
-			// Listen on IPv6, choose an available port
-			multiaddr.StringCast("/ip6/::/tcp/0")),
+func NewConn() *Conn {
+	return &Conn{
+		std: &net.TCPConn{},
 	}
+}
 
+func (c Conn) Read(b []byte) (n int, err error) {
+	return c.std.Read(b)
+}
+
+func (c Conn) Write(b []byte) (n int, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c Conn) Close() error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c Conn) LocalAddr() net.Addr {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c Conn) RemoteAddr() net.Addr {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c Conn) SetDeadline(t time.Time) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c Conn) SetReadDeadline(t time.Time) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c Conn) SetWriteDeadline(t time.Time) error {
+	//TODO implement me
+	panic("implement me")
 }
