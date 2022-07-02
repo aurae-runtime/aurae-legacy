@@ -24,43 +24,38 @@ package peer
 
 // HamiltonianPaths will be 0 indexed
 
-type HamiltonianPathPeer map[int]*Peer
-type HamiltonianPathHostname map[int]string
+type HamiltonianPath map[int]*Peer
 
-func NewHamiltonianPathPeer() HamiltonianPathPeer {
+func NewHamiltonianPath() HamiltonianPath {
 	return make(map[int]*Peer)
 }
 
-func NewHamiltonianPathHostname() HamiltonianPathHostname {
-	return make(map[int]string)
-}
-
-func CalculateHamiltonianPathHostname(root *Peer) HamiltonianPathHostname {
-	x := CalculateHamiltonianPathPeer(root)
-	y := NewHamiltonianPathHostname()
+func CalculateHamiltonianPathHostname(root *Peer) HamiltonianPath {
+	x := CalculateHamiltonianPath(root)
+	y := NewHamiltonianPath()
 	for i, peer := range x {
-		y[i] = peer.Hostname
+		y[i] = peer
 	}
 	return y
 }
 
-// CalculateHamiltonianPathPeer is where the magic happens.
+// CalculateHamiltonianPath is where the magic happens.
 //
 // Here is where the magic happens.
-func CalculateHamiltonianPathPeer(root *Peer) HamiltonianPathPeer {
-	x := NewHamiltonianPathPeer()
+func CalculateHamiltonianPath(root *Peer) HamiltonianPath {
+	x := NewHamiltonianPath()
 	if x.recursiveCycle(root, 0) {
 		// We have found a path
 		return x
 	}
-	x = NewHamiltonianPathPeer() // Reset if no cycle is found (return empty)
+	x = NewHamiltonianPath() // Reset if no cycle is found (return empty)
 	return x
 }
 
 // recursiveCycle will assert a single root against a graph
 //
 // This is where the core logic of the Hamilton path algorithm lives.
-func (h HamiltonianPathPeer) recursiveCycle(graph *Peer, pos int) bool {
+func (h HamiltonianPath) recursiveCycle(graph *Peer, pos int) bool {
 
 	// Check if this peer already exists in the graph
 	for _, x := range h {

@@ -18,9 +18,11 @@ package peer
 
 import (
 	"context"
+	"crypto"
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/kris-nova/aurae/pkg/common"
+	"github.com/kris-nova/aurae/pkg/hostname"
 	p2p "github.com/libp2p/go-libp2p"
 	"github.com/libp2p/go-libp2p-core/host"
 	"github.com/libp2p/go-libp2p-core/network"
@@ -31,27 +33,22 @@ import (
 	"net"
 )
 
-// Research
-//
-// Should we build a DAG?
-// How do we handle "cluster wide" updates?
-// What are the advantages of a DAG?
-// What other types of graphs should we consider?
-// Is there prior art here?
-
 // Peer represents a single peer in the mesh.
 //
-// Each peer will be mapped by its Hostname and will serve
-// as
+// Peers exist in a directed graph.
+//
+// Each peer will be mapped by its Hostname in a local hash table.
+// Each peer will be mapped by its Hostname in a public DHT.
+// Each peer will dependent on a cryptographic key in order to initialize.
 type Peer struct {
 
-	// Hostname is a special string. This is the actual
-	// DNS name of this peer in the network.
-	Hostname string
+	// Hostname is the 3 part name of the peer in the mesh.
+	Hostname *hostname.Hostname
 
 	// Peers is where the digraph happens.
 	Peers map[string]*Peer
 
+	// Host is the peer instance of this peer.
 	Host host.Host
 
 	// runtimeID is a UUID generated at runtime
@@ -61,6 +58,9 @@ type Peer struct {
 	// This ID should never "persist" past the
 	// execution context of this particular runtime.
 	runtimeID uuid.UUID
+
+	// All hosts are encrypted by default on the public
+	Key crypto.PrivateKey
 }
 
 var self *Peer
@@ -69,7 +69,7 @@ var self *Peer
 func Self() *Peer {
 	if self == nil {
 		self = &Peer{
-			Hostname: common.Self,
+			Hostname: hostname.New(common.Self),
 		}
 	}
 	return self
@@ -84,8 +84,8 @@ func Self() *Peer {
 // Note: Connect() MUST be called on the new peer outside
 // the scope of this function. This is effectively an AddChild()
 // style function.
-func (p *Peer) ToPeer(hostname string) *Peer {
-	newPeer := NewPeer(hostname)
+func (p *Peer) ToPeer(h *hostname.Hostname) *Peer {
+	newPeer := NewPeerFromHostname(h, p.Key)
 	p.AddPeer(newPeer)
 	return newPeer
 }
@@ -116,7 +116,7 @@ func (p *Peer) NewSafeConnection() *net.Conn {
 }
 
 func (p *Peer) AddPeer(newPeer *Peer) *net.Conn {
-	p.Peers[newPeer.Hostname] = newPeer
+	p.Peers[newPeer.Hostname.String()] = newPeer
 	return nil
 }
 
@@ -163,10 +163,16 @@ func (p *Peer) DialID(id string) error {
 //
 // This will be an empty reference, and will do nothing
 // until Connect() is called.
-func NewPeer(hostname string) *Peer {
+func NewPeer(name string, key crypto.PrivateKey) *Peer {
+	return NewPeerFromHostname(hostname.New(name), key)
+}
+
+// NewPeerFromHostname will initialize a new peer directly from a hostname.Hostname
+func NewPeerFromHostname(hn *hostname.Hostname, key crypto.PrivateKey) *Peer {
 	return &Peer{
 		Peers:     make(map[string]*Peer),
-		Hostname:  hostname,
+		Hostname:  hn,
 		runtimeID: uuid.New(),
+		Key:       key,
 	}
 }

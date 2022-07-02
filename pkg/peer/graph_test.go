@@ -22,11 +22,12 @@
 package peer
 
 import (
+	"github.com/kris-nova/aurae/pkg/hostname"
 	"testing"
 )
 
 func TestGraph1to1(t *testing.T) {
-	expected := AssertHamPathHostname{
+	expected := TestHamPathCase{
 		0: "a",
 		1: "b",
 	}
@@ -38,7 +39,7 @@ func TestGraph1to1(t *testing.T) {
 }
 
 func TestGraph3Cycle(t *testing.T) {
-	expected := AssertHamPathHostname{
+	expected := TestHamPathCase{
 		0: "a",
 		1: "b",
 		2: "c",
@@ -51,7 +52,7 @@ func TestGraph3Cycle(t *testing.T) {
 }
 
 func TestGraph5OuterCycle(t *testing.T) {
-	expected := AssertHamPathHostname{
+	expected := TestHamPathCase{
 		0: "a",
 		1: "b",
 		2: "c",
@@ -66,7 +67,7 @@ func TestGraph5OuterCycle(t *testing.T) {
 }
 
 func TestGraph5SingleInnerLink(t *testing.T) {
-	expected := AssertHamPathHostname{
+	expected := TestHamPathCase{
 		0: "a",
 		1: "b",
 		2: "c",
@@ -81,7 +82,7 @@ func TestGraph5SingleInnerLink(t *testing.T) {
 }
 
 func TestGraph5FullInnerLink(t *testing.T) {
-	expected := AssertHamPathHostname{
+	expected := TestHamPathCase{
 		0: "a",
 		1: "b",
 		2: "c",
@@ -96,7 +97,7 @@ func TestGraph5FullInnerLink(t *testing.T) {
 }
 
 func TestGraphSuperNode(t *testing.T) {
-	expected := AssertHamPathHostname{
+	expected := TestHamPathCase{
 		0: "a",
 		1: "b",
 		2: "c",
@@ -110,24 +111,28 @@ func TestGraphSuperNode(t *testing.T) {
 	}
 }
 
-type AssertHamPathHostname map[int]string
+type TestHamPathCase map[int]string
 
-func AssertHamPath(h HamiltonianPathHostname, a AssertHamPathHostname) bool {
-	for i, hostname := range a {
-		if x, ok := h[i]; ok {
-			if x == hostname {
-				continue
+func AssertHamPath(a HamiltonianPath, t TestHamPathCase) bool {
+	for _, peer := range a {
+		found := false
+		for _, name := range t {
+			if name == peer.Hostname.Host {
+				found = true
+				break
 			}
 		}
-		return false
+		if !found {
+			return false
+		}
 	}
 	return true
 }
 
 // a ----- b
 func graph1to1() *Peer {
-	root := NewPeer("a")
-	b := root.ToPeer("b")
+	root := NewPeer("a", nil)
+	b := root.ToPeer(hostname.New("b"))
 	b.AddPeer(root)
 	return root
 }
@@ -137,9 +142,9 @@ func graph1to1() *Peer {
 //   \   /
 //     c
 func graph3cycle() *Peer {
-	root := NewPeer("a")
-	b := root.ToPeer("b")
-	c := b.ToPeer("c")
+	root := NewPeer("a", nil)
+	b := root.ToPeer(hostname.New("b"))
+	c := b.ToPeer(hostname.New("c"))
 	c.AddPeer(root)
 	return root
 }
@@ -150,11 +155,11 @@ func graph3cycle() *Peer {
 //  \     /
 //     d
 func graph5cycleOuter() *Peer {
-	root := NewPeer("a")
-	b := root.ToPeer("b")
-	c := b.ToPeer("c")
-	d := c.ToPeer("d")
-	e := d.ToPeer("e")
+	root := NewPeer("a", nil)
+	b := root.ToPeer(hostname.New("b"))
+	c := b.ToPeer(hostname.New("c"))
+	d := c.ToPeer(hostname.New("d"))
+	e := d.ToPeer(hostname.New("e"))
 	e.AddPeer(root)
 	return root
 }
@@ -165,11 +170,11 @@ func graph5cycleOuter() *Peer {
 //  \     /
 //     d
 func graph5cycleSingleInnerLink() *Peer {
-	root := NewPeer("a")
-	b := root.ToPeer("b")
-	c := b.ToPeer("c")
-	d := c.ToPeer("d")
-	e := d.ToPeer("e")
+	root := NewPeer("a", nil)
+	b := root.ToPeer(hostname.New("b"))
+	c := b.ToPeer(hostname.New("c"))
+	d := c.ToPeer(hostname.New("d"))
+	e := d.ToPeer(hostname.New("e"))
 
 	c.AddPeer(e) // Single inner link
 
@@ -183,11 +188,11 @@ func graph5cycleSingleInnerLink() *Peer {
 //  \     /
 //     d
 func graph5cycleFullInnerLink() *Peer {
-	root := NewPeer("a")
-	b := root.ToPeer("b")
-	c := b.ToPeer("c")
-	d := c.ToPeer("d")
-	e := d.ToPeer("e")
+	root := NewPeer("a", nil)
+	b := root.ToPeer(hostname.New("b"))
+	c := b.ToPeer(hostname.New("c"))
+	d := c.ToPeer(hostname.New("d"))
+	e := d.ToPeer(hostname.New("e"))
 
 	c.AddPeer(e)
 	e.AddPeer(c)
@@ -212,11 +217,11 @@ func graph5cycleFullInnerLink() *Peer {
 //       d
 //
 func graphSuperNode() *Peer {
-	root := NewPeer("a")
-	b := root.ToPeer("b")
-	c := b.ToPeer("c")
-	d := c.ToPeer("d")
-	e := d.ToPeer("e")
+	root := NewPeer("a", nil)
+	b := root.ToPeer(hostname.New("b"))
+	c := b.ToPeer(hostname.New("c"))
+	d := c.ToPeer(hostname.New("d"))
+	e := d.ToPeer(hostname.New("e"))
 
 	c.AddPeer(e)
 	e.AddPeer(c)
@@ -229,9 +234,9 @@ func graphSuperNode() *Peer {
 	e.AddPeer(root)
 
 	// Create a sub graph that cycles
-	x := root.ToPeer("x")
-	y := root.ToPeer("y")
-	z := root.ToPeer("z")
+	x := root.ToPeer(hostname.New("x"))
+	y := root.ToPeer(hostname.New("y"))
+	z := root.ToPeer(hostname.New("z"))
 	x.AddPeer(y)
 	y.AddPeer(x)
 	y.AddPeer(z)

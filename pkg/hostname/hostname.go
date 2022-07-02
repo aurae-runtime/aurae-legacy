@@ -14,27 +14,46 @@
  *                                                                           *
 \*===========================================================================*/
 
-package peer
+package hostname
 
 import (
-	"testing"
+	"fmt"
+	"strings"
 )
 
-func TestPeerToPeerConnectSingle(t *testing.T) {
-	a := NewPeer("a", nil)
-	b := NewPeer("b", nil)
-	var err error
-	_, err = a.Connect()
-	if err != nil {
-		t.Errorf("unable to connect: %v", err)
+// Hostname represents a 3 part hostname.
+//
+// beeps@boops@computer.com
+type Hostname struct {
+	Sub    string
+	Host   string
+	Domain string
+}
+
+func New(any string) *Hostname {
+	domain := ""
+	host := ""
+	sub := ""
+	spl := strings.Split(any, "@")
+	if len(spl) >= 3 {
+		domain = spl[2]
+		host = spl[1]
+		sub = spl[0]
+	} else if len(spl) == 2 {
+		host = spl[0]
+		domain = spl[1]
+	} else if len(spl) == 1 {
+		host = spl[0]
+	} else {
+		host = any
 	}
-	_, err = b.Connect()
-	if err != nil {
-		t.Errorf("unable to connect: %v", err)
+	return &Hostname{
+		Domain: domain,
+		Host:   host,
+		Sub:    sub,
 	}
-	id := b.GetID()
-	err = a.DialID(id)
-	if err != nil {
-		t.Errorf("unable to dial a -> b: %v", err)
-	}
+}
+
+func (h *Hostname) String() string {
+	return fmt.Sprintf("%s@%s@%s", h.Sub, h.Host, h.Domain)
 }

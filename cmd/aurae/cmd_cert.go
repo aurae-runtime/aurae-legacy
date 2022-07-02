@@ -18,6 +18,7 @@ package main
 
 import (
 	"github.com/libp2p/go-libp2p-core/crypto"
+	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 	"io/ioutil"
 )
@@ -51,6 +52,7 @@ func Cert() *cli.Command {
 					if err != nil {
 						return err
 					}
+					logrus.Infof("Wrote: id_ed25519")
 					pubKeyBytes, err := pubKey.Raw()
 					if err != nil {
 						return err
@@ -59,6 +61,7 @@ func Cert() *cli.Command {
 					if err != nil {
 						return err
 					}
+					logrus.Infof("Wrote: id_ed25519.pub")
 					return nil
 				},
 			},
