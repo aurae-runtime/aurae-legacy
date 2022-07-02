@@ -141,7 +141,26 @@ func graph5cycleSingleInnerLink() *Peer {
 	d := c.ToPeer("d")
 	e := d.ToPeer("e")
 
-	c.AddPeer(c) // Single inner link
+	c.AddPeer(e) // Single inner link
+
+	e.AddPeer(root)
+	return root
+}
+
+// a ----- b
+// |   X   |
+// e ----- c
+//  \     /
+//     d
+func graph5cycleFullInnerLink() *Peer {
+	root := NewPeer("a")
+	b := root.ToPeer("b")
+	c := b.ToPeer("c")
+	d := c.ToPeer("d")
+	e := d.ToPeer("e")
+
+	c.AddPeer(e)
+	e.AddPeer(c)
 
 	e.AddPeer(root)
 	return root
