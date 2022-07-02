@@ -58,7 +58,20 @@ func CalculateHamiltonianPathPeer(root *Peer) HamiltonianPathPeer {
 }
 
 // recursiveCycle will assert a single root against a graph
+//
+// This is where the core logic of the Hamilton path algorithm lives.
 func (h HamiltonianPathPeer) recursiveCycle(graph *Peer, pos int) bool {
+
+	// Check if this peer already exists in the graph
+	existsInGraph := false
+	for _, x := range h {
+		if x.runtimeID == graph.runtimeID {
+			existsInGraph = true
+		}
+	}
+	if existsInGraph {
+		return true
+	}
 
 	// Base case. Set the current position to the current *Peer in the graph.
 	h[pos] = graph

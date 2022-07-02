@@ -73,7 +73,22 @@ func TestGraph5SingleInnerLink(t *testing.T) {
 		3: "d",
 		4: "e",
 	}
-	graph := graph5cycleOuter()
+	graph := graph5cycleSingleInnerLink()
+	actual := CalculateHamiltonianPathHostname(graph)
+	if !AssertHamPath(actual, expected) {
+		t.Errorf("Unable to find Ham path. Actual: %v, Expected: %v", actual, expected)
+	}
+}
+
+func TestGraph5FullInnerLink(t *testing.T) {
+	expected := AssertHamPathHostname{
+		0: "a",
+		1: "b",
+		2: "c",
+		3: "d",
+		4: "e",
+	}
+	graph := graph5cycleFullInnerLink()
 	actual := CalculateHamiltonianPathHostname(graph)
 	if !AssertHamPath(actual, expected) {
 		t.Errorf("Unable to find Ham path. Actual: %v, Expected: %v", actual, expected)
@@ -161,6 +176,11 @@ func graph5cycleFullInnerLink() *Peer {
 
 	c.AddPeer(e)
 	e.AddPeer(c)
+
+	root.AddPeer(c)
+	root.AddPeer(e)
+	b.AddPeer(e)
+	e.AddPeer(b)
 
 	e.AddPeer(root)
 	return root
