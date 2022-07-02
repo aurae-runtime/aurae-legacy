@@ -23,10 +23,11 @@ import (
 
 // DefaultOptions are the default p2p options for Aurae
 func DefaultOptions(key crypto.PrivKey) []p2p.Option {
+
 	return []p2p.Option{
 		//p2p.EnableAutoRelay(),
 		p2p.Identity(key),
-		//p2p.ListenAddrs(manet.IP6Loopback),
+		//p2p.ListenAddrs(multiaddr.StringCast("/p2p-circuit")),
 	}
 
 }
