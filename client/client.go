@@ -28,10 +28,10 @@ type Client struct {
 // After a local client has been authenticated the functionality to leverage
 // the internal Aurae peering and routing mechanisms are now available.
 //
-// An authenticated client can use PeerConnect() to connect to a proxy in the
+// An authenticated client can use NewPeer() to connect to a proxy in the
 // network.
 //
-// Both Connect() and PeerConnect() return unique instances of the same client
+// Both Connect() and NewPeer() return unique instances of the same client
 // to the user (if successful).
 //
 // Clients can be chained together to navigate the Aurae mesh.
