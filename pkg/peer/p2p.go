@@ -26,5 +26,7 @@ func DefaultOptions(key crypto.PrivKey) []p2p.Option {
 	return []p2p.Option{
 		//p2p.EnableAutoRelay(),
 		p2p.Identity(key),
+		//p2p.ListenAddrs(manet.IP6Loopback),
 	}
+
 }

@@ -48,5 +48,17 @@ func Peer() *cli.Command {
 			}
 			return nil
 		},
+		Subcommands: []*cli.Command{
+			{
+				Name:      "keygen",
+				Usage:     "Generate new keypair (id_ed25519, id_ed25519.pub)",
+				UsageText: `aurae cert`,
+				Flags:     GlobalFlags([]cli.Flag{}),
+				Action: func(c *cli.Context) error {
+
+					return nil
+				},
+			},
+		},
 	}
 }

@@ -112,8 +112,17 @@ func (p *Peer) Connect() (host.Host, error) {
 	p.Host.SetStreamHandler(AuraeStream, func(s network.Stream) {
 		logrus.Infof("Received stream: %v", s.ID())
 	})
-	p.GetID()
-	defer p.GetAddr()
+	logrus.Infof("Connected. Listening on: %v", h.Network().ListenAddresses())
+	id := p.GetID()
+	if id == "" {
+		return nil, fmt.Errorf("unable to get id")
+	}
+	addr, err := p.GetAddr()
+	if err != nil {
+		return nil, fmt.Errorf("unable to get addr: %v", err)
+	}
+	logrus.Infof("Local addr: %v", addr.String())
+
 	return h, nil
 }
 
@@ -127,9 +136,13 @@ func (p *Peer) NewSafeConnection() (*net.Conn, error) {
 	if err != nil {
 		return nil, fmt.Errorf("unable to connect to stream: %v", err)
 	}
+
+	logrus.Infof("Local Address: %s", stream.Conn().LocalMultiaddr().String())
+
 	if conn, ok := stream.Conn().(net.Conn); ok {
 		return &conn, nil
 	}
+
 	return nil, fmt.Errorf("unable to convert to *net.Conn")
 }
 
@@ -139,6 +152,7 @@ func (p *Peer) AddPeer(newPeer *Peer) {
 
 func (p *Peer) GetID() string {
 	if p.Host == nil {
+		logrus.Warnf("Unable to get ID")
 		return ""
 	}
 	if p.peerID.String() == "" {
@@ -150,6 +164,7 @@ func (p *Peer) GetID() string {
 			return ""
 		}
 		p.peerID = peerID
+		logrus.Infof("Setting peer ID: %s", p.peerID)
 	}
 	return p.peerID.String()
 }
@@ -175,6 +190,7 @@ func (p *Peer) GetAddr() (multiaddr.Multiaddr, error) {
 		p.Host.Peerstore().AddAddr(peerID, targetAddr, peerstore.PermanentAddrTTL)
 		p.peerAddr = targetAddr
 	}
+	p.NewSafeConnection()
 	return p.peerAddr, nil
 }
 
