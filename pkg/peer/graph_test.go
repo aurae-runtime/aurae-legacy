@@ -107,7 +107,7 @@ func TestGraphSuperNode(t *testing.T) {
 	graph := graphSuperNode()
 	actual := CalculateHamiltonianPathHostname(graph)
 	if AssertHamPath(actual, expected) {
-		t.Errorf("Expected failure. Actual: %v, Expected: %v", actual, expected)
+		t.Errorf("Expected failure. Actual: %+v, Expected: %v", actual, expected)
 	}
 }
 
