@@ -42,6 +42,7 @@ func Peer() *cli.Command {
 			if err != nil {
 				return err
 			}
+			self.DialID(self.GetID())
 			logrus.Infof("Runtime ID: %s", host.ID())
 			for _, p := range host.Peerstore().PeersWithAddrs() {
 				fmt.Println(p.String())
