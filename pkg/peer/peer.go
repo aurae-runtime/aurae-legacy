@@ -18,12 +18,12 @@ package peer
 
 import (
 	"context"
-	"crypto"
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/kris-nova/aurae/pkg/common"
 	"github.com/kris-nova/aurae/pkg/hostname"
 	p2p "github.com/libp2p/go-libp2p"
+	"github.com/libp2p/go-libp2p-core/crypto"
 	"github.com/libp2p/go-libp2p-core/host"
 	"github.com/libp2p/go-libp2p-core/network"
 	"github.com/libp2p/go-libp2p-core/peer"
@@ -31,6 +31,7 @@ import (
 	"github.com/libp2p/go-libp2p-core/protocol"
 	"github.com/multiformats/go-multiaddr"
 	"github.com/sirupsen/logrus"
+	"io/ioutil"
 	"net"
 )
 
@@ -65,17 +66,15 @@ type Peer struct {
 	runtimeID uuid.UUID
 
 	// All hosts are encrypted by default on the public
-	Key crypto.PrivateKey
+	Key crypto.PrivKey
 }
 
 var self *Peer
 
 // Self is a singleton for one's self in the mesh.
-func Self() *Peer {
+func Self(key crypto.PrivKey) *Peer {
 	if self == nil {
-		self = &Peer{
-			Hostname: hostname.New(common.Self),
-		}
+		self = NewPeer(common.Localhost, key)
 	}
 	return self
 }
@@ -99,7 +98,7 @@ func (p *Peer) ToPeer(h *hostname.Hostname) *Peer {
 // this peer. After a Connect() is successful this peer can now
 // accept connections from clients.
 func (p *Peer) Connect() (host.Host, error) {
-	host, err := p2p.New(DefaultOptions()...)
+	host, err := p2p.New(DefaultOptions(p.Key)...)
 	if err != nil {
 		return nil, fmt.Errorf("unable to initialize peer-to-peer host: %v", err)
 	}
@@ -168,16 +167,26 @@ func (p *Peer) DialID(id string) error {
 //
 // This will be an empty reference, and will do nothing
 // until Connect() is called.
-func NewPeer(name string, key crypto.PrivateKey) *Peer {
+func NewPeer(name string, key crypto.PrivKey) *Peer {
 	return NewPeerFromHostname(hostname.New(name), key)
 }
 
 // NewPeerFromHostname will initialize a new peer directly from a hostname.Hostname
-func NewPeerFromHostname(hn *hostname.Hostname, key crypto.PrivateKey) *Peer {
+func NewPeerFromHostname(hn *hostname.Hostname, key crypto.PrivKey) *Peer {
 	return &Peer{
 		Peers:     make(map[string]*Peer),
 		Hostname:  hn,
 		runtimeID: uuid.New(),
 		Key:       key,
 	}
+}
+
+func KeyFromPath(path string) (crypto.PrivKey, error) {
+	bytes, err := ioutil.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	// TODO We should check the keys and support all the SSH keys
+	return crypto.UnmarshalEd25519PrivateKey(bytes)
+	//return crypto.UnmarshalPrivateKey(bytes)
 }

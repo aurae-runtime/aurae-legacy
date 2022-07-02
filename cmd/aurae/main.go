@@ -17,6 +17,9 @@
 package main
 
 import (
+	"fmt"
+	"github.com/kris-nova/aurae/pkg/common"
+	"github.com/kris-nova/aurae/pkg/crypto"
 	"github.com/kris-nova/aurae/pkg/daemon"
 	"os"
 	"time"
@@ -31,6 +34,7 @@ var run = &RuntimeOptions{}
 type RuntimeOptions struct {
 	verbose bool
 	socket  string
+	key     string
 }
 
 func main() {
@@ -105,6 +109,12 @@ func GlobalFlags(c []cli.Flag) []cli.Flag {
 			Aliases:     []string{"sock"},
 			Destination: &run.socket,
 			Value:       daemon.DefaultSocketLocationLinux,
+		},
+		&cli.StringFlag{
+			Name:        "key",
+			Aliases:     []string{"s"},
+			Destination: &run.key,
+			Value:       fmt.Sprintf("%s/.ssh/%s", common.HomeDir(), crypto.DefaultAuraePrivateKeyName),
 		},
 	}
 	for _, gf := range g {

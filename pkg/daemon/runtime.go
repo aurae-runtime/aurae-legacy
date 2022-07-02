@@ -21,6 +21,7 @@ import (
 	"github.com/kris-nova/aurae"
 	"github.com/kris-nova/aurae/pkg/core"
 	"github.com/kris-nova/aurae/pkg/core/local"
+	"github.com/kris-nova/aurae/pkg/peer"
 	"github.com/kris-nova/aurae/pkg/posix"
 	"github.com/kris-nova/aurae/pkg/proxy"
 	"github.com/kris-nova/aurae/pkg/runtime"
@@ -50,16 +51,23 @@ const (
 // feature.
 //
 type Daemon struct {
+
+	// Self is the root of the peer to peer digraph.
+	Self *peer.Peer
+
+	// Config options
 	runtime    bool
 	socket     string
 	localStore string
+	keypath    string
 }
 
-func New(socket, localStore string) *Daemon {
+func New(socket, localStore, keypath string) *Daemon {
 	return &Daemon{
 		runtime:    true,
 		socket:     socket,
 		localStore: localStore,
+		keypath:    keypath,
 	}
 }
 
@@ -100,6 +108,7 @@ func (d *Daemon) Run() error {
 	} else {
 		logrus.Infof("Success. Socket acquired.")
 	}
+	defer conn.Close()
 
 	server := grpc.NewServer()
 	logrus.Infof("Starting gRPC Server.")
@@ -129,7 +138,18 @@ func (d *Daemon) Run() error {
 		}
 	}()
 
-	logrus.Infof("Listening.")
+	// Step 7. Peer host and initialize peer to peer network.
+	instanceKey, err := peer.KeyFromPath(d.keypath)
+	if err != nil {
+		return fmt.Errorf("invalid private key: %s: %v", d.keypath, err)
+	}
+	self := peer.Self(instanceKey)
+	host, err := self.Connect()
+	if err != nil {
+		return fmt.Errorf("unable to join auraespace peer network: %v", err)
+	}
+	d.Self = self
+	logrus.Infof("Peering with runtime ID: %s", host.ID())
 
 	// Step 7. Dispatch events from the filesystem
 

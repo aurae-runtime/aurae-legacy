@@ -16,10 +16,15 @@
 
 package peer
 
-import p2p "github.com/libp2p/go-libp2p"
+import (
+	p2p "github.com/libp2p/go-libp2p"
+	"github.com/libp2p/go-libp2p-core/crypto"
+)
 
-func DefaultOptions() []p2p.Option {
+// DefaultOptions are the default p2p options for Aurae
+func DefaultOptions(key crypto.PrivKey) []p2p.Option {
 	return []p2p.Option{
 		//p2p.EnableAutoRelay(),
+		p2p.Identity(key),
 	}
 }

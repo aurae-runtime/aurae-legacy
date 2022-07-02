@@ -51,7 +51,8 @@ func NewClient(socket string) *Client {
 // TODO manage cert material and fix auth
 func (c *Client) Connect() error {
 	logrus.Warnf("mTLS disabled. running insecure.")
-	conn, err := grpc.Dial(fmt.Sprintf("passthrough:///unix://%s", c.socket), grpc.WithInsecure(), grpc.WithTimeout(time.Second*3))
+	conn, err := grpc.Dial(fmt.Sprintf("passthrough:///unix://%s", c.socket),
+		grpc.WithInsecure(), grpc.WithTimeout(time.Second*3))
 	if err != nil {
 		return err
 	}

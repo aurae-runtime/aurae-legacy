@@ -17,48 +17,34 @@
 package main
 
 import (
-	"context"
 	"fmt"
-	"github.com/kris-nova/aurae/client"
-	"github.com/kris-nova/aurae/rpc"
+	"github.com/kris-nova/aurae/pkg/peer"
+	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 )
 
+// Peer
+//
+// TODO this needs to go over the aurae socket!
 func Peer() *cli.Command {
 	return &cli.Command{
 		Name:      "peer",
-		Usage:     "Peer aurae with other aurae instances.",
-		UsageText: `aurae peer <optional-token>`,
+		Usage:     "Work with Aurae peers in the mesh.",
+		UsageText: `aurae peer <options>`,
 		Flags:     GlobalFlags([]cli.Flag{}),
 		Action: func(c *cli.Context) error {
-			token := c.Args().Get(0)
-			rootClient := client.NewClient(run.socket)
-			err := rootClient.Connect()
+			key, err := peer.KeyFromPath(run.key)
 			if err != nil {
 				return err
 			}
-			if token != "" {
-				// Client mode
-				proxyResp, err := rootClient.LocalProxy(context.Background(), &rpc.LocalProxyReq{
-					Hostname: "TODO",
-					Token:    token,
-				})
-				if err != nil {
-					return err
-				}
-				fmt.Println(proxyResp.Hostname)
-				fmt.Println(proxyResp.Socket)
-				fmt.Println(proxyResp.Message)
-				fmt.Println(proxyResp.Code)
-			} else {
-				// Server mode
-				peerResp, err := rootClient.PeerRequest(context.Background(), &rpc.PeerRequestReq{})
-				if err != nil {
-					return err
-				}
-
-				fmt.Println("Token:")
-				fmt.Println(peerResp.Token)
+			self := peer.Self(key)
+			host, err := self.Connect()
+			if err != nil {
+				return err
+			}
+			logrus.Infof("Runtime ID: %s", host.ID())
+			for _, p := range host.Peerstore().PeersWithAddrs() {
+				fmt.Println(p.String())
 			}
 			return nil
 		},

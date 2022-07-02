@@ -17,6 +17,9 @@
 package main
 
 import (
+	"fmt"
+	"github.com/kris-nova/aurae/pkg/common"
+	"github.com/kris-nova/aurae/pkg/crypto"
 	"github.com/kris-nova/aurae/pkg/daemon"
 	"os"
 	"time"
@@ -31,9 +34,9 @@ var run = &RuntimeOptions{}
 
 type RuntimeOptions struct {
 	verbose    bool
-	mountpoint string
 	socket     string
 	localStore string
+	key        string
 }
 
 func main() {
@@ -72,26 +75,13 @@ func main() {
 			//},
 			// ----------------------------------------
 		},
-		Flags: GlobalFlags([]cli.Flag{
-			&cli.StringFlag{
-				Name:        "socket",
-				Aliases:     []string{"sock"},
-				Destination: &run.socket,
-				Value:       daemon.DefaultSocketLocationLinux,
-			},
-			&cli.StringFlag{
-				Name:        "local",
-				Aliases:     []string{"store"},
-				Destination: &run.localStore,
-				Value:       daemon.DefaultLocalStateLocationLinux,
-			},
-		}),
+		Flags:                GlobalFlags([]cli.Flag{}),
 		EnableBashCompletion: true,
 		HideHelp:             false,
 		HideVersion:          false,
 
 		Action: func(c *cli.Context) error {
-			d := daemon.New(run.socket, run.localStore)
+			d := daemon.New(run.socket, run.localStore, run.key)
 			return d.Run()
 		},
 	}
@@ -122,6 +112,24 @@ func GlobalFlags(c []cli.Flag) []cli.Flag {
 			Name:        "verbose",
 			Aliases:     []string{"v"},
 			Destination: &run.verbose,
+		},
+		&cli.StringFlag{
+			Name:        "key",
+			Aliases:     []string{"s"},
+			Destination: &run.key,
+			Value:       fmt.Sprintf("%s/.ssh/%s", common.HomeDir(), crypto.DefaultAuraePrivateKeyName),
+		},
+		&cli.StringFlag{
+			Name:        "socket",
+			Aliases:     []string{"sock"},
+			Destination: &run.socket,
+			Value:       daemon.DefaultSocketLocationLinux,
+		},
+		&cli.StringFlag{
+			Name:        "local",
+			Aliases:     []string{"store"},
+			Destination: &run.localStore,
+			Value:       daemon.DefaultLocalStateLocationLinux,
 		},
 	}
 	for _, gf := range g {
