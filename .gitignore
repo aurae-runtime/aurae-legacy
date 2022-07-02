@@ -4,3 +4,4 @@
 .ll
 bin/*
 release
+id_ed25519*

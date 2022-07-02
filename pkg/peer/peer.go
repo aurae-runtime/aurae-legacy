@@ -146,6 +146,7 @@ func (p *Peer) DialID(id string) error {
 	targetAddr := hostAddr.Decapsulate(targetPeerAddr)
 
 	// TODO Understand the peer store more
+	logrus.Infof("Adding to Peer store. PeerID: %s, Target Addr: %s,", peerID, targetAddr)
 	p.Host.Peerstore().AddAddr(peerID, targetAddr, peerstore.PermanentAddrTTL)
 
 	stream, err := p.Host.NewStream(context.Background(), peerID, "/aurae")

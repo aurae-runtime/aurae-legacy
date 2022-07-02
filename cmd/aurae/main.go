@@ -60,6 +60,7 @@ func main() {
 			//Remove(),
 			Peer(),
 			Status(),
+			Cert(),
 		},
 		Flags:                GlobalFlags([]cli.Flag{}),
 		EnableBashCompletion: true,
