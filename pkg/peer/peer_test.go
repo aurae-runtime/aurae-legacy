@@ -32,12 +32,4 @@ func TestPeerToPeerConnectSingle(t *testing.T) {
 	if err != nil {
 		t.Errorf("unable to connect: %v", err)
 	}
-	_, err = a.NewSafeConnection()
-	if err != nil {
-		t.Errorf("unable to net.conn: %v", err)
-	}
-	_, err = b.NewSafeConnection()
-	if err != nil {
-		t.Errorf("unable to net.conn: %v", err)
-	}
 }
