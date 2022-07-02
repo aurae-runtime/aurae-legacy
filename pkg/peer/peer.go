@@ -56,16 +56,18 @@ func Self() *Peer {
 //
 // This mechanism will effectively serve as an alternative
 // to DNS for the mesh if the peer is able to connect.
-func (s *Peer) ToPeer(hostname string) *Peer {
-	newPeer := &Peer{
-		Hostname: hostname,
-	}
-	s.Peers[hostname] = newPeer
+//
+// Note: Connect() MUST be called on the new peer outside
+// the scope of this function. This is effectively an AddChild()
+// style function.
+func (p *Peer) ToPeer(hostname string) *Peer {
+	newPeer := NewPeer(hostname)
+	p.AddPeer(newPeer)
 	return newPeer
 }
 
 // Connect will connect to the peer
-func (*Peer) Connect() (*client.Client, error) {
+func (p *Peer) Connect() (*client.Client, error) {
 
 	return nil, nil
 }
@@ -75,7 +77,24 @@ func (*Peer) Connect() (*client.Client, error) {
 //
 // These connections MUST be safe to use while adhering
 // the scope of the Aurae project.
-func (*Peer) NewSafeConnection() *net.Conn {
+func (p *Peer) NewSafeConnection() *net.Conn {
 
 	return nil
+}
+
+func (p *Peer) AddPeer(newPeer *Peer) *net.Conn {
+	p.Peers[newPeer.Hostname] = newPeer
+	return nil
+}
+
+// NewPeer will initialize a new *Peer
+//
+// I am unsure we actually want to be able to "new"
+// one of these peers in the graph.
+// For now this exists specifically for testing.
+func NewPeer(hostname string) *Peer {
+	return &Peer{
+		Peers:    make(map[string]*Peer),
+		Hostname: hostname,
+	}
 }
