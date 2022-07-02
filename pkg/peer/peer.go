@@ -17,6 +17,7 @@
 package peer
 
 import (
+	"github.com/google/uuid"
 	"github.com/kris-nova/aurae/client"
 	"github.com/kris-nova/aurae/pkg/common"
 	"net"
@@ -37,6 +38,14 @@ import (
 type Peer struct {
 	Hostname string
 	Peers    map[string]*Peer
+
+	// runtimeID is a UUID generated at runtime
+	// that exists for this specific reference
+	// to the Peer in the network.
+	//
+	// This ID should never "persist" past the
+	// execution context of this particular runtime.
+	runtimeID uuid.UUID
 }
 
 var self *Peer
@@ -94,7 +103,8 @@ func (p *Peer) AddPeer(newPeer *Peer) *net.Conn {
 // For now this exists specifically for testing.
 func NewPeer(hostname string) *Peer {
 	return &Peer{
-		Peers:    make(map[string]*Peer),
-		Hostname: hostname,
+		Peers:     make(map[string]*Peer),
+		Hostname:  hostname,
+		runtimeID: uuid.New(),
 	}
 }

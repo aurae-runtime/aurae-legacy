@@ -54,7 +54,8 @@ func AssertHamPath(h HamiltonianPathHostname, a AssertHamPathHostname) bool {
 // a ----- b
 func graph1to1() *Peer {
 	root := NewPeer("a")
-	root.ToPeer("b")
+	b := root.ToPeer("b")
+	b.AddPeer(root)
 	return root
 }
 
