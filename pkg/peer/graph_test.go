@@ -32,7 +32,7 @@ func TestGraph1to1(t *testing.T) {
 		1: "b",
 	}
 	graph := graph1to1()
-	actual := CalculateHamiltonianPathHostname(graph)
+	actual := CalculateHamiltonianPath(graph)
 	if !AssertHamPath(actual, expected) {
 		t.Errorf("Unable to find Ham path. Actual: %v, Expected: %v", actual, expected)
 	}
@@ -45,7 +45,7 @@ func TestGraph3Cycle(t *testing.T) {
 		2: "c",
 	}
 	graph := graph3cycle()
-	actual := CalculateHamiltonianPathHostname(graph)
+	actual := CalculateHamiltonianPath(graph)
 	if !AssertHamPath(actual, expected) {
 		t.Errorf("Unable to find Ham path. Actual: %v, Expected: %v", actual, expected)
 	}
@@ -60,7 +60,7 @@ func TestGraph5OuterCycle(t *testing.T) {
 		4: "e",
 	}
 	graph := graph5cycleOuter()
-	actual := CalculateHamiltonianPathHostname(graph)
+	actual := CalculateHamiltonianPath(graph)
 	if !AssertHamPath(actual, expected) {
 		t.Errorf("Unable to find Ham path. Actual: %v, Expected: %v", actual, expected)
 	}
@@ -75,7 +75,7 @@ func TestGraph5SingleInnerLink(t *testing.T) {
 		4: "e",
 	}
 	graph := graph5cycleSingleInnerLink()
-	actual := CalculateHamiltonianPathHostname(graph)
+	actual := CalculateHamiltonianPath(graph)
 	if !AssertHamPath(actual, expected) {
 		t.Errorf("Unable to find Ham path. Actual: %v, Expected: %v", actual, expected)
 	}
@@ -90,7 +90,7 @@ func TestGraph5FullInnerLink(t *testing.T) {
 		4: "e",
 	}
 	graph := graph5cycleFullInnerLink()
-	actual := CalculateHamiltonianPathHostname(graph)
+	actual := CalculateHamiltonianPath(graph)
 	if !AssertHamPath(actual, expected) {
 		t.Errorf("Unable to find Ham path. Actual: %v, Expected: %v", actual, expected)
 	}
@@ -105,9 +105,9 @@ func TestGraphSuperNode(t *testing.T) {
 		4: "e",
 	}
 	graph := graphSuperNode()
-	actual := CalculateHamiltonianPathHostname(graph)
+	actual := CalculateHamiltonianPath(graph)
 	if AssertHamPath(actual, expected) {
-		//t.Errorf("Expected failure. Actual: %+v, Expected: %v", actual, expected)
+		t.Errorf("Expected failure. Actual: %+v, Expected: %v", actual, expected)
 	}
 }
 

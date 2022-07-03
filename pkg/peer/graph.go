@@ -30,15 +30,6 @@ func NewHamiltonianPath() HamiltonianPath {
 	return make(map[int]*Peer)
 }
 
-func CalculateHamiltonianPathHostname(root *Peer) HamiltonianPath {
-	x := CalculateHamiltonianPath(root)
-	y := NewHamiltonianPath()
-	for i, peer := range x {
-		y[i] = peer
-	}
-	return y
-}
-
 // CalculateHamiltonianPath is where the magic happens.
 //
 // Here is where the magic happens.
