@@ -8,8 +8,6 @@ require (
 	github.com/google/uuid v1.1.1
 	github.com/hanwen/go-fuse/v2 v2.1.0
 	github.com/libp2p/go-libp2p-core v0.19.0
-	github.com/libp2p/go-libp2p-crypto v0.1.0
-	github.com/libp2p/go-libp2p-protocol v0.1.0
 	github.com/multiformats/go-multiaddr v0.5.0
 	github.com/paralin/go-libp2p-grpc v0.0.0-20171228081709-3d5d33466aef
 	github.com/sirupsen/logrus v1.7.0
@@ -30,10 +28,12 @@ require (
 	github.com/ipfs/go-cid v0.2.0 // indirect
 	github.com/klauspost/cpuid/v2 v2.0.9 // indirect
 	github.com/libp2p/go-buffer-pool v0.0.2 // indirect
+	github.com/libp2p/go-libp2p-crypto v0.1.0 // indirect
 	github.com/libp2p/go-libp2p-host v0.1.0 // indirect
 	github.com/libp2p/go-libp2p-net v0.1.0 // indirect
 	github.com/libp2p/go-libp2p-peer v0.2.0 // indirect
 	github.com/libp2p/go-libp2p-peerstore v0.6.0 // indirect
+	github.com/libp2p/go-libp2p-protocol v0.1.0 // indirect
 	github.com/libp2p/go-openssl v0.0.7 // indirect
 	github.com/mattn/go-colorable v0.1.9 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect

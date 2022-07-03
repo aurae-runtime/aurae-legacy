@@ -33,7 +33,7 @@ compile: gen aurae auraed auraefs ## Compile for the local architecture ⚙
 .PHONY: aurae
 aurae: ## Compile aurae (local arch)
 	@echo "Compiling [aurae] ..."
-	go build -ldflags "\
+	go build -v -ldflags "\
 	-X 'github.com/$(org)/$(toplevel).Version=$(version)' \
 	-X 'github.com/$(org)/$(toplevel).AuthorName=$(authorname)' \
 	-X 'github.com/$(org)/$(toplevel).AuthorEmail=$(authoremail)' \
@@ -44,7 +44,7 @@ aurae: ## Compile aurae (local arch)
 .PHONY: auraed
 auraed: ## Compile auraed (local arch)
 	@echo "Compiling [auraed] ..."
-	go build -ldflags "\
+	go build -v -ldflags "\
 	-X 'github.com/$(org)/$(toplevel).Version=$(version)' \
 	-X 'github.com/$(org)/$(toplevel).AuthorName=$(authorname)' \
 	-X 'github.com/$(org)/$(toplevel).AuthorEmail=$(authoremail)' \
@@ -55,7 +55,7 @@ auraed: ## Compile auraed (local arch)
 .PHONY: auraefs
 auraefs: ## Compile auraefs (local arch)
 	@echo "Compiling [auraefs] ..."
-	go build -ldflags "\
+	go build -v -ldflags "\
 	-X 'github.com/$(org)/$(toplevel).Version=$(version)' \
 	-X 'github.com/$(org)/$(toplevel).AuthorName=$(authorname)' \
 	-X 'github.com/$(org)/$(toplevel).AuthorEmail=$(authoremail)' \
