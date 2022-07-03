@@ -28,6 +28,9 @@ github.com/cheekybits/genny/parse
 ## explicit; go 1.13
 github.com/containerd/cgroups
 github.com/containerd/cgroups/stats/v1
+# github.com/coreos/go-semver v0.3.0
+## explicit
+github.com/coreos/go-semver/semver
 # github.com/coreos/go-systemd/v22 v22.1.0
 ## explicit; go 1.12
 github.com/coreos/go-systemd/v22/dbus
@@ -197,6 +200,7 @@ github.com/libp2p/go-libp2p-core/control
 github.com/libp2p/go-libp2p-core/crypto
 github.com/libp2p/go-libp2p-core/crypto/pb
 github.com/libp2p/go-libp2p-core/event
+github.com/libp2p/go-libp2p-core/helpers
 github.com/libp2p/go-libp2p-core/host
 github.com/libp2p/go-libp2p-core/internal/catch
 github.com/libp2p/go-libp2p-core/introspection
@@ -216,11 +220,26 @@ github.com/libp2p/go-libp2p-core/sec
 github.com/libp2p/go-libp2p-core/sec/insecure
 github.com/libp2p/go-libp2p-core/sec/insecure/pb
 github.com/libp2p/go-libp2p-core/transport
+# github.com/libp2p/go-libp2p-crypto v0.1.0
+## explicit
+github.com/libp2p/go-libp2p-crypto
+# github.com/libp2p/go-libp2p-host v0.1.0
+## explicit
+github.com/libp2p/go-libp2p-host
+# github.com/libp2p/go-libp2p-net v0.1.0
+## explicit
+github.com/libp2p/go-libp2p-net
+# github.com/libp2p/go-libp2p-peer v0.2.0
+## explicit
+github.com/libp2p/go-libp2p-peer
 # github.com/libp2p/go-libp2p-peerstore v0.6.0
 ## explicit; go 1.16
 github.com/libp2p/go-libp2p-peerstore
 github.com/libp2p/go-libp2p-peerstore/addr
 github.com/libp2p/go-libp2p-peerstore/pstoremem
+# github.com/libp2p/go-libp2p-protocol v0.1.0
+## explicit; go 1.12
+github.com/libp2p/go-libp2p-protocol
 # github.com/libp2p/go-libp2p-resource-manager v0.3.0
 ## explicit; go 1.17
 github.com/libp2p/go-libp2p-resource-manager
@@ -318,6 +337,9 @@ github.com/multiformats/go-multiaddr-dns
 # github.com/multiformats/go-multiaddr-fmt v0.1.0
 ## explicit; go 1.13
 github.com/multiformats/go-multiaddr-fmt
+# github.com/multiformats/go-multiaddr-net v0.2.0
+## explicit; go 1.12
+github.com/multiformats/go-multiaddr-net
 # github.com/multiformats/go-multibase v0.0.3
 ## explicit; go 1.11
 github.com/multiformats/go-multibase
@@ -375,6 +397,9 @@ github.com/onsi/ginkgo/types
 # github.com/opencontainers/runtime-spec v1.0.2
 ## explicit
 github.com/opencontainers/runtime-spec/specs-go
+# github.com/paralin/go-libp2p-grpc v0.0.0-20171228081709-3d5d33466aef
+## explicit
+github.com/paralin/go-libp2p-grpc
 # github.com/pbnjay/memory v0.0.0-20210728143218-7b4eea64cf58
 ## explicit; go 1.16
 github.com/pbnjay/memory
