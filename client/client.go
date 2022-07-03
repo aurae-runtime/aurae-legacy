@@ -42,6 +42,12 @@ func NewClient(socket string) *Client {
 	}
 }
 
+//
+// TODO We need to have a new Connect() style function
+// TODO This will need to use grpcDial to dial the peer id
+// TODO from the peer network
+//
+
 // Connect solves identity authorization.
 //
 // Connect will read authorization certificate material

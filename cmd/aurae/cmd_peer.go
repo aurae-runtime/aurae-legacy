@@ -18,8 +18,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/kris-nova/aurae/pkg/crypto"
 	"github.com/kris-nova/aurae/pkg/peer"
-	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 )
 
@@ -33,26 +33,27 @@ func Peer() *cli.Command {
 		UsageText: `aurae peer <options>`,
 		Flags:     GlobalFlags([]cli.Flag{}),
 		Action: func(c *cli.Context) error {
-			key, err := peer.KeyFromPath(run.key)
+			key, err := crypto.KeyFromPath(run.key)
 			if err != nil {
 				return err
 			}
 			self := peer.Self(key)
-			host, err := self.Connect()
+			host, err := self.Establish()
 			if err != nil {
 				return err
 			}
-			logrus.Infof("Runtime ID: %s", host.ID())
+			fmt.Printf("Peer ID: %s\n", host.ID())
+			fmt.Printf("Peerstore:\n")
 			for _, p := range host.Peerstore().PeersWithAddrs() {
-				fmt.Println(p.String())
+				fmt.Printf(" - %s\n", p.String())
 			}
 			return nil
 		},
 		Subcommands: []*cli.Command{
 			{
-				Name:      "keygen",
-				Usage:     "Generate new keypair (id_ed25519, id_ed25519.pub)",
-				UsageText: `aurae cert`,
+				Name:      "",
+				Usage:     "",
+				UsageText: ``,
 				Flags:     GlobalFlags([]cli.Flag{}),
 				Action: func(c *cli.Context) error {
 

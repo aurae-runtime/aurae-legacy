@@ -19,22 +19,32 @@ package peer
 import (
 	"fmt"
 	"github.com/google/uuid"
+	"github.com/kris-nova/aurae"
 	"github.com/kris-nova/aurae/pkg/common"
-	"github.com/kris-nova/aurae/pkg/hostname"
+	"github.com/kris-nova/aurae/pkg/name"
 	p2p "github.com/libp2p/go-libp2p"
 	"github.com/libp2p/go-libp2p-core/crypto"
 	"github.com/libp2p/go-libp2p-core/host"
 	"github.com/libp2p/go-libp2p-core/network"
 	"github.com/libp2p/go-libp2p-core/peer"
 	"github.com/libp2p/go-libp2p-core/protocol"
-	"github.com/multiformats/go-multiaddr"
+	"github.com/libp2p/go-libp2p/p2p/discovery/mdns"
 	"github.com/sirupsen/logrus"
-	"io/ioutil"
 )
 
 const (
-	AuraeStream protocol.ID = "/aurae" // The official stream endpoint for Aurae
+	AuraeStream              string = "/aurae"    // The official stream endpoint for Aurae
+	AuraeStreamVersionFormat string = "/aurae/%s" // Format with the package version
 )
+
+func AuraeStreamProtocol() protocol.ID {
+	auraeStreamProtocol := fmt.Sprintf(AuraeStreamVersionFormat, aurae.Version)
+	ids := protocol.ConvertFromStrings([]string{auraeStreamProtocol})
+	if len(ids) != 1 {
+		panic("unable to find aurae protocol!")
+	}
+	return ids[0]
+}
 
 // Peer represents a single peer in the mesh.
 //
@@ -45,8 +55,8 @@ const (
 // Each peer will dependent on a cryptographic key in order to initialize.
 type Peer struct {
 
-	// Hostname is the 3 part name of the peer in the mesh.
-	Hostname *hostname.Hostname
+	// Name is the 3 part name of the peer in the mesh.
+	Name *name.Name
 
 	// Peers is where the digraph happens.
 	Peers map[string]*Peer
@@ -54,11 +64,8 @@ type Peer struct {
 	// Host is the peer instance of this peer.
 	Host host.Host
 
-	// peerID is the ID used to index on in the distributed hash table.
-	peerID peer.ID
-
-	// peerAddr is this unique address in the mesh
-	peerAddr multiaddr.Multiaddr
+	// DNS is an instance of multicast DNS
+	DNS mdns.Service
 
 	// runtimeID is a UUID generated at runtime
 	// that exists for this specific reference
@@ -70,20 +77,93 @@ type Peer struct {
 
 	// All hosts are encrypted by default on the public
 	Key crypto.PrivKey
+
+	// established denotes if a peer is established in the mesh
+	// or not
+	established bool
+}
+
+// NewPeer will initialize a new *Peer without connecting.
+//
+// This will be an empty reference, and will do nothing
+// until Connect() is called.
+func NewPeer(n *name.Name, key crypto.PrivKey) *Peer {
+	return &Peer{
+		Peers:     make(map[string]*Peer),
+		Name:      n,
+		runtimeID: uuid.New(),
+		Key:       key,
+	}
+}
+
+func NewPeerServicename(svc string, key crypto.PrivKey) *Peer {
+	return NewPeer(name.New(svc), key)
+}
+
+// Establish will initialize a network connection with the peer to peer circuit.
+// Establish will also initialize multicast domain name name (mDNS) for
+// managing distributed name names.
+func (p *Peer) Establish() (host.Host, error) {
+
+	// [p2p]
+	// Here is where we establish ourselves in the mesh.
+	h, err := p2p.New(DefaultOptions(p.Key)...)
+	if err != nil {
+		return nil, fmt.Errorf("unable to initialize peer-to-peer host: %v", err)
+	}
+	p.Host = h
+	p.Host.SetStreamHandler(AuraeStreamProtocol(), func(s network.Stream) {
+		logrus.Infof("Received stream: %v", s.ID())
+	})
+	logrus.Infof("Established. Listening on: %v", h.Network().ListenAddresses())
+
+	// [mDNS]
+	// Here is where we identify ourselves in the mesh.
+	dns := mdns.NewMdnsService(h, p.Name.Service(), Notifee())
+	p.DNS = dns
+	logrus.Infof("Multicast DNS Established. Hostname: %s", p.Name.Service())
+
+	return h, nil
+}
+
+func (p *Peer) ID() peer.ID {
+	return p.Host.ID()
 }
 
 var self *Peer
 
 // Self is a singleton for one's self in the mesh.
+//
+// TODO we need a way to cleanly manage service names
+// TODO if the peer already exists.
 func Self(key crypto.PrivKey) *Peer {
 	if self == nil {
-		self = NewPeer(common.Localhost, key)
+		self = NewPeer(name.New(common.Localhost), key)
 	}
 	return self
 }
 
+// --
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+// --
+
 // ToPeer will initialize a new Peer object based on a
-// hostname.
+// name.
 //
 // This mechanism will effectively serve as an alternative
 // to DNS for the mesh if the peer is able to connect.
@@ -91,56 +171,12 @@ func Self(key crypto.PrivKey) *Peer {
 // Note: Connect() MUST be called on the new peer outside
 // the scope of this function. This is effectively an AddChild()
 // style function.
-func (p *Peer) ToPeer(h *hostname.Hostname) *Peer {
-	newPeer := NewPeerFromHostname(h, p.Key)
-	p.AddPeer(newPeer)
-	return newPeer
-}
+//func (p *Peer) ToPeer(h *name.Hostname) *Peer {
+//	newPeer := NewPeerFromHostname(h, p.Key)
+//	p.AddPeer(newPeer)
+//	return newPeer
+//}
 
-// Connect will connect this peer to the mesh, and begin hosting
-// this peer. After a Connect() is successful this peer can now
-// accept connections from clients.
-func (p *Peer) Connect() (host.Host, error) {
-	h, err := p2p.New(DefaultOptions(p.Key)...)
-	if err != nil {
-		return nil, fmt.Errorf("unable to initialize peer-to-peer host: %v", err)
-	}
-	p.Host = h
-	p.Host.SetStreamHandler(AuraeStream, func(s network.Stream) {
-		logrus.Infof("Received stream: %v", s.ID())
-	})
-	logrus.Infof("Connected. Listening on: %v", h.Network().ListenAddresses())
-	return h, nil
-}
-
-func (p *Peer) AddPeer(newPeer *Peer) {
-	p.Peers[newPeer.Hostname.String()] = newPeer
-}
-
-// NewPeer will initialize a new *Peer without connecting.
-//
-// This will be an empty reference, and will do nothing
-// until Connect() is called.
-func NewPeer(name string, key crypto.PrivKey) *Peer {
-	return NewPeerFromHostname(hostname.New(name), key)
-}
-
-// NewPeerFromHostname will initialize a new peer directly from a hostname.Hostname
-func NewPeerFromHostname(hn *hostname.Hostname, key crypto.PrivKey) *Peer {
-	return &Peer{
-		Peers:     make(map[string]*Peer),
-		Hostname:  hn,
-		runtimeID: uuid.New(),
-		Key:       key,
-	}
-}
-
-func KeyFromPath(path string) (crypto.PrivKey, error) {
-	bytes, err := ioutil.ReadFile(path)
-	if err != nil {
-		return nil, err
-	}
-	// TODO We should check the keys and support all the SSH keys
-	return crypto.UnmarshalEd25519PrivateKey(bytes)
-	//return crypto.UnmarshalPrivateKey(bytes)
-}
+//func (p *Peer) AddPeer(newPeer *Peer) {
+//	p.Peers[newPeer.Name.String()] = newPeer
+//}

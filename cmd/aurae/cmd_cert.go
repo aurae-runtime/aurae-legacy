@@ -29,7 +29,7 @@ import (
 func Cert() *cli.Command {
 	return &cli.Command{
 		Name:      "cert",
-		Usage:     "Work with local TLS certificates.",
+		Usage:     "Work with local TLS material.",
 		UsageText: `aurae cert`,
 		Flags:     GlobalFlags([]cli.Flag{}),
 		Action: func(c *cli.Context) error {
@@ -38,8 +38,9 @@ func Cert() *cli.Command {
 		},
 		Subcommands: []*cli.Command{
 			{
+				// TODO We need to support multiple keys, and -o
 				Name:      "keygen",
-				Usage:     "Generate new keypair (id_ed25519, id_ed25519.pub)",
+				Usage:     "Generate new keypair.",
 				UsageText: `aurae cert`,
 				Flags:     GlobalFlags([]cli.Flag{}),
 				Action: func(c *cli.Context) error {

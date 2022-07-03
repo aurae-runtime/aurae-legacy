@@ -36,7 +36,7 @@ import (
 
 var _ rpc.ProxyServer = &Service{}
 
-// Service is the main proxy service for managing peer-to-peer connections.
+// Service is the main proxy name for managing peer-to-peer connections.
 //
 // This will implement the proxy server methods defined in rpc/proxy.proto
 type Service struct {
@@ -101,7 +101,7 @@ func (s *Service) PeerRequest(ctx context.Context, in *rpc.PeerRequestReq) (*rpc
 // There's some doors in this house.
 func (s *Service) LocalProxy(ctx context.Context, in *rpc.LocalProxyReq) (*rpc.LocalProxyResp, error) {
 
-	logrus.Infof("Peering with hostname: %s", in.Hostname)
+	logrus.Infof("Peering with name: %s", in.Hostname)
 	logrus.Infof("Peering with token: %s", in.Token)
 
 	ret := &rpc.LocalProxyResp{

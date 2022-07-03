@@ -22,7 +22,7 @@ The hostname can be anything, and does not need to match the hostname of your co
 The domain name should be a domain you own and plan on exposing on the internet. If you are unsure, leave it blank for now.
 
 ```bash
-$ aurae up <hostname>[@<domain>]
+$ aurae up <name>[@<domain>]
 $ aurae up alice 
 $ aurae up alice@nivenly.com
 ```
@@ -30,7 +30,7 @@ $ aurae up alice@nivenly.com
 Aurae is now running on the system and ready to serve requests. 
 
 ```bash
-$ aurae run <image>@<hostname>@<domain> [options]
+$ aurae run <image>@<name>@<domain> [options]
 $ aurae run nginx
 ```
 
@@ -59,7 +59,7 @@ Either peer can now control each other.
 You can now run a container on any node in your domain using the same parlance as before.
 
 ```bash
-$ aurae run <image>@<hostname>@<domain> [options]
+$ aurae run <image>@<name>@<domain> [options]
 
 # Alice can schedule on Emily
 $ aurae run nginx@emily 
@@ -94,7 +94,7 @@ We call the mesh space "Auraespace" as it resembles userspace in Linux.
 The `ash` shell or `aurae shell` runs as a container and be scheduled in `aurae`.
 
 ```bash
-ash <hostname>
+ash <name>
 ```
 
 Once inside an `ash` shell you will be inside a container.
