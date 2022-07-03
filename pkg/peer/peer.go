@@ -121,9 +121,9 @@ func (p *Peer) Establish() (host.Host, error) {
 
 	// [mDNS]
 	// Here is where we identify ourselves in the mesh.
-	//dns := mdns.NewMdnsService(h, p.Name.Service(), Notifee())
-	//p.DNS = dns
-	//logrus.Infof("Multicast DNS Established. Hostname: %s", p.Name.Service())
+	dns := mdns.NewMdnsService(h, p.Name.Service(), Notifee())
+	p.DNS = dns
+	logrus.Infof("Multicast DNS Established. Hostname: %s", p.Name.Service())
 
 	return h, nil
 }
