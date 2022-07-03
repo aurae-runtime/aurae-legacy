@@ -25,6 +25,7 @@ import (
 	p2p "github.com/libp2p/go-libp2p"
 	"github.com/libp2p/go-libp2p-core/network"
 	"github.com/libp2p/go-libp2p-core/protocol"
+
 	"github.com/libp2p/go-libp2p/p2p/discovery/mdns"
 
 	"github.com/sirupsen/logrus"
