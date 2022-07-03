@@ -14,46 +14,62 @@
  *                                                                           *
 \*===========================================================================*/
 
-package hostname
+package peer
 
-import (
-	"fmt"
-	"strings"
-)
-
-// Hostname represents a 3 part hostname.
+//import (
+//	"github.com/libp2p/go-libp2p-core/network"
+//	"net"
+//	"time"
+//)
 //
-// beeps@boops@computer.com
-type Hostname struct {
-	Sub    string
-	Host   string
-	Domain string
-}
-
-func New(any string) *Hostname {
-	domain := ""
-	host := ""
-	sub := ""
-	spl := strings.Split(any, "@")
-	if len(spl) >= 3 {
-		domain = spl[2]
-		host = spl[1]
-		sub = spl[0]
-	} else if len(spl) == 2 {
-		host = spl[0]
-		domain = spl[1]
-	} else if len(spl) == 1 {
-		host = spl[0]
-	} else {
-		host = any
-	}
-	return &Hostname{
-		Domain: domain,
-		Host:   host,
-		Sub:    sub,
-	}
-}
-
-func (h *Hostname) String() string {
-	return fmt.Sprintf("%s@%s@%s", h.Sub, h.Host, h.Domain)
-}
+//var _ net.Conn = &Conn{}
+//
+//type Conn struct {
+//	std net.Conn
+//	p2p network.Conn
+//}
+//
+//func NewConn() *Conn {
+//	return &Conn{
+//		std: &net.TCPConn{},
+//	}
+//}
+//
+//func (c Conn) Read(b []byte) (n int, err error) {
+//	return c.std.Read(b)
+//}
+//
+//func (c Conn) Write(b []byte) (n int, err error) {
+//	//TODO implement me
+//	panic("implement me")
+//}
+//
+//func (c Conn) Close() error {
+//	//TODO implement me
+//	panic("implement me")
+//}
+//
+//func (c Conn) LocalAddr() net.Addr {
+//	//TODO implement me
+//	panic("implement me")
+//}
+//
+//func (c Conn) RemoteAddr() net.Addr {
+//	//TODO implement me
+//	panic("implement me")
+//}
+//
+//func (c Conn) SetDeadline(t time.Time) error {
+//	//TODO implement me
+//	panic("implement me")
+//}
+//
+//func (c Conn) SetReadDeadline(t time.Time) error {
+//	//TODO implement me
+//	panic("implement me")
+//}
+//
+//func (c Conn) SetWriteDeadline(t time.Time) error {
+//	//TODO implement me
+//	panic("implement me")
+//}
