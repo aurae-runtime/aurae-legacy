@@ -27,6 +27,7 @@ import (
 	"github.com/libp2p/go-libp2p-core/network"
 	"github.com/libp2p/go-libp2p-core/peer"
 	"github.com/libp2p/go-libp2p-core/protocol"
+	"github.com/libp2p/go-libp2p/p2p/discovery/mdns"
 
 	p2p "github.com/libp2p/go-libp2p"
 	"github.com/sirupsen/logrus"
@@ -65,7 +66,7 @@ type Peer struct {
 	Host host.Host
 
 	// DNS is an instance of multicast DNS
-	//DNS mdns.Service
+	DNS mdns.Service
 
 	// runtimeID is a UUID generated at runtime
 	// that exists for this specific reference

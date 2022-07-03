@@ -1,4 +1,4 @@
-package p2pgrpc
+package grpc
 
 import (
 	"github.com/libp2p/go-libp2p-core/network"
@@ -17,7 +17,6 @@ func (c *streamConn) LocalAddr() net.Addr {
 	ret := &net.IPAddr{}
 	// TODO THIS IS BROKEN
 	logrus.Warnf("UNSUPPORTED TRANSLATION")
-
 	return ret
 }
 
@@ -27,7 +26,6 @@ func (c *streamConn) RemoteAddr() net.Addr {
 	ret := &net.IPAddr{}
 	// TODO THIS IS BROKEN
 	logrus.Warnf("UNSUPPORTED TRANSLATION")
-
 	return ret
 }
 
