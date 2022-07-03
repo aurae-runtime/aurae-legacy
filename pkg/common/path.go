@@ -46,11 +46,3 @@ func Path(key string) string {
 	}
 	return ret
 }
-
-func recursiveStripLeadingSuffix(key string, suffix string) string {
-	if strings.HasSuffix(key, suffix) {
-		key = strings.TrimSuffix(key, suffix)
-		return recursiveStripLeadingSuffix(key, suffix)
-	}
-	return key
-}

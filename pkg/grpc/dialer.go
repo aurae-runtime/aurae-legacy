@@ -33,17 +33,11 @@ func (p *GRPCProtocol) GetDialOption(ctx context.Context) grpc.DialOption {
 			return nil, err
 		}
 
-		return &streamConn{Stream: stream}, nil
+		return &Conn{Stream: stream}, nil
 	})
 }
 
-// Dial attempts to open a GRPC connection over libp2p to a peer.
-// Note that the context is used as the **stream context** not just the dial context.
-func (p *GRPCProtocol) Dial(
-	ctx context.Context,
-	peerID peer.ID,
-	dialOpts ...grpc.DialOption,
-) (*grpc.ClientConn, error) {
+func (p *GRPCProtocol) Dial(ctx context.Context, peerID peer.ID, dialOpts ...grpc.DialOption) (*grpc.ClientConn, error) {
 	dialOpsPrepended := append([]grpc.DialOption{p.GetDialOption(ctx)}, dialOpts...)
 	return grpc.DialContext(ctx, peerID.Pretty(), dialOpsPrepended...)
 }

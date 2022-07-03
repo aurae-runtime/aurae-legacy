@@ -2,6 +2,7 @@ package grpc
 
 import (
 	"context"
+	manet "github.com/multiformats/go-multiaddr/net"
 	"github.com/sirupsen/logrus"
 	"io"
 	"net"
@@ -29,7 +30,7 @@ func (l *grpcListener) Accept() (net.Conn, error) {
 	case <-l.listenerCtx.Done():
 		return nil, io.EOF
 	case stream := <-l.streamCh:
-		return &streamConn{Stream: stream}, nil
+		return &Conn{Stream: stream}, nil
 	}
 }
 
@@ -38,13 +39,13 @@ func (l *grpcListener) Addr() net.Addr {
 	listenAddrs := l.host.Network().ListenAddresses()
 	if len(listenAddrs) > 0 {
 		for _, addr := range listenAddrs {
-			//if na, err := manet.ToNetAddr(addr); err == nil {
-			//	return na
-			//}
-			logrus.Warnf("UNSUPPORTED TRANSLATION: %v", addr)
+			if na, err := manet.ToNetAddr(addr); err == nil {
+				return na
+			}
 		}
 	}
-	return fakeLocalAddr()
+	logrus.Warnf("Unable to calculate listen address from peer to peer network. %v", listenAddrs)
+	return &net.TCPAddr{IP: net.ParseIP(""), Port: 0}
 }
 
 // Close closes the listener.
