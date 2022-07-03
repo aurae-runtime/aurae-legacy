@@ -22,11 +22,9 @@ import (
 	"github.com/kris-nova/aurae"
 	"github.com/kris-nova/aurae/pkg/common"
 	"github.com/kris-nova/aurae/pkg/name"
-	p2p "github.com/libp2p/go-libp2p"
+	p2p "github.com/libp2p/go-libp2p-core"
 	"github.com/libp2p/go-libp2p-core/network"
-	"github.com/libp2p/go-libp2p-core/protocol"
-
-	"github.com/libp2p/go-libp2p/p2p/discovery/mdns"
+	"github.com/libp2p/go-libp2p-protocol"
 
 	"github.com/sirupsen/logrus"
 )
@@ -64,7 +62,7 @@ type Peer struct {
 	Host host.Host
 
 	// DNS is an instance of multicast DNS
-	DNS mdns.Service
+	//DNS mdns.Service
 
 	// runtimeID is a UUID generated at runtime
 	// that exists for this specific reference
@@ -118,9 +116,9 @@ func (p *Peer) Establish() (host.Host, error) {
 
 	// [mDNS]
 	// Here is where we identify ourselves in the mesh.
-	dns := mdns.NewMdnsService(h, p.Name.Service(), Notifee())
-	p.DNS = dns
-	logrus.Infof("Multicast DNS Established. Hostname: %s", p.Name.Service())
+	//dns := mdns.NewMdnsService(h, p.Name.Service(), Notifee())
+	//p.DNS = dns
+	//logrus.Infof("Multicast DNS Established. Hostname: %s", p.Name.Service())
 
 	return h, nil
 }

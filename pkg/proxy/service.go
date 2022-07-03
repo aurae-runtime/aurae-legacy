@@ -24,7 +24,7 @@ import (
 	"github.com/kris-nova/aurae/pkg/core"
 	"github.com/kris-nova/aurae/pkg/peer"
 	"github.com/kris-nova/aurae/rpc"
-	p2p "github.com/libp2p/go-libp2p"
+	p2p "github.com/libp2p/go-libp2p-core"
 	"github.com/libp2p/go-libp2p-core/crypto"
 	"github.com/libp2p/go-libp2p-core/protocol"
 	"github.com/multiformats/go-multiaddr"
