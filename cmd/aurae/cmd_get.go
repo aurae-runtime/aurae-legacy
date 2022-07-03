@@ -44,8 +44,8 @@ func Get() *cli.Command {
 				return fmt.Errorf("usage: aurae get <key>")
 			}
 
-			auraeClient := client.NewClient(run.socket)
-			err := auraeClient.Connect()
+			auraeClient := client.NewClient()
+			err := auraeClient.ConnectSocket(run.socket)
 			if err != nil {
 				return err
 			}

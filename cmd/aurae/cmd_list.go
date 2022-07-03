@@ -45,8 +45,8 @@ func List() *cli.Command {
 				return fmt.Errorf("usage: aurae list <key>")
 			}
 
-			auraeClient := client.NewClient(run.socket)
-			err := auraeClient.Connect()
+			auraeClient := client.NewClient()
+			err := auraeClient.ConnectSocket(run.socket)
 			if err != nil {
 				return err
 			}

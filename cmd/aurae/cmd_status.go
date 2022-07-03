@@ -46,25 +46,25 @@ func Status() *cli.Command {
 
 			logrus.Infof("Host: %s", hostname)
 			var clientToUse *client.Client
-			rootClient := client.NewClient(run.socket)
-			err := rootClient.Connect()
+			auraeClient := client.NewClient()
+			err := auraeClient.ConnectSocket(run.socket)
 			if err != nil {
 				return err
 			}
 
-			if hostname != common.Localhost {
-				peerClient, err := rootClient.NewPeer(hostname)
-				if err != nil {
-					return err
-				}
-				err = peerClient.Connect()
-				if err != nil {
-					return err
-				}
-				clientToUse = peerClient
-			} else {
-				clientToUse = rootClient
-			}
+			//if hostname != common.Localhost {
+			//	peerClient, err := rootClient.NewPeer(hostname)
+			//	if err != nil {
+			//		return err
+			//	}
+			//	err = peerClient.Connect()
+			//	if err != nil {
+			//		return err
+			//	}
+			//	clientToUse = peerClient
+			//} else {
+			//	clientToUse = rootClient
+			//}
 			statusResp, err := clientToUse.Status(context.Background(), &rpc.StatusReq{})
 			if err != nil {
 				return err

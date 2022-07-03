@@ -28,16 +28,11 @@ func NewClient() *Client {
 	}
 }
 
-//
-// TODO We need to have a new Connect() style function
-// TODO This will need to use grpcDial to dial the peer id
-// TODO from the peer network
-//
-
 func (c *Client) ConnectPeer(p *peer.Peer) error {
 
 	// Cache the peer
 	c.peer = p
+
 	grpcProto := p2pgrpc.NewGRPCProtocol(context.Background(), p.Host)
 	conn, err := grpcProto.Dial(context.Background(), p.ID(), grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {

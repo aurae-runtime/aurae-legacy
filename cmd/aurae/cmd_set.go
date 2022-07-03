@@ -48,8 +48,8 @@ func Set() *cli.Command {
 				return fmt.Errorf("usage: aurae set <key> <value>")
 			}
 
-			auraeClient := client.NewClient(run.socket)
-			err := auraeClient.Connect()
+			auraeClient := client.NewClient()
+			err := auraeClient.ConnectSocket(run.socket)
 			if err != nil {
 				return err
 			}
