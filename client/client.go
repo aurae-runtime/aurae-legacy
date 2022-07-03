@@ -1,11 +1,10 @@
 package client
 
 import (
-	"context"
 	"fmt"
 	"github.com/kris-nova/aurae/pkg/peer"
 	"github.com/kris-nova/aurae/rpc"
-	p2pgrpc "github.com/paralin/go-libp2p-grpc"
+	//p2pgrpc "github.com/paralin/go-libp2p-grpc"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"time"
@@ -15,7 +14,7 @@ type Client struct {
 	rpc.CoreClient
 	rpc.RuntimeClient
 	rpc.ScheduleClient
-	rpc.ProxyClient
+	//rpc.ProxyClient
 
 	socket    string
 	connected bool
@@ -28,18 +27,18 @@ func NewClient() *Client {
 	}
 }
 
-func (c *Client) ConnectPeer(p *peer.Peer) error {
-
-	// Cache the peer
-	c.peer = p
-
-	grpcProto := p2pgrpc.NewGRPCProtocol(context.Background(), p.Host)
-	conn, err := grpcProto.Dial(context.Background(), p.ID(), grpc.WithInsecure(), grpc.WithBlock())
-	if err != nil {
-		return err
-	}
-	return c.establish(conn)
-}
+//func (c *Client) ConnectPeer(p *peer.Peer) error {
+//
+//	// Cache the peer
+//	c.peer = p
+//
+//	grpcProto := p2pgrpc.NewGRPCProtocol(context.Background(), p.Host)
+//	conn, err := grpcProto.Dial(context.Background(), p.ID(), grpc.WithInsecure(), grpc.WithBlock())
+//	if err != nil {
+//		return err
+//	}
+//	return c.establish(conn)
+//}
 
 func (c *Client) ConnectSocket(sock string) error {
 
@@ -63,8 +62,8 @@ func (c *Client) establish(conn grpc.ClientConnInterface) error {
 	c.RuntimeClient = runtime
 	schedule := rpc.NewScheduleClient(conn)
 	c.ScheduleClient = schedule
-	proxy := rpc.NewProxyClient(conn)
-	c.ProxyClient = proxy
+	//proxy := rpc.NewProxyClient(conn)
+	//c.ProxyClient = proxy
 	c.connected = true
 	return nil
 }
