@@ -89,8 +89,8 @@ func main() {
 					if path == "" {
 						return fmt.Errorf("usage: auraefs mount <path>")
 					}
-					auraeClient := client.NewClient(run.socket)
-					err := auraeClient.Connect()
+					auraeClient := client.NewClient()
+					err := auraeClient.ConnectSocket(run.socket)
 					if err != nil {
 						return err
 					}

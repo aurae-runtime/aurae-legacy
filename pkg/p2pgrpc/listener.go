@@ -2,10 +2,9 @@ package p2pgrpc
 
 import (
 	"context"
+	"github.com/sirupsen/logrus"
 	"io"
 	"net"
-
-	manet "github.com/multiformats/go-multiaddr-net"
 )
 
 // grpcListener implements the net.Listener interface.
@@ -39,9 +38,10 @@ func (l *grpcListener) Addr() net.Addr {
 	listenAddrs := l.host.Network().ListenAddresses()
 	if len(listenAddrs) > 0 {
 		for _, addr := range listenAddrs {
-			if na, err := manet.ToNetAddr(addr); err == nil {
-				return na
-			}
+			//if na, err := manet.ToNetAddr(addr); err == nil {
+			//	return na
+			//}
+			logrus.Warnf("UNSUPPORTED TRANSLATION: %v", addr)
 		}
 	}
 	return fakeLocalAddr()
