@@ -43,10 +43,23 @@ func (t *KeyValueTable) AddKeyValue(key string, value any) {
 	if len(key) > t.keyWidth {
 		t.keyWidth = len(key)
 	}
-	if len(valStr) > t.valWidth {
+	// TODO change 120 to term width
+	if len(valStr) > t.valWidth && len(valStr) < 120 {
 		t.valWidth = len(valStr)
 	}
-	t.data[key] = valStr
+	t.data[key] = color.CyanString(valStr)
+}
+
+func (t *KeyValueTable) AddKeyValueErr(key string, value any) {
+	valStr := fmt.Sprintf("%v", value)
+	if len(key) > t.keyWidth {
+		t.keyWidth = len(key)
+	}
+	// TODO change 120 to term width
+	if len(valStr) > t.valWidth && len(valStr) < 120 {
+		t.valWidth = len(valStr)
+	}
+	t.data[key] = color.RedString(valStr)
 }
 
 func (t *KeyValueTable) Print(w io.Writer) error {
@@ -57,7 +70,7 @@ func (t *KeyValueTable) Print(w io.Writer) error {
 	}
 
 	for k, v := range t.data {
-		fmt.Fprintf(w, "%-*s: %-*s", t.keyWidth*2, color.BlueString(k), t.valWidth*2, color.CyanString(v))
+		fmt.Fprintf(w, "%-*s: %-*s", t.keyWidth*2, color.BlueString(k), t.valWidth, v)
 		fmt.Fprintf(w, "\n")
 
 	}
