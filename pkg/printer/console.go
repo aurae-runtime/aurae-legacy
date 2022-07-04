@@ -75,8 +75,8 @@ func (c *Console) Print(w io.Writer) error {
 	return nil
 }
 
-func (c *Console) AddTable(t *Table) {
-	c.OrderedPrinters[c.i] = t
+func (c *Console) AddPrinter(printer Printer) {
+	c.OrderedPrinters[c.i] = printer
 	c.i++
 }
 

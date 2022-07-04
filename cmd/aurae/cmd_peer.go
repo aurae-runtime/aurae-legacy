@@ -72,7 +72,7 @@ func Peer() *cli.Command {
 			tabPeer.AddField(prettyField)
 			tabPeer.AddField(pubKeyField)
 			tabPeer.AddField(pubKeyTypeField)
-			con.AddTable(tabPeer)
+			con.AddPrinter(tabPeer)
 
 			// Connect to the default service
 			selfStream, err := host.NewStream(context.Background(), svc.ID())
@@ -80,7 +80,7 @@ func Peer() *cli.Command {
 				return err
 			}
 			tabStream := printer.NewTable(fmt.Sprintf("Stream: %s", selfStream.Protocol()))
-			con.AddTable(tabStream)
+			con.AddPrinter(tabStream)
 
 			con.PrintStdout()
 			return nil

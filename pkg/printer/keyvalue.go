@@ -16,64 +16,50 @@
 
 package printer
 
-import "testing"
+import (
+	"fmt"
+	"github.com/fatih/color"
+	"io"
+)
 
-func TestConsoleSingleField(t *testing.T) {
+type KeyValueTable struct {
+	Title    string
+	keyWidth int
+	valWidth int
+	data     map[string]string
+}
 
-	c := NewConsole("TestConsoleSingleField")
-	t1 := NewTable("People")
-	nameField := t1.NewField("Names")
-	nameField.AddValue("Kris")
-	nameField.AddValue("Nóva")
-	nameField.AddValue("Björn")
-	t1.AddField(nameField)
-	c.AddPrinter(t1)
-	err := c.PrintStdout()
-	if err != nil {
-		t.Errorf("unable to print: %v", err)
+func NewKeyValueTable(title string) *KeyValueTable {
+	return &KeyValueTable{
+		Title:    title,
+		data:     make(map[string]string),
+		keyWidth: 0,
+		valWidth: 0,
 	}
 }
 
-func TestConsoleDoubleField(t *testing.T) {
-
-	c := NewConsole("TestConsoleDoubleField")
-	t1 := NewTable("People")
-
-	nameField := t1.NewField("Names")
-	nameField.AddValue("Kris")
-	nameField.AddValue("Quintessence")
-	nameField.AddValue("Björn")
-	t1.AddField(nameField)
-
-	thingField := t1.NewField("Favorite Things")
-	thingField.AddValue("Mountains")
-	thingField.AddValue("Stars")
-	thingField.AddValue("Gravy")
-	t1.AddField(thingField)
-
-	c.AddPrinter(t1)
-	err := c.PrintStdout()
-	if err != nil {
-		t.Errorf("unable to print: %v", err)
+func (t *KeyValueTable) AddKeyValue(key string, value any) {
+	valStr := fmt.Sprintf("%v", value)
+	if len(key) > t.keyWidth {
+		t.keyWidth = len(key)
 	}
+	if len(valStr) > t.valWidth {
+		t.valWidth = len(valStr)
+	}
+	t.data[key] = valStr
 }
 
-func TestKeyValue(t *testing.T) {
+func (t *KeyValueTable) Print(w io.Writer) error {
 
-	c := NewConsole("TestConsoleDoubleField")
-	t1 := NewKeyValueTable("") // No title does not print
-
-	t1.AddKeyValue("Beeps", "Boops")
-	t1.AddKeyValue("Meeps", 1)
-	t1.AddKeyValue("Boops", &struct {
-		something string
-	}{
-		something: "anything",
-	})
-
-	c.AddPrinter(t1)
-	err := c.PrintStdout()
-	if err != nil {
-		t.Errorf("unable to print: %v", err)
+	// Title
+	if t.Title != "" {
+		fmt.Fprintf(w, "%s\n", color.GreenString(t.Title))
 	}
+
+	for k, v := range t.data {
+		fmt.Fprintf(w, "%-*s: %-*s", t.keyWidth*2, color.BlueString(k), t.valWidth*2, color.CyanString(v))
+		fmt.Fprintf(w, "\n")
+
+	}
+	return nil
 }
