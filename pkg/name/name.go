@@ -24,8 +24,8 @@ package name
 // These names can be used for identifying instances in the
 // various mesh networks.
 type Name struct {
-	*Servicename
-	*Hostname
+	Servicename
+	Hostname
 	raw string
 }
 

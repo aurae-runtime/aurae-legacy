@@ -30,7 +30,7 @@ type Hostname struct {
 	domain string
 }
 
-func NewHostname(any string) *Hostname {
+func NewHostname(any string) Hostname {
 	domain := ""
 	host := ""
 	sub := ""
@@ -47,7 +47,7 @@ func NewHostname(any string) *Hostname {
 	} else {
 		host = any
 	}
-	return &Hostname{
+	return Hostname{
 		domain: domain,
 		host:   host,
 		sub:    sub,

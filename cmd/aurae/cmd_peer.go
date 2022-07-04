@@ -20,7 +20,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/kris-nova/aurae/pkg/crypto"
-	"github.com/kris-nova/aurae/pkg/name"
 	"github.com/kris-nova/aurae/pkg/peer"
 	"github.com/kris-nova/aurae/pkg/printer"
 	"github.com/urfave/cli/v2"
@@ -39,6 +38,7 @@ func Peer() *cli.Command {
 				Name:        "servicename",
 				Aliases:     []string{"svc"},
 				Destination: &run.servicename,
+				Value:       "aurae", // TODO plumb service name through
 			},
 		}),
 		Action: func(c *cli.Context) error {
@@ -46,7 +46,7 @@ func Peer() *cli.Command {
 			if err != nil {
 				return err
 			}
-			svc := peer.NewPeer(name.New(run.servicename), key)
+			svc := peer.NewPeerServicename(run.servicename, key)
 			host, err := svc.Establish()
 			if err != nil {
 				return err

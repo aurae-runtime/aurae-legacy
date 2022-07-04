@@ -20,8 +20,8 @@ type Servicename struct {
 	service string
 }
 
-func NewServicename(any string) *Servicename {
-	return &Servicename{
+func NewServicename(any string) Servicename {
+	return Servicename{
 		service: any,
 	}
 }
