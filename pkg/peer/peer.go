@@ -129,7 +129,6 @@ func (p *Peer) Establish() (host.Host, error) {
 }
 
 func (p *Peer) ID() peer.ID {
-
 	return p.Host.ID()
 }
 

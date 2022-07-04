@@ -35,6 +35,8 @@ type RuntimeOptions struct {
 	verbose bool
 	socket  string
 	key     string
+
+	servicename string
 }
 
 func main() {

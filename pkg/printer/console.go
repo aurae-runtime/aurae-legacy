@@ -18,8 +18,10 @@ package printer
 
 import (
 	"fmt"
+	"github.com/fatih/color"
 	"io"
 	"os"
+	"strings"
 )
 
 // Console will print to the terminal using a configured output stream.
@@ -54,7 +56,10 @@ func (c *Console) PrintStderr() error {
 
 func (c *Console) Print(w io.Writer) error {
 	// Title
-	fmt.Fprintf(w, "%s:\n", c.Title)
+	if c.Title != "" {
+		col := color.New(color.Bold, color.FgGreen)
+		fmt.Fprintf(w, "[%s]\n", col.Sprintf(strings.ToUpper(c.Title)))
+	}
 
 	// Printers
 	for i := 0; i <= c.i; i++ {

@@ -18,6 +18,7 @@ package printer
 
 import (
 	"fmt"
+	"github.com/fatih/color"
 	"golang.org/x/crypto/ssh/terminal"
 	"io"
 )
@@ -52,33 +53,41 @@ func (t *Table) AddField(f *Field) {
 
 func (t *Table) Print(w io.Writer) error {
 	// Title
-	fmt.Fprintf(w, "%s:\n", t.Title)
+	if t.Title != "" {
+		fmt.Fprintf(w, "%s\n", color.GreenString(t.Title))
+	}
 
 	// Print the Headers first
-	headerLine := ""
+	headerLine := " " // Offset a single space
+	maxRow := 0       // maxRow is dynamically calculated as we print the headers
 	for i := 0; i <= t.i; i++ {
 		f := t.OrderedFields[i]
 		if f == nil {
 			continue // Sanity check
 		}
+		if f.i > maxRow {
+			maxRow = f.i
+		}
 
-		headerLine += fmt.Sprintf("%*s", f.width, f.Header)
+		headerLine += fmt.Sprintf("%-*s", f.width, color.BlueString(f.Header))
 	}
 	headerLine += "\n"
 	fmt.Fprintf(w, headerLine)
 
 	// Print the Fields next
-	fieldLine := ""
-	row := 0 // Row is the "row" of the fields to print. Start at 0
-	for i := 0; i <= t.i; i++ {
-		f := t.OrderedFields[i]
-		if f == nil {
-			continue // Sanity check
+	// Row is the "row" of the fields to print. Start at 0
+	for row := 0; row <= maxRow; row++ {
+		fieldLine := ""
+
+		for i := 0; i <= t.i; i++ {
+			f := t.OrderedFields[i]
+			if f == nil {
+				continue // Sanity check
+			}
+			fieldLine += fmt.Sprintf("%*s", f.width, f.values[row])
 		}
-		fieldLine += fmt.Sprintf("%*s", f.width, f.values[row])
-		row++
+		fieldLine += "\n"
+		fmt.Fprintf(w, fieldLine)
 	}
-	fieldLine += "\n"
-	fmt.Fprintf(w, fieldLine)
 	return nil
 }
