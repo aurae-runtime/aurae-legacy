@@ -62,7 +62,7 @@ func (t *Table) Print(w io.Writer) error {
 			continue // Sanity check
 		}
 
-		headerLine += fmt.Sprintf("%*s", t.width, f.Header)
+		headerLine += fmt.Sprintf("%*s", f.width, f.Header)
 	}
 	headerLine += "\n"
 	fmt.Fprintf(w, headerLine)
@@ -75,7 +75,7 @@ func (t *Table) Print(w io.Writer) error {
 		if f == nil {
 			continue // Sanity check
 		}
-		fieldLine += fmt.Sprintf("%*s", t.width, f.values[row])
+		fieldLine += fmt.Sprintf("%*s", f.width, f.values[row])
 		row++
 	}
 	fieldLine += "\n"
