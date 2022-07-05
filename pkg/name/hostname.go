@@ -59,6 +59,6 @@ func NewHostname(any string) Hostname {
 //
 // beeps@alice@nivenly.com
 // hack@alice@nivenly.com
-func (h *Hostname) Host() string {
+func (h Hostname) Host() string {
 	return fmt.Sprintf("%s@%s@%s", h.sub, h.host, h.domain)
 }

@@ -21,7 +21,6 @@ import (
 	"github.com/kris-nova/aurae"
 	"github.com/kris-nova/aurae/pkg/core"
 	"github.com/kris-nova/aurae/pkg/core/local"
-	"github.com/kris-nova/aurae/pkg/crypto"
 	"github.com/kris-nova/aurae/pkg/peer"
 	"github.com/kris-nova/aurae/pkg/posix"
 	"github.com/kris-nova/aurae/pkg/proxy"
@@ -60,15 +59,15 @@ type Daemon struct {
 	runtime    bool
 	socket     string
 	localStore string
-	keypath    string
+	//keypath    string
 }
 
-func New(socket, localStore, keypath string) *Daemon {
+func New(socket, localStore string) *Daemon {
 	return &Daemon{
 		runtime:    true,
 		socket:     socket,
 		localStore: localStore,
-		keypath:    keypath,
+		//keypath:    keypath,
 	}
 }
 
@@ -140,17 +139,16 @@ func (d *Daemon) Run() error {
 	}()
 
 	// Step 7. Peer host and initialize peer to peer network.
-	instanceKey, err := crypto.KeyFromPath(d.keypath)
-	if err != nil {
-		return fmt.Errorf("invalid private key: %s: %v", d.keypath, err)
-	}
-	self := peer.Self(instanceKey)
-	host, err := self.Establish()
+	//instanceKey, err := crypto.KeyFromPath(d.keypath)
+	//if err != nil {
+	//	return fmt.Errorf("invalid private key: %s: %v", d.keypath, err)
+	//}
+	self := peer.Self()
+	_, err = self.Establish()
 	if err != nil {
 		return fmt.Errorf("unable to join auraespace peer network: %v", err)
 	}
 	d.Self = self
-	logrus.Infof("Peering with runtime ID: %s", host.ID())
 
 	// Step 7. Dispatch events from the filesystem
 

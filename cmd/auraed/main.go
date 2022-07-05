@@ -81,7 +81,7 @@ func main() {
 		HideVersion:          false,
 
 		Action: func(c *cli.Context) error {
-			d := daemon.New(run.socket, run.localStore, run.key)
+			d := daemon.New(run.socket, run.localStore)
 			return d.Run()
 		},
 	}

@@ -26,6 +26,6 @@ func NewServicename(any string) Servicename {
 	}
 }
 
-func (s *Servicename) Service() string {
+func (s Servicename) Service() string {
 	return s.service
 }

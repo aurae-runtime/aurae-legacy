@@ -18,19 +18,13 @@ package peer
 
 import (
 	p2p "github.com/libp2p/go-libp2p"
-	"github.com/libp2p/go-libp2p-core/crypto"
 	"github.com/multiformats/go-multiaddr"
 )
 
 // DefaultOptions are the default p2p options for Aurae
-func DefaultOptions(key crypto.PrivKey) []p2p.Option {
+func DefaultOptions() []p2p.Option {
 
 	return []p2p.Option{
-
-		// We MUST use a key in order to adhere to our guarantee that all
-		// connections can be fundamentally achieved with only a single
-		// encryption key.
-		p2p.Identity(key),
 
 		// EnableAutoRelay for performance reasons in the circuit.
 		p2p.EnableAutoRelay(),

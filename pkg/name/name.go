@@ -29,16 +29,16 @@ type Name struct {
 	raw string
 }
 
-func New(any string) *Name {
+func New(any string) Name {
 	host := NewHostname(any)
 	svc := NewServicename(any)
-	return &Name{
+	return Name{
 		raw:         any,
 		Hostname:    host,
 		Servicename: svc,
 	}
 }
 
-func (n *Name) String() string {
+func (n Name) String() string {
 	return n.Service()
 }

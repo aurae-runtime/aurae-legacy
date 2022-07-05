@@ -16,17 +16,21 @@
 
 package peer
 
+import "testing"
+
 //
-//func TestPeerToPeerConnectSingle(t *testing.T) {
-//	a := NewPeer("a", nil)
-//	b := NewPeer("b", nil)
-//	var err error
-//	_, err = a.Connect()
-//	if err != nil {
-//		t.Errorf("unable to connect: %v", err)
-//	}
-//	_, err = b.Connect()
-//	if err != nil {
-//		t.Errorf("unable to connect: %v", err)
-//	}
-//}
+func TestPeerToPeerConnectSingle(t *testing.T) {
+	a := NewPeerServicename("a", nil)
+	b := NewPeerServicename("b", nil)
+
+	var err error
+	_, err = a.Establish()
+	if err != nil {
+		t.Errorf("unable to establish a: %v", err)
+	}
+	_, err = b.Establish()
+	if err != nil {
+		t.Errorf("unable to establish b: %v", err)
+	}
+
+}

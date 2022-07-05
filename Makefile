@@ -16,11 +16,11 @@
 
 all: compile
 
-version       ?=  0.1.2            # Semantic versioning for the entire suite
+version       ?=  0.1.2
 toplevel      ?=  aurae
-auraetarget   ?=  aurae            # Targets are written to local /bin directory
-auraedtarget  ?=  auraed           # Targets are written to local /bin directory
-auraefstarget ?=  auraefs          # Targets are written to local /bin directory
+auraetarget   ?=  aurae
+auraedtarget  ?=  auraed
+auraefstarget ?=  auraefs
 org           ?=  kris-nova
 authorname    ?=  Kris Nóva
 authoremail   ?=  kris@nivenly.com

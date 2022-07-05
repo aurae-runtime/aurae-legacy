@@ -17,48 +17,62 @@
 package peer
 
 import (
-	"github.com/kris-nova/aurae/pkg/name"
+	"fmt"
 	"github.com/libp2p/go-libp2p-core/peer"
+	"github.com/multiformats/go-multiaddr"
+	"github.com/sirupsen/logrus"
 )
 
-// TODO We need to understand if we want to host this in a (the?) DHT
-
-type NameService struct {
-	Peers map[string]*Record
-}
-
-type Record struct {
-	ID   peer.ID
-	Name name.Name
-	Info peer.AddrInfo
-}
-
-// TODO We need to figure out where to host state
-
-func (s *NameService) HandlePeerFound(info peer.AddrInfo) {
-	//logrus.Infof("Peer discovery: %v", info)
-	//logrus.Warnf("Stateless name mapping with raw addr info: %s", info.String())
-	name := name.New(info.String())
-	//logrus.Infof("Peer registered in DNS registry: [%s]", name.String())
-	s.Peers[name.String()] = &Record{
-		Name: name,
-		Info: info,
-		ID:   info.ID,
-	}
-}
-
-func NewNameService() *NameService {
-	return &NameService{
-		Peers: make(map[string]*Record),
-	}
-}
-
-// GetAddrInfo is a knock off of glibc getaddrinfo.
+// Address will calculate an address encapsulated from IPFS
 //
-// Hopefully without the bugs and controversy.
-func (s *NameService) GetAddrInfo(name string) *Record {
-	if record, ok := s.Peers[name]; ok {
-		return record
+// Example address: /ip4/127.0.0.1/tcp/10000/p2p/QmYo41GybvrXk8y8Xnm1P7pfA4YEXCpfnLyzgRPnNbG35e
+func (p *Peer) Address() string {
+	// Create a new IPFS specific address
+	ipfsAddr, err := multiaddr.NewMultiaddr(fmt.Sprintf("/ipfs/%s", p.Host.ID().Pretty()))
+	if err != nil {
+		logrus.Warnf("unable to create IPFS host address: %v", err)
+		return ""
 	}
-	return nil
+
+	hostAddrs := p.Host.Addrs()
+	if len(hostAddrs) < 1 {
+		logrus.Warnf("unable to find host address")
+		return ""
+	}
+	hostAddr := hostAddrs[0]
+	return hostAddr.Encapsulate(ipfsAddr).String()
+}
+
+// AddressDecode will decode a raw address from p.Address() and return
+// the details needed to connect from another peer.
+//
+// This is taken from the sample code, and doesn't need to be this offensive.
+//
+// Pass the value that p.Address() returns here.
+func AddressDecode(addr string) (peer.ID, multiaddr.Multiaddr) {
+
+	ipfsAddr, err := multiaddr.NewMultiaddr(addr)
+	if err != nil {
+		logrus.Warnf("unable to create IPFS host address: %v", err)
+		return "", ipfsAddr
+	}
+
+	ipfsProtocol, err := ipfsAddr.ValueForProtocol(multiaddr.P_IPFS)
+	if err != nil {
+		logrus.Warnf("unable to lookup ipfs protocol: %v", err)
+		return "", ipfsAddr
+	}
+
+	peerID, err := peer.Decode(ipfsProtocol)
+	if err != nil {
+		logrus.Warnf("unable to decode ipfs protocol: %v", err)
+		return "", ipfsAddr
+	}
+
+	// Here be dragons
+	// TODO we can debug this and simplify this, it doesnt need to be this bad
+	targetPeerAddr, _ := multiaddr.NewMultiaddr(fmt.Sprintf("/ipfs/%s", ipfsProtocol))
+	targetAddr := ipfsAddr.Decapsulate(targetPeerAddr)
+
+	return peerID, targetAddr
 }

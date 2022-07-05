@@ -17,18 +17,18 @@
 package peer
 
 import (
+	"context"
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/kris-nova/aurae"
 	"github.com/kris-nova/aurae/pkg/common"
 	"github.com/kris-nova/aurae/pkg/name"
-	"github.com/libp2p/go-libp2p-core/crypto"
+	p2p "github.com/libp2p/go-libp2p"
 	"github.com/libp2p/go-libp2p-core/host"
 	"github.com/libp2p/go-libp2p-core/network"
+	"github.com/libp2p/go-libp2p-core/peerstore"
 	"github.com/libp2p/go-libp2p-core/protocol"
 	"github.com/libp2p/go-libp2p/p2p/discovery/mdns"
-
-	p2p "github.com/libp2p/go-libp2p"
 	"github.com/sirupsen/logrus"
 )
 
@@ -56,7 +56,7 @@ func AuraeStreamProtocol() protocol.ID {
 type Peer struct {
 
 	// Name is the 3 part name of the peer in the mesh.
-	Name *name.Name
+	Name name.Name
 
 	// Peers is where the digraph happens.
 	Peers map[string]*Peer
@@ -78,9 +78,6 @@ type Peer struct {
 	// execution context of this particular runtime.
 	runtimeID uuid.UUID
 
-	// All hosts are encrypted by default on the public
-	Key crypto.PrivKey
-
 	// established denotes if a peer is established in the mesh
 	// or not
 	established bool
@@ -90,17 +87,16 @@ type Peer struct {
 //
 // This will be an empty reference, and will do nothing
 // until Connect() is called.
-func NewPeer(n *name.Name, key crypto.PrivKey) *Peer {
+func NewPeer(n name.Name) *Peer {
 	return &Peer{
 		Peers:     make(map[string]*Peer),
 		Name:      n,
 		runtimeID: uuid.New(),
-		Key:       key,
 	}
 }
 
-func NewPeerServicename(svc string, key crypto.PrivKey) *Peer {
-	return NewPeer(name.New(svc), key)
+func NewPeerServicename(svc string) *Peer {
+	return NewPeer(name.New(svc))
 }
 
 // Establish will initialize a network connection with the peer to peer circuit.
@@ -111,7 +107,7 @@ func (p *Peer) Establish() (host.Host, error) {
 	// [p2p]
 	// Here is where we establish ourselves in the mesh.
 
-	h, err := p2p.New(DefaultOptions(p.Key)...)
+	h, err := p2p.New(DefaultOptions()...)
 	if err != nil {
 		return nil, fmt.Errorf("unable to initialize peer-to-peer host: %v", err)
 	}
@@ -130,7 +126,29 @@ func (p *Peer) Establish() (host.Host, error) {
 	p.internalDNS = internalDNS
 	logrus.Infof("Multicast DNS Established. Hostname: %s", p.Name.Service())
 
+	// All Peers will respond on the default Aurae Protocol.
+	// We establish that handler now.
+	addr := p.Address()
+	logrus.Infof("Establish Aurae protocol [%s] on address: %s", AuraeStreamProtocol(), addr)
 	return h, nil
+}
+
+// ToPeer is a simple heartbeat method to exercise connectivity.
+//func (p *Peer) ToPeer(n name.Name) error {
+//	return fmt.Errorf("UNSUPPORTED")
+//}
+
+//func (p *Peer) ToPeerID(id peer.ID) (network.Stream, error) {
+//
+//}
+
+// ToPeerAddr will dial an address directly.
+//
+// You can find an address by calling p.Address()
+func (p *Peer) ToPeerAddr(addr string) (network.Stream, error) {
+	id, ma := AddressDecode(addr)
+	p.Host.Peerstore().AddAddr(id, ma, peerstore.PermanentAddrTTL)
+	return p.Host.NewStream(context.Background(), id, AuraeStreamProtocol())
 }
 
 func (p *Peer) Close() error {
@@ -140,12 +158,9 @@ func (p *Peer) Close() error {
 var self *Peer
 
 // Self is a singleton for one's self in the mesh.
-//
-// TODO we need a way to cleanly manage service names
-// TODO if the peer already exists.
-func Self(key crypto.PrivKey) *Peer {
+func Self() *Peer {
 	if self == nil {
-		self = NewPeer(name.New(common.Localhost), key)
+		self = NewPeer(name.New(common.Localhost))
 	}
 	return self
 }
