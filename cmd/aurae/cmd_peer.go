@@ -75,7 +75,7 @@ func Peer() *cli.Command {
 			con.AddPrinter(tabPeer)
 
 			// Connect to the default service
-			selfStream, err := host.NewStream(context.Background(), svc.ID())
+			selfStream, err := host.NewStream(context.Background(), svc.Host.ID())
 			if err != nil {
 				return err
 			}

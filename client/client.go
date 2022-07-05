@@ -35,7 +35,7 @@ func (c *Client) ConnectPeer(p *peer.Peer) error {
 	c.peer = p
 
 	grpcProto := p2pgrpc.NewGRPCProtocol(context.Background(), p.Host)
-	conn, err := grpcProto.Dial(context.Background(), p.ID(), grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpcProto.Dial(context.Background(), p.Host.ID(), grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		return err
 	}

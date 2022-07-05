@@ -25,7 +25,6 @@ import (
 	"github.com/libp2p/go-libp2p-core/crypto"
 	"github.com/libp2p/go-libp2p-core/host"
 	"github.com/libp2p/go-libp2p-core/network"
-	"github.com/libp2p/go-libp2p-core/peer"
 	"github.com/libp2p/go-libp2p-core/protocol"
 	"github.com/libp2p/go-libp2p/p2p/discovery/mdns"
 
@@ -66,7 +65,10 @@ type Peer struct {
 	Host host.Host
 
 	// DNS is an instance of multicast DNS
-	DNS mdns.Service
+	DNS *NameService
+
+	// internalDNS is the mdns service itself
+	internalDNS mdns.Service
 
 	// runtimeID is a UUID generated at runtime
 	// that exists for this specific reference
@@ -121,15 +123,18 @@ func (p *Peer) Establish() (host.Host, error) {
 
 	// [mDNS]
 	// Here is where we identify ourselves in the mesh.
-	dns := mdns.NewMdnsService(h, p.Name.Service(), Notifee())
+	dns := NewNameService()
+	internalDNS := mdns.NewMdnsService(h, p.Name.Service(), dns)
+	internalDNS.Start()
 	p.DNS = dns
+	p.internalDNS = internalDNS
 	logrus.Infof("Multicast DNS Established. Hostname: %s", p.Name.Service())
 
 	return h, nil
 }
 
-func (p *Peer) ID() peer.ID {
-	return p.Host.ID()
+func (p *Peer) Close() error {
+	return p.internalDNS.Close()
 }
 
 var self *Peer

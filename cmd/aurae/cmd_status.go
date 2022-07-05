@@ -34,7 +34,7 @@ func Status() *cli.Command {
 		UsageText: `aurae status <options>`,
 		Flags:     GlobalFlags([]cli.Flag{}),
 		Action: func(c *cli.Context) error {
-			
+
 			foundErr := false
 			con := printer.NewConsole("Status")
 
