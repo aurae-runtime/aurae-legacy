@@ -26,16 +26,24 @@ type KeyValueTable struct {
 	Title    string
 	keyWidth int
 	valWidth int
-	data     map[string]string
+	data     map[int]*Record
+	i        int
 }
 
 func NewKeyValueTable(title string) *KeyValueTable {
 	return &KeyValueTable{
 		Title:    title,
-		data:     make(map[string]string),
+		data:     make(map[int]*Record),
 		keyWidth: 0,
 		valWidth: 0,
+		i:        0,
 	}
+}
+
+type Record struct {
+	Key   string
+	Value string
+	Color func(format string, a ...interface{}) string
 }
 
 func (t *KeyValueTable) AddKeyValue(key string, value any) {
@@ -47,7 +55,12 @@ func (t *KeyValueTable) AddKeyValue(key string, value any) {
 	if len(valStr) > t.valWidth && len(valStr) < 120 {
 		t.valWidth = len(valStr)
 	}
-	t.data[key] = color.CyanString(valStr)
+	t.data[t.i] = &Record{
+		Key:   key,
+		Value: valStr,
+		Color: color.GreenString,
+	}
+	t.i++
 }
 
 func (t *KeyValueTable) AddKeyValueErr(key string, value any) {
@@ -59,7 +72,12 @@ func (t *KeyValueTable) AddKeyValueErr(key string, value any) {
 	if len(valStr) > t.valWidth && len(valStr) < 120 {
 		t.valWidth = len(valStr)
 	}
-	t.data[key] = color.RedString(valStr)
+	t.data[t.i] = &Record{
+		Key:   key,
+		Value: valStr,
+		Color: color.RedString,
+	}
+	t.i++
 }
 
 func (t *KeyValueTable) Print(w io.Writer) error {
@@ -69,10 +87,10 @@ func (t *KeyValueTable) Print(w io.Writer) error {
 		fmt.Fprintf(w, "%s\n", color.GreenString(t.Title))
 	}
 
-	for k, v := range t.data {
-		fmt.Fprintf(w, "%-*s: %-*s", t.keyWidth*2, color.BlueString(k), t.valWidth, v)
+	for i := 0; i < len(t.data); i++ {
+		record := t.data[i]
+		fmt.Fprintf(w, "%-*s: %-*s", t.keyWidth*2, color.BlueString(record.Key), t.valWidth, record.Color(record.Value))
 		fmt.Fprintf(w, "\n")
-
 	}
 	return nil
 }
