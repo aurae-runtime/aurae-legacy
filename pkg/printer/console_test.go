@@ -77,3 +77,68 @@ func TestKeyValue(t *testing.T) {
 		t.Errorf("unable to print: %v", err)
 	}
 }
+
+func TestMultiPrint(t *testing.T) {
+
+	c := NewConsole("TestMultiPrint")
+	t1 := NewKeyValueTable("") // No title does not print
+
+	t1.AddKeyValue("Beeps", "Boops")
+	t1.AddKeyValue("Meeps", 1)
+	t1.AddKeyValue("Boops", &struct {
+		something string
+	}{
+		something: "anything",
+	})
+
+	c.AddPrinter(t1)
+	t2 := NewTable("")
+
+	field := t2.NewField("boops")
+	field.AddValue("meeps")
+	field.AddValue("moops")
+	field.AddValue("sheesh")
+	t2.AddField(field)
+
+	field = t2.NewField("beeps")
+	field.AddValue("meeps")
+	field.AddValue("moops")
+	field.AddValue("zeeps")
+	t2.AddField(field)
+
+	field = t2.NewField("meeps")
+	field.AddValue("zerks")
+	field.AddValue("jeepers")
+	field.AddValue("zeeps")
+	field.AddValue("zeeks")
+	t2.AddField(field)
+
+	field = t2.NewField("jeepers")
+	field.AddValue("zorps")
+	field.AddValue("borks")
+	field.AddValue("zeeps")
+	field.AddValue("zeeks")
+	t2.AddField(field)
+
+	field = t2.NewField("jenkies")
+	field.AddValue("zorps")
+	field.AddValue("zoops")
+	field.AddValue("eeks")
+	field.AddValue("zeeks")
+	t2.AddField(field)
+
+	field = t2.NewField("zeeps")
+	field.AddValue("zorps")
+	field.AddValue("zoops")
+	field.AddValue("zeeps")
+	field.AddValue("zeeks")
+	t2.AddField(field)
+
+	c.AddPrinter(t1)
+	c.AddPrinter(t2)
+
+	err := c.PrintStdout()
+	if err != nil {
+		t.Errorf("unable to print: %v", err)
+	}
+}
