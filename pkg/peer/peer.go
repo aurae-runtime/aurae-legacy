@@ -23,9 +23,11 @@ import (
 	"github.com/kris-nova/aurae/pkg/name"
 	"github.com/libp2p/go-libp2p-core/host"
 	"github.com/libp2p/go-libp2p-core/network"
+	"github.com/libp2p/go-libp2p-core/peer"
 	"github.com/libp2p/go-libp2p-core/peerstore"
 	"github.com/libp2p/go-libp2p/p2p/discovery/mdns"
 	routedhost "github.com/libp2p/go-libp2p/p2p/host/routed"
+	"github.com/sirupsen/logrus"
 )
 
 // Peer represents a single peer in the mesh.
@@ -89,15 +91,17 @@ func NewPeerServicename(svc string) *Peer {
 //	return fmt.Errorf("UNSUPPORTED")
 //}
 
-//func (p *Peer) ToPeerID(id peer.ID) (network.Stream, error) {
-//
-//}
+func (p *Peer) ToPeerID(id peer.ID) (network.Stream, error) {
+	return p.Host.NewStream(context.Background(), id, AuraeStreamProtocol())
+}
 
 // ToPeerAddr will dial an address directly.
 //
 // You can find an address by calling p.Address()
 func (p *Peer) ToPeerAddr(addr string) (network.Stream, error) {
 	id, ma := AddressDecode(addr)
+	logrus.Infof("Dialing to peer ID: %s", id)
+	logrus.Infof("Dialing to peer Addr: %s", ma.String())
 	p.Host.Peerstore().AddAddr(id, ma, peerstore.PermanentAddrTTL)
 	return p.Host.NewStream(context.Background(), id, AuraeStreamProtocol())
 }

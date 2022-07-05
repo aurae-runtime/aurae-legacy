@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"log"
 	mrand "math/rand"
+	"os"
 
 	"github.com/libp2p/go-libp2p"
 	"github.com/libp2p/go-libp2p-core/crypto"
@@ -150,12 +151,21 @@ func main() {
 		log.Println("listening for connections")
 		select {} // hang forever
 	}
-	/**** This is where the listener code ends ****/
+	/**** This is where the listener code ends *****/
+
+	fmt.Println()
+	fmt.Println(*target)
+	fmt.Println()
 
 	peerid, err := peer.Decode(*target)
 	if err != nil {
 		log.Fatalln(err)
 	}
+
+	fmt.Println()
+	fmt.Println(peerid)
+	fmt.Println()
+	os.Exit(1)
 
 	// peerinfo := peer.AddrInfo{ID: peerid}
 	log.Println("opening stream")
