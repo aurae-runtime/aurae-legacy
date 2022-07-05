@@ -81,8 +81,10 @@ func (p *Peer) Establish() error {
 
 	hostAddr, _ := ma.NewMultiaddr(fmt.Sprintf("/ipfs/%s", routedHost.ID().Pretty()))
 	for _, addr := range p.RHost.Addrs() {
-		logrus.Infof("Public address: %s", addr.Encapsulate(hostAddr))
+		logrus.Infof("Listening on address: %s", addr.Encapsulate(hostAddr))
 	}
+
+	logrus.Infof("Public address to connect: %s", p.RHost.ID().Pretty())
 
 	logrus.Infof("Established.")
 	return nil
