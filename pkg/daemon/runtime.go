@@ -144,7 +144,7 @@ func (d *Daemon) Run() error {
 	//	return fmt.Errorf("invalid private key: %s: %v", d.keypath, err)
 	//}
 	self := peer.Self()
-	_, err = self.Establish()
+	err = self.Establish()
 	if err != nil {
 		return fmt.Errorf("unable to join auraespace peer network: %v", err)
 	}

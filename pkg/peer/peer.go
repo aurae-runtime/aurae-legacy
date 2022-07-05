@@ -18,33 +18,15 @@ package peer
 
 import (
 	"context"
-	"fmt"
 	"github.com/google/uuid"
-	"github.com/kris-nova/aurae"
 	"github.com/kris-nova/aurae/pkg/common"
 	"github.com/kris-nova/aurae/pkg/name"
-	p2p "github.com/libp2p/go-libp2p"
 	"github.com/libp2p/go-libp2p-core/host"
 	"github.com/libp2p/go-libp2p-core/network"
 	"github.com/libp2p/go-libp2p-core/peerstore"
-	"github.com/libp2p/go-libp2p-core/protocol"
 	"github.com/libp2p/go-libp2p/p2p/discovery/mdns"
-	"github.com/sirupsen/logrus"
+	routedhost "github.com/libp2p/go-libp2p/p2p/host/routed"
 )
-
-const (
-	AuraeStream              string = "/aurae"    // The official stream endpoint for Aurae
-	AuraeStreamVersionFormat string = "/aurae/%s" // Format with the package version
-)
-
-func AuraeStreamProtocol() protocol.ID {
-	auraeStreamProtocol := fmt.Sprintf(AuraeStreamVersionFormat, aurae.Version)
-	ids := protocol.ConvertFromStrings([]string{auraeStreamProtocol})
-	if len(ids) != 1 {
-		panic("unable to find aurae protocol!")
-	}
-	return ids[0]
-}
 
 // Peer represents a single peer in the mesh.
 //
@@ -64,6 +46,9 @@ type Peer struct {
 	// Host is the peer instance of this peer.
 	Host host.Host
 
+	// RHost is a wrapper around Host
+	RHost *routedhost.RoutedHost
+
 	// DNS is an instance of multicast DNS
 	DNS *NameService
 
@@ -76,7 +61,7 @@ type Peer struct {
 	//
 	// This ID should never "persist" past the
 	// execution context of this particular runtime.
-	runtimeID uuid.UUID
+	RuntimeID uuid.UUID
 
 	// established denotes if a peer is established in the mesh
 	// or not
@@ -91,46 +76,12 @@ func NewPeer(n name.Name) *Peer {
 	return &Peer{
 		Peers:     make(map[string]*Peer),
 		Name:      n,
-		runtimeID: uuid.New(),
+		RuntimeID: uuid.New(),
 	}
 }
 
 func NewPeerServicename(svc string) *Peer {
 	return NewPeer(name.New(svc))
-}
-
-// Establish will initialize a network connection with the peer to peer circuit.
-// Establish will also initialize multicast domain name name (mDNS) for
-// managing distributed name names.
-func (p *Peer) Establish() (host.Host, error) {
-
-	// [p2p]
-	// Here is where we establish ourselves in the mesh.
-
-	h, err := p2p.New(DefaultOptions()...)
-	if err != nil {
-		return nil, fmt.Errorf("unable to initialize peer-to-peer host: %v", err)
-	}
-	p.Host = h
-	p.Host.SetStreamHandler(AuraeStreamProtocol(), func(s network.Stream) {
-		logrus.Infof("Received stream: %v", s.ID())
-	})
-	logrus.Infof("Established. Listening on: %v", h.Network().ListenAddresses())
-
-	// [mDNS]
-	// Here is where we identify ourselves in the mesh.
-	dns := NewNameService()
-	internalDNS := mdns.NewMdnsService(h, p.Name.Service(), dns)
-	internalDNS.Start()
-	p.DNS = dns
-	p.internalDNS = internalDNS
-	logrus.Infof("Multicast DNS Established. Hostname: %s", p.Name.Service())
-
-	// All Peers will respond on the default Aurae Protocol.
-	// We establish that handler now.
-	addr := p.Address()
-	logrus.Infof("Establish Aurae protocol [%s] on address: %s", AuraeStreamProtocol(), addr)
-	return h, nil
 }
 
 // ToPeer is a simple heartbeat method to exercise connectivity.

@@ -20,20 +20,22 @@
 // We will never be able to determine the size of the graph before
 // walking the graph.
 
-package peer
+package graph
+
+import "github.com/kris-nova/aurae/pkg/peer"
 
 // HamiltonianPaths will be 0 indexed
 
-type HamiltonianPath map[int]*Peer
+type HamiltonianPath map[int]*peer.Peer
 
 func NewHamiltonianPath() HamiltonianPath {
-	return make(map[int]*Peer)
+	return make(map[int]*peer.Peer)
 }
 
 // CalculateHamiltonianPath is where the magic happens.
 //
 // Here is where the magic happens.
-func CalculateHamiltonianPath(root *Peer) HamiltonianPath {
+func CalculateHamiltonianPath(root *peer.Peer) HamiltonianPath {
 	x := NewHamiltonianPath()
 	if x.recursiveCycle(root, 0) {
 		// We have found a path
@@ -46,11 +48,11 @@ func CalculateHamiltonianPath(root *Peer) HamiltonianPath {
 // recursiveCycle will assert a single root against a graph
 //
 // This is where the core logic of the Hamilton path algorithm lives.
-func (h HamiltonianPath) recursiveCycle(graph *Peer, pos int) bool {
+func (h HamiltonianPath) recursiveCycle(graph *peer.Peer, pos int) bool {
 
 	// Check if this peer already exists in the graph
 	for _, x := range h {
-		if x.runtimeID == graph.runtimeID {
+		if x.RuntimeID == graph.RuntimeID {
 			return true
 		}
 	}
@@ -62,7 +64,7 @@ func (h HamiltonianPath) recursiveCycle(graph *Peer, pos int) bool {
 	// to be a true Ham path.
 	connectsToRoot := false
 	for _, peer := range graph.Peers {
-		if peer.runtimeID == h[0].runtimeID {
+		if peer.RuntimeID == h[0].RuntimeID {
 			connectsToRoot = true
 		} else {
 			return h.recursiveCycle(peer, pos+1)

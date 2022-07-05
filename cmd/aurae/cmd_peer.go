@@ -38,12 +38,10 @@ func Peer() *cli.Command {
 			//	return err
 			//}
 			svc := peer.Self()
-			_, err := svc.Establish()
+			err := svc.Establish()
 			if err != nil {
 				return err
 			}
-			addr := svc.Address()
-			logrus.Infof("Address: %s", addr)
 			for {
 			}
 		},
@@ -63,7 +61,7 @@ func Peer() *cli.Command {
 					//	return err
 					//}
 					svc := peer.Self()
-					_, err := svc.Establish()
+					err := svc.Establish()
 					if err != nil {
 						return err
 					}

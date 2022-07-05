@@ -21,8 +21,6 @@ import (
 	"github.com/libp2p/go-libp2p-core/peer"
 )
 
-// TODO We need to understand if we want to host this in a (the?) DHT
-
 type NameService struct {
 	Peers map[string]*Record
 }
@@ -32,8 +30,6 @@ type Record struct {
 	Name name.Name
 	Info peer.AddrInfo
 }
-
-// TODO We need to figure out where to host state
 
 func (s *NameService) HandlePeerFound(info peer.AddrInfo) {
 	//logrus.Infof("Peer discovery: %v", info)
@@ -48,9 +44,11 @@ func (s *NameService) HandlePeerFound(info peer.AddrInfo) {
 }
 
 func NewNameService() *NameService {
-	return &NameService{
+	dns := &NameService{
 		Peers: make(map[string]*Record),
 	}
+
+	return dns
 }
 
 // GetAddrInfo is a knock off of glibc getaddrinfo.

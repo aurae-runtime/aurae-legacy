@@ -19,7 +19,7 @@
 // A Hamiltonian path is a path that passes through every vertex exactly once (NOT every edge).
 // If it ends at the initial vertex then it is a Hamiltonian cycle.
 
-package peer
+package graph
 
 //
 //import (
