@@ -23,20 +23,20 @@ import (
 )
 
 type KeyValueTable struct {
-	Title    string
-	keyWidth int
-	valWidth int
-	data     map[int]*Record
-	i        int
+	Title       string
+	keyWidth    int
+	valWidth    int
+	OrderedData map[int]*Record
+	i           int
 }
 
 func NewKeyValueTable(title string) *KeyValueTable {
 	return &KeyValueTable{
-		Title:    title,
-		data:     make(map[int]*Record),
-		keyWidth: 0,
-		valWidth: 0,
-		i:        0,
+		Title:       title,
+		OrderedData: make(map[int]*Record),
+		keyWidth:    0,
+		valWidth:    0,
+		i:           0,
 	}
 }
 
@@ -55,7 +55,7 @@ func (t *KeyValueTable) AddKeyValue(key string, value any) {
 	if len(valStr) > t.valWidth && len(valStr) < 120 {
 		t.valWidth = len(valStr)
 	}
-	t.data[t.i] = &Record{
+	t.OrderedData[t.i] = &Record{
 		Key:   key,
 		Value: valStr,
 		Color: color.GreenString,
@@ -72,7 +72,7 @@ func (t *KeyValueTable) AddKeyValueErr(key string, value any) {
 	if len(valStr) > t.valWidth && len(valStr) < 120 {
 		t.valWidth = len(valStr)
 	}
-	t.data[t.i] = &Record{
+	t.OrderedData[t.i] = &Record{
 		Key:   key,
 		Value: valStr,
 		Color: color.RedString,
@@ -87,8 +87,8 @@ func (t *KeyValueTable) Print(w io.Writer) error {
 		fmt.Fprintf(w, "%s\n", color.GreenString(t.Title))
 	}
 
-	for i := 0; i < len(t.data); i++ {
-		record := t.data[i]
+	for i := 0; i < len(t.OrderedData); i++ {
+		record := t.OrderedData[i]
 		fmt.Fprintf(w, "%-*s: %-*s", t.keyWidth*2, color.BlueString(record.Key), t.valWidth, record.Color(record.Value))
 		fmt.Fprintf(w, "\n")
 	}
