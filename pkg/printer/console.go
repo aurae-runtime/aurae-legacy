@@ -38,7 +38,8 @@ type Console struct {
 	i int
 }
 
-func NewConsole(title string) *Console {
+func NewConsole(title string, a ...interface{}) *Console {
+	title = fmt.Sprintf(title, a...)
 	return &Console{
 		i:               0,
 		Title:           title,

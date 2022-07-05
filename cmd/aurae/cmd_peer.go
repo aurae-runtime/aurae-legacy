@@ -17,11 +17,9 @@
 package main
 
 import (
-	"context"
-	"fmt"
+	"github.com/kris-nova/aurae/pkg/common"
 	"github.com/kris-nova/aurae/pkg/crypto"
 	"github.com/kris-nova/aurae/pkg/peer"
-	"github.com/kris-nova/aurae/pkg/printer"
 	"github.com/urfave/cli/v2"
 )
 
@@ -31,59 +29,28 @@ import (
 func Peer() *cli.Command {
 	return &cli.Command{
 		Name:      "peer",
-		Usage:     "Work with Aurae peers in the mesh.",
-		UsageText: `aurae peer <options>`,
-		Flags: GlobalFlags([]cli.Flag{
-			&cli.StringFlag{
-				Name:        "servicename",
-				Aliases:     []string{"svc"},
-				Destination: &run.servicename,
-				Value:       "aurae", // TODO plumb service name through
-			},
-		}),
+		Usage:     "Learn about a peer in the mesh. IDs or service names accepted.",
+		UsageText: `aurae peer <peer> <options>`,
+		Flags:     GlobalFlags([]cli.Flag{}),
 		Action: func(c *cli.Context) error {
+
+			peerQuery := c.Args().Get(0)
+			if peerQuery == "" {
+				peerQuery = common.Self // No query, use self
+			}
+
 			key, err := crypto.KeyFromPath(run.key)
 			if err != nil {
 				return err
 			}
-			svc := peer.NewPeerServicename(run.servicename, key)
-			host, err := svc.Establish()
+
+			svc := peer.NewPeerServicename(peerQuery, key)
+			_, err = svc.Establish()
 			if err != nil {
 				return err
 			}
 
-			con := printer.NewConsole("")
-			tabPeer := printer.NewTable(fmt.Sprintf("PeerID: %s", host.ID()))
-			prettyField := tabPeer.NewField("Peer")
-			pubKeyTypeField := tabPeer.NewField("Public Key Type")
-			pubKeyField := tabPeer.NewField("Public Key Type")
-			for _, p := range host.Peerstore().PeersWithAddrs() {
-				prettyField.AddValue(p.Pretty())
-				pk, err := p.ExtractPublicKey()
-				if err != nil {
-					continue
-				}
-				pubKeyTypeField.AddValue(pk.Type())
-				rawKeyData, err := pk.Raw()
-				if err == nil {
-					pubKeyField.AddValue(string(rawKeyData))
-				}
-			}
-			tabPeer.AddField(prettyField)
-			tabPeer.AddField(pubKeyField)
-			tabPeer.AddField(pubKeyTypeField)
-			con.AddPrinter(tabPeer)
-
-			// Connect to the default service
-			selfStream, err := host.NewStream(context.Background(), svc.Host.ID())
-			if err != nil {
-				return err
-			}
-			tabStream := printer.NewTable(fmt.Sprintf("Stream: %s", selfStream.Protocol()))
-			con.AddPrinter(tabStream)
-
-			con.PrintStdout()
-			return nil
+			return svc.Print()
 		},
 		Subcommands: []*cli.Command{
 			{

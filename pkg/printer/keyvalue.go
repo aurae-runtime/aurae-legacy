@@ -30,7 +30,8 @@ type KeyValueTable struct {
 	i           int
 }
 
-func NewKeyValueTable(title string) *KeyValueTable {
+func NewKeyValueTable(title string, a ...interface{}) *KeyValueTable {
+	title = fmt.Sprintf(title, a...)
 	return &KeyValueTable{
 		Title:       title,
 		OrderedData: make(map[int]*Record),

@@ -31,7 +31,8 @@ type Table struct {
 	height        int
 }
 
-func NewTable(title string) *Table {
+func NewTable(title string, a ...interface{}) *Table {
+	title = fmt.Sprintf(title, a...)
 	width, height, err := terminal.GetSize(0)
 	if err != nil {
 		width = 80
