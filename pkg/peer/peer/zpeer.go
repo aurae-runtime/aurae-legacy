@@ -5,60 +5,68 @@ import (
 	"context"
 	"crypto/rand"
 	"fmt"
+	ds "github.com/ipfs/go-datastore"
+	dsync "github.com/ipfs/go-datastore/sync"
 	"github.com/libp2p/go-libp2p"
 	"github.com/libp2p/go-libp2p-core/crypto"
 	"github.com/libp2p/go-libp2p-core/host"
 	"github.com/libp2p/go-libp2p-core/network"
 	"github.com/libp2p/go-libp2p-core/peer"
-	"io"
-	"io/ioutil"
-	"log"
-	mrand "math/rand"
-
-	ds "github.com/ipfs/go-datastore"
-	dsync "github.com/ipfs/go-datastore/sync"
 	dht "github.com/libp2p/go-libp2p-kad-dht"
 	rhost "github.com/libp2p/go-libp2p/p2p/host/routed"
 	ma "github.com/multiformats/go-multiaddr"
+	"github.com/sirupsen/logrus"
+	"io/ioutil"
+	"log"
 )
 
-// makeRoutedHost creates a LibP2P host with a random peer ID listening on the
-// given multiaddress. It will bootstrap using the provided PeerInfo.
-func makeRoutedHost(listenPort int, randseed int64, bootstrapPeers []peer.AddrInfo, globalFlag string) (host.Host, error) {
-	// If the seed is zero, use real cryptographic randomness. Otherwise, use a
-	// deterministic randomness source to make generated keys stay the same
-	// across multiple runs
-	var r io.Reader
-	if randseed == 0 {
-		r = rand.Reader
-	} else {
-		r = mrand.New(mrand.NewSource(randseed))
-	}
+// Notes
+//
+// Listen Port: 1235
+// Client Port: 1234
 
-	// Generate a key pair for this host. We will use it at least
-	// to obtain a valid host ID.
-	priv, _, err := crypto.GenerateKeyPairWithReader(crypto.RSA, 2048, r)
+const (
+	DefaultGenerateKeyPairBits int = 2048
+	DefaultListenPort          int = 8709
+	DefaultPeerPort            int = 8708
+)
+
+var emptyKey crypto.PrivKey = &crypto.Ed25519PrivateKey{}
+
+type Peer struct {
+	uniqKey    crypto.PrivKey
+	routedHost rhost.RoutedHost
+	host       host.Host
+}
+
+func NewPeer() *Peer {
+	randSeeder := rand.Reader
+	key, _, err := crypto.GenerateKeyPairWithReader(crypto.RSA, DefaultGenerateKeyPairBits, randSeeder)
 	if err != nil {
-		return nil, err
+		logrus.Errorf("unable to GenerateKeyPair for new peer: %v", err)
+		key = emptyKey
 	}
+	return &Peer{
+		uniqKey: key,
+	}
+}
 
+func (p *Peer) Establish(ctx context.Context, offset int) error {
 	opts := []libp2p.Option{
-		libp2p.ListenAddrStrings(fmt.Sprintf("/ip4/0.0.0.0/tcp/%d", listenPort)),
-		libp2p.Identity(priv),
+		libp2p.ListenAddrStrings(fmt.Sprintf("/ip4/0.0.0.0/tcp/%d", DefaultListenPort+offset)),
+		libp2p.Identity(p.uniqKey),
 		libp2p.DefaultTransports,
 		libp2p.DefaultMuxers,
 		libp2p.DefaultSecurity,
 		libp2p.NATPortMap(),
 	}
 
-	ctx := context.Background()
-
 	basicHost, err := libp2p.New(opts...)
 	if err != nil {
-		return nil, err
+		return err
 	}
+	p.host = basicHost
 
-	// Construct a datastore (needed by the DHT). This is just a simple, in-memory thread-safe datastore.
 	dstore := dsync.MutexWrap(ds.NewMapDatastore())
 
 	// Make the DHT
@@ -66,17 +74,18 @@ func makeRoutedHost(listenPort int, randseed int64, bootstrapPeers []peer.AddrIn
 
 	// Make the routed host
 	routedHost := rhost.Wrap(basicHost, dht)
+	p.routedHost = *routedHost
 
 	// connect to the chosen ipfs nodes
-	err = bootstrapConnect(ctx, routedHost, bootstrapPeers)
+	err = bootstrapConnect(ctx, routedHost, IPFS_PEERS)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// Bootstrap the host
 	err = dht.Bootstrap(ctx)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// Build host multiaddress
@@ -94,7 +103,7 @@ func makeRoutedHost(listenPort int, randseed int64, bootstrapPeers []peer.AddrIn
 	// targetF = Pretty()
 	//log.Printf("Now run \"aurae -d %s%s\" on a different terminal\n",  routedHost.ID().Pretty())
 	log.Printf("ID: %s", routedHost.ID().Pretty())
-	return routedHost, nil
+	return nil
 }
 
 func RunClient(input string) {
@@ -111,16 +120,23 @@ func RunClient(input string) {
 	//	log.Fatal("Please provide a port to bind on with -l")
 	//}
 
-	// Make a host that listens on the given multiaddress
-	//var bootstrapPeers []peer.AddrInfo
-	bootstrapPeers := IPFS_PEERS
-	ha, err := makeRoutedHost(1234, 0, bootstrapPeers, "global")
+	p := NewPeer()
+	err := p.Establish(context.Background(), 0)
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	// Make a host that listens on the given multiaddress
+	//var bootstrapPeers []peer.AddrInfo
+	//bootstrapPeers := IPFS_PEERS
+	//ha, err := makeRoutedHost(1234, 0, bootstrapPeers, "global")
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+
 	// Set a stream handler on host A. /echo/1.0.0 is
 	// a user-defined protocol name.
+	ha := p.routedHost
 	ha.SetStreamHandler("/echo/1.0.0", func(s network.Stream) {
 		log.Println("Got a new stream!")
 		if err := doEcho(s); err != nil {
@@ -161,11 +177,12 @@ func RunClient(input string) {
 }
 
 func RunServer() {
-	bootstrapPeers := IPFS_PEERS
-	ha, err := makeRoutedHost(1235, 0, bootstrapPeers, "global")
+	p := NewPeer()
+	err := p.Establish(context.Background(), 1)
 	if err != nil {
 		log.Fatal(err)
 	}
+	ha := p.routedHost
 	ha.SetStreamHandler("/echo/1.0.0", func(s network.Stream) {
 		log.Println("Got a new stream!")
 		if err := doEcho(s); err != nil {
