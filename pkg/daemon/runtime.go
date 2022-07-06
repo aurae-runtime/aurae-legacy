@@ -17,6 +17,7 @@
 package daemon
 
 import (
+	"context"
 	"fmt"
 	"github.com/kris-nova/aurae"
 	"github.com/kris-nova/aurae/pkg/core"
@@ -144,7 +145,7 @@ func (d *Daemon) Run() error {
 	//	return fmt.Errorf("invalid private key: %s: %v", d.keypath, err)
 	//}
 	self := peer.Self()
-	err = self.Establish()
+	err = self.Establish(context.Background(), 1)
 	if err != nil {
 		return fmt.Errorf("unable to join auraespace peer network: %v", err)
 	}

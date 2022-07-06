@@ -19,13 +19,13 @@ package main
 import (
 	"context"
 	"fmt"
-	zpeer "github.com/kris-nova/aurae/pkg/peer/peer"
+	"github.com/kris-nova/aurae/pkg/name"
+	peer "github.com/kris-nova/aurae/pkg/peer"
 	"github.com/urfave/cli/v2"
+	"os"
 )
 
-// Peer
-//
-//
+// Peer is the command for p2p
 func Peer() *cli.Command {
 	return &cli.Command{
 		Name:      "peer",
@@ -37,8 +37,12 @@ func Peer() *cli.Command {
 			//if err != nil {
 			//	return err
 			//}
-			p := zpeer.NewPeer()
-			err := p.Establish(context.Background(), 1)
+			hostname, err := os.Hostname()
+			if err != nil {
+				return fmt.Errorf("unable to calculate hostname: %v", err)
+			}
+			p := peer.NewPeer(name.New(hostname))
+			err = p.Establish(context.Background(), 1)
 			if err != nil {
 				return err
 			}
@@ -55,8 +59,12 @@ func Peer() *cli.Command {
 					if input == "" {
 						return fmt.Errorf("usage: aurae peer to <addr>")
 					}
-					p := zpeer.NewPeer()
-					err := p.Establish(context.Background(), 0)
+					hostname, err := os.Hostname()
+					if err != nil {
+						return fmt.Errorf("unable to calculate hostname: %v", err)
+					}
+					p := peer.NewPeer(name.New(hostname))
+					err = p.Establish(context.Background(), 0)
 					if err != nil {
 						return err
 					}

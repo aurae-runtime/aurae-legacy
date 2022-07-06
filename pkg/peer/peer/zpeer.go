@@ -77,27 +77,18 @@ func (p *Peer) Establish(ctx context.Context, offset int) error {
 	p.host = basicHost
 
 	dstore := dsync.MutexWrap(ds.NewMapDatastore())
-
-	// Make the DHT
 	dht := dht.NewDHT(ctx, basicHost, dstore)
-
-	// Make the routed host
 	routedHost := rhost.Wrap(basicHost, dht)
 	p.routedHost = *routedHost
-
-	// connect to the chosen ipfs nodes
 	err = bootstrapConnect(ctx, routedHost, IPFS_PEERS)
 	if err != nil {
 		return err
 	}
-
-	// Bootstrap the host
 	err = dht.Bootstrap(ctx)
 	if err != nil {
 		return err
 	}
 
-	// Build host multiaddress
 	//hostAddr, _ := ma.NewMultiaddr(fmt.Sprintf("/ipfs/%s", routedHost.ID().Pretty()))
 
 	// Now we can build a full multiaddress to reach this host
@@ -109,8 +100,6 @@ func (p *Peer) Establish(ctx context.Context, offset int) error {
 	//	//log.Println(addr.Encapsulate(hostAddr))
 	//}
 
-	// targetF = Pretty()
-	//log.Printf("Now run \"aurae -d %s%s\" on a different terminal\n",  routedHost.ID().Pretty())
 	logrus.Infof("ID: %s", routedHost.ID().Pretty())
 	p.established = true
 	return nil
