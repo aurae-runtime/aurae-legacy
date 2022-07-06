@@ -1,13 +1,9 @@
 package client
 
 import (
-	"context"
 	"fmt"
-	p2pgrpc "github.com/kris-nova/aurae/pkg/grpc"
 	"github.com/kris-nova/aurae/pkg/peer"
 	"github.com/kris-nova/aurae/rpc"
-	peer2 "github.com/libp2p/go-libp2p-core/peer"
-
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"time"
@@ -30,17 +26,17 @@ func NewClient() *Client {
 	}
 }
 
-func (c *Client) ConnectPeer(self *peer.Peer, to peer2.ID) error {
-	// Cache the peer
-	c.peer = self
-
-	grpcProto := p2pgrpc.NewGRPCProtocol(context.Background(), &self.RHost)
-	conn, err := grpcProto.Dial(context.Background(), to, grpc.WithTimeout(time.Second*6), grpc.WithInsecure(), grpc.WithBlock())
-	if err != nil {
-		return err
-	}
-	return c.establish(conn)
-}
+//func (c *Client) ConnectPeer(self *peer.Peer, to peer2.ID) error {
+//	// Cache the peer
+//	c.peer = self
+//
+//	grpcProto := p2pgrpc.NewGRPCProtocol(context.Background(), &self.RHost)
+//	conn, err := grpcProto.Dial(context.Background(), to, grpc.WithTimeout(time.Second*6), grpc.WithInsecure(), grpc.WithBlock())
+//	if err != nil {
+//		return err
+//	}
+//	return c.establish(conn)
+//}
 
 func (c *Client) ConnectSocket(sock string) error {
 

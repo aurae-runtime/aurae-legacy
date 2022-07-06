@@ -23,6 +23,7 @@ import (
 	"github.com/kris-nova/aurae/pkg/core"
 	"github.com/kris-nova/aurae/pkg/core/local"
 	p2pgrpc "github.com/kris-nova/aurae/pkg/grpc"
+	"github.com/kris-nova/aurae/pkg/name"
 	"github.com/kris-nova/aurae/pkg/peer"
 	"github.com/kris-nova/aurae/pkg/posix"
 	"github.com/kris-nova/aurae/pkg/proxy"
@@ -144,11 +145,16 @@ func (d *Daemon) Run() error {
 	//if err != nil {
 	//	return fmt.Errorf("invalid private key: %s: %v", d.keypath, err)
 	//}
-	self := peer.Self()
+	hostname, err := os.Hostname()
+	if err != nil {
+		return fmt.Errorf("unable to calculate hostname: %v", err)
+	}
+	self := peer.NewPeer(name.New(hostname))
 	err = self.Establish(context.Background(), 1)
 	if err != nil {
 		return fmt.Errorf("unable to join auraespace peer network: %v", err)
 	}
+	go self.Stream()
 	d.Self = self
 
 	peerConn := p2pgrpc.NewGRPCProtocol(ctx, &self.RHost)

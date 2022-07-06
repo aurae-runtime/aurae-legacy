@@ -61,7 +61,7 @@ type Peer struct {
 
 func NewPeer(n name.Name) *Peer {
 	golog.SetupLogging(golog.Config{
-		Stdout: false,
+		Stdout: true,
 		Stderr: false,
 	})
 	golog.SetAllLoggers(golog.LevelFatal)
@@ -150,9 +150,10 @@ func (p *Peer) To(peerID string) error {
 		return err
 	}
 
+	logrus.Infof("Trying NewStream: %s", id)
 	s, err := p.RHost.NewStream(context.Background(), id, AuraeStreamProtocol())
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to create new stream: %v", err)
 	}
 
 	_, err = s.Write([]byte("Hello, world!\n"))

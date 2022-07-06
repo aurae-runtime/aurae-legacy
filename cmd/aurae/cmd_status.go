@@ -21,8 +21,6 @@ import (
 	"fmt"
 	"github.com/kris-nova/aurae/client"
 	"github.com/kris-nova/aurae/pkg/common"
-	"github.com/kris-nova/aurae/pkg/name"
-	"github.com/kris-nova/aurae/pkg/peer"
 	"github.com/kris-nova/aurae/pkg/printer"
 	"github.com/kris-nova/aurae/rpc"
 	"github.com/urfave/cli/v2"
@@ -53,23 +51,28 @@ func Status() *cli.Command {
 			var daemonErr error
 
 			// Initalize Peers and Clients
-			var p *peer.Peer
-			if input == "" || input == common.Self {
-				p = peer.Self()
-				err := auraeClient.ConnectSocket(run.socket)
-				if err != nil {
-					daemonErr = fmt.Errorf("unable to dial self socket: %v", err)
-				}
-			} else {
-				p = peer.NewPeer(name.New(input))
-				err := p.Establish(context.Background(), 0)
-				if err != nil {
-					daemonErr = fmt.Errorf("unable to establish peer: %v", err)
-				}
-				err = auraeClient.ConnectPeer(p, "") // TODO dial to peer
-				if err != nil {
-					return fmt.Errorf("unable to dial peer: %v", err)
-				}
+			//var p *peer.Peer
+			//if input == "" || input == common.Self {
+			//	p = peer.Self()
+			//	err := auraeClient.ConnectSocket(run.socket)
+			//	if err != nil {
+			//		daemonErr = fmt.Errorf("unable to dial self socket: %v", err)
+			//	}
+			//} else {
+			//	p = peer.NewPeer(name.New(input))
+			//	err := p.Establish(context.Background(), 0)
+			//	if err != nil {
+			//		daemonErr = fmt.Errorf("unable to establish peer: %v", err)
+			//	}
+			//	err = auraeClient.ConnectPeer(p, "") // TODO dial to peer
+			//	if err != nil {
+			//		return fmt.Errorf("unable to dial peer: %v", err)
+			//	}
+			//}
+
+			err := auraeClient.ConnectSocket(run.socket)
+			if err != nil {
+				daemonErr = fmt.Errorf("unable to dial self socket: %v", err)
 			}
 
 			// Get Status
