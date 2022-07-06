@@ -60,11 +60,12 @@ type Peer struct {
 }
 
 func NewPeer(n name.Name) *Peer {
-	golog.SetAllLoggers(golog.LevelFatal)
 	golog.SetupLogging(golog.Config{
 		Stdout: false,
 		Stderr: false,
 	})
+	golog.SetAllLoggers(golog.LevelFatal)
+
 	randSeeder := rand.Reader
 	key, _, err := crypto.GenerateKeyPairWithReader(crypto.RSA, DefaultGenerateKeyPairBits, randSeeder)
 	if err != nil {
@@ -74,6 +75,11 @@ func NewPeer(n name.Name) *Peer {
 	logrus.Infof("New Peer: %s", n.String())
 	runtimeID := uuid.New()
 	logrus.Debugf("New Peer Runtime ID: %s", runtimeID.String())
+
+	// Linux specific
+	// This can fix the log line about UDP sizing
+	//sysctl.Set("net.core.rmem_max", "2500000")
+	// Linux specific
 
 	return &Peer{
 		Name:        n,
