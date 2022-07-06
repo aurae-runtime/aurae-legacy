@@ -17,12 +17,12 @@
 package peer
 
 import (
+	"bufio"
 	"fmt"
 	"github.com/kris-nova/aurae"
 	"github.com/libp2p/go-libp2p-core/network"
 	"github.com/libp2p/go-libp2p-core/protocol"
 	"github.com/sirupsen/logrus"
-	"io/ioutil"
 )
 
 const (
@@ -39,12 +39,25 @@ func AuraeStreamProtocol() protocol.ID {
 	return ids[0]
 }
 
-func HandlePeerConnectStream(s network.Stream) {
-	logrus.Infof("Received new stream. Protocol: %s", s.Protocol())
-	data, err := ioutil.ReadAll(s)
+const (
+	AuraeProtocolHandshakeError    string = "<--**<<ERROR>>**-->\n"
+	AuraeProtocolHandshakeRequest  string = "<--**<<REQUEST>>**-->\n"
+	AuraeProtocolHandshakeResponse string = "<--**<<RESPONSE>>**-->\n"
+)
+
+func Handshake(s network.Stream) {
+	defer s.Close()
+	buf := bufio.NewReader(s)
+	handshakeStr, err := buf.ReadString('\n')
 	if err != nil {
-		logrus.Warnf("Unable to read network stream: %v", err)
+		logrus.Warnf("Handshake failure: %v", err)
+		s.Write([]byte(AuraeProtocolHandshakeError)) // Error
+		return
 	}
-	logrus.Infof("Raw stream:")
-	logrus.Infof("%v", data)
+	if handshakeStr != AuraeProtocolHandshakeRequest {
+		s.Write([]byte(AuraeProtocolHandshakeError)) // Error
+		return
+	}
+	s.Write([]byte(AuraeProtocolHandshakeResponse)) // Okay
+	return
 }

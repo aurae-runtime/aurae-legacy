@@ -35,8 +35,7 @@ import (
 	dht "github.com/libp2p/go-libp2p-kad-dht"
 	rhost "github.com/libp2p/go-libp2p/p2p/host/routed"
 	"github.com/sirupsen/logrus"
-	"io/ioutil"
-	"log"
+	"io"
 )
 
 const (
@@ -135,13 +134,7 @@ func (p *Peer) To(peerID string) error {
 	if !p.established {
 		return fmt.Errorf("unable to stream, first establish in the mesh")
 	}
-	p.RHost.SetStreamHandler(AuraeStreamProtocol(), func(s network.Stream) {
-		if err := doEcho(s); err != nil {
-			s.Reset()
-		} else {
-			s.Close()
-		}
-	})
+	p.RHost.SetStreamHandler(AuraeStreamProtocol(), Handshake)
 
 	id, err := peer.Decode(peerID)
 	if err != nil {
@@ -154,17 +147,19 @@ func (p *Peer) To(peerID string) error {
 		return fmt.Errorf("unable to create new stream: %v", err)
 	}
 
-	_, err = s.Write([]byte("Hello, world!\n"))
+	_, err = s.Write([]byte(AuraeProtocolHandshakeRequest))
 	if err != nil {
-		return err
+		return fmt.Errorf("handshake failure write: %v", err)
 	}
-
-	out, err := ioutil.ReadAll(s)
+	response, err := io.ReadAll(s)
 	if err != nil {
-		return err
+		return fmt.Errorf("handshake failure read: %v", err)
 	}
+	if string(response) != AuraeProtocolHandshakeResponse {
+		return fmt.Errorf("handshake failure validate: %s", string(response))
+	}
+	logrus.Infof("Aurae handshake success!")
 
-	logrus.Infof("%q", out)
 	return nil
 }
 
@@ -172,15 +167,7 @@ func (p *Peer) Stream() error {
 	if !p.established {
 		return fmt.Errorf("unable to stream, first establish in the mesh")
 	}
-	p.RHost.SetStreamHandler(AuraeStreamProtocol(), func(s network.Stream) {
-		logrus.Infof("Received new stream: %s", s.ID())
-		if err := doEcho(s); err != nil {
-			log.Println(err)
-			s.Reset()
-		} else {
-			s.Close()
-		}
-	})
+	p.RHost.SetStreamHandler(AuraeStreamProtocol(), Handshake)
 	select {} // hang forever
 }
 
