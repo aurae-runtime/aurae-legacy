@@ -113,12 +113,16 @@ func (p *Peer) Establish(ctx context.Context, offset int) error {
 	// Routed Host
 	routedHost := rhost.Wrap(basicHost, dht)
 	p.RHost = *routedHost
+	p.established = true
 
 	// Bootstrap
-	err = p.Bootstrap(IPFSPeers)
-	if err != nil {
-		return err
-	}
+	go func() {
+		err = p.Bootstrap(IPFSPeers)
+		if err != nil {
+			logrus.Errorf("Unable to bootstrap with IPFS: %v", err)
+			p.established = false
+		}
+	}()
 	err = dht.Bootstrap(ctx)
 	if err != nil {
 		return err
@@ -126,7 +130,6 @@ func (p *Peer) Establish(ctx context.Context, offset int) error {
 
 	// ID
 	logrus.Infof("ID: %s", routedHost.ID().Pretty())
-	p.established = true
 	return nil
 }
 
