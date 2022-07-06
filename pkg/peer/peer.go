@@ -26,6 +26,7 @@ import (
 	dsync "github.com/ipfs/go-datastore/sync"
 	golog "github.com/ipfs/go-log/v2"
 	"github.com/kris-nova/aurae/pkg/common"
+	crypto2 "github.com/kris-nova/aurae/pkg/crypto"
 	"github.com/kris-nova/aurae/pkg/name"
 	"github.com/libp2p/go-libp2p"
 	"github.com/libp2p/go-libp2p-core/crypto"
@@ -33,7 +34,6 @@ import (
 	"github.com/libp2p/go-libp2p-core/network"
 	"github.com/libp2p/go-libp2p-core/peer"
 	dht "github.com/libp2p/go-libp2p-kad-dht"
-	"github.com/libp2p/go-libp2p/p2p/discovery/mdns"
 	rhost "github.com/libp2p/go-libp2p/p2p/host/routed"
 	"github.com/sirupsen/logrus"
 	"io/ioutil"
@@ -49,19 +49,19 @@ const (
 var emptyKey crypto.PrivKey = &crypto.Ed25519PrivateKey{}
 
 type Peer struct {
-	uniqKey     crypto.PrivKey
-	Name        name.Name
-	Peers       map[string]*Peer
-	Host        host.Host
-	RHost       rhost.RoutedHost
-	DNS         *NameService
-	internalDNS mdns.Service
+	uniqKey crypto.PrivKey
+	Name    name.Name
+	//Peers       map[string]*Peer
+	Host  host.Host
+	RHost rhost.RoutedHost
+	//DNS         *NameService
+	//internalDNS mdns.Service
 	RuntimeID   uuid.UUID
 	established bool
 }
 
 func NewPeer(n name.Name) *Peer {
-	golog.SetAllLoggers(golog.LevelPanic)
+	golog.SetAllLoggers(golog.LevelFatal)
 	golog.SetupLogging(golog.Config{
 		Stdout: false,
 		Stderr: false,
@@ -73,10 +73,19 @@ func NewPeer(n name.Name) *Peer {
 		key = emptyKey
 	}
 	logrus.Infof("New Peer: %s", n.String())
+	runtimeID := uuid.New()
+	logrus.Debugf("New Peer Runtime ID: %s", runtimeID.String())
+
+	key, err = crypto2.KeyFromPath(fmt.Sprintf("%s/.ssh/%s", common.HomeDir(), crypto2.DefaultAuraePrivateKeyName))
+	if err != nil {
+		panic("unable to load key")
+	}
+
 	return &Peer{
 		Name:        n,
 		uniqKey:     key,
 		established: false,
+		RuntimeID:   runtimeID,
 	}
 }
 
@@ -86,24 +95,18 @@ func Self() *Peer {
 
 func (p *Peer) Establish(ctx context.Context, offset int) error {
 
-	// Options
-	opts := []libp2p.Option{
-		libp2p.ListenAddrStrings(fmt.Sprintf("/ip4/0.0.0.0/tcp/%d", DefaultListenPort+offset)),
-		libp2p.Identity(p.uniqKey),
-		libp2p.DefaultTransports,
-		libp2p.DefaultMuxers,
-		libp2p.DefaultSecurity,
-		libp2p.NATPortMap(),
-	}
-
-	// Host
-	basicHost, err := libp2p.New(opts...)
+	// [Host]
+	//
+	// Create a host with the Aurae default options
+	basicHost, err := libp2p.New(DefaultOptions(p.uniqKey, offset)...)
 	if err != nil {
 		return err
 	}
 	p.Host = basicHost
 
-	// DHT
+	// [DHT]
+	//
+	// Create a new distributed hash table for storing records
 	dstore := dsync.MutexWrap(ds.NewMapDatastore())
 	dht := dht.NewDHT(ctx, basicHost, dstore)
 
