@@ -17,6 +17,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	zpeer "github.com/kris-nova/aurae/pkg/peer/peer"
 	"github.com/urfave/cli/v2"
@@ -36,8 +37,12 @@ func Peer() *cli.Command {
 			//if err != nil {
 			//	return err
 			//}
-			zpeer.RunServer()
-			return nil
+			p := zpeer.NewPeer()
+			err := p.Establish(context.Background(), 1)
+			if err != nil {
+				return err
+			}
+			return p.Stream()
 		},
 		Subcommands: []*cli.Command{
 			{
@@ -50,9 +55,12 @@ func Peer() *cli.Command {
 					if input == "" {
 						return fmt.Errorf("usage: aurae peer to <addr>")
 					}
-					zpeer.RunClient(input)
-
-					return nil
+					p := zpeer.NewPeer()
+					err := p.Establish(context.Background(), 0)
+					if err != nil {
+						return err
+					}
+					return p.To(input)
 				},
 			},
 		},

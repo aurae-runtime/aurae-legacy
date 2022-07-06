@@ -24,6 +24,8 @@ import (
 //
 // Listen Port: 1235
 // Client Port: 1234
+//
+// TODO WE need to manage golog for the sub-libraries here 	//golog.SetAllLoggers(golog.LevelInfo) // Change to INFO for extra info
 
 const (
 	DefaultGenerateKeyPairBits int = 2048
@@ -34,9 +36,10 @@ const (
 var emptyKey crypto.PrivKey = &crypto.Ed25519PrivateKey{}
 
 type Peer struct {
-	uniqKey    crypto.PrivKey
-	routedHost rhost.RoutedHost
-	host       host.Host
+	uniqKey     crypto.PrivKey
+	routedHost  rhost.RoutedHost
+	host        host.Host
+	established bool
 }
 
 func NewPeer() *Peer {
@@ -47,7 +50,8 @@ func NewPeer() *Peer {
 		key = emptyKey
 	}
 	return &Peer{
-		uniqKey: key,
+		uniqKey:     key,
+		established: false,
 	}
 }
 
@@ -103,41 +107,15 @@ func (p *Peer) Establish(ctx context.Context, offset int) error {
 	// targetF = Pretty()
 	//log.Printf("Now run \"aurae -d %s%s\" on a different terminal\n",  routedHost.ID().Pretty())
 	log.Printf("ID: %s", routedHost.ID().Pretty())
+	p.established = true
 	return nil
 }
 
-func RunClient(input string) {
-	//golog.SetAllLoggers(golog.LevelInfo) // Change to INFO for extra info
-
-	// Parse options from the command line
-	//listenF := flag.Int("l", 0, "wait for incoming connections")
-	//target := flag.String("d", "", "target peer to dial")
-	//seed := flag.Int64("seed", 0, "set random seed for id generation")
-	//global := flag.Bool("global", false, "use global ipfs peers for bootstrapping")
-	//flag.Parse()
-	//
-	//if *listenF == 0 {
-	//	log.Fatal("Please provide a port to bind on with -l")
-	//}
-
-	p := NewPeer()
-	err := p.Establish(context.Background(), 0)
-	if err != nil {
-		log.Fatal(err)
+func (p *Peer) To(peerID string) error {
+	if !p.established {
+		return fmt.Errorf("unable to stream, first establish in the mesh")
 	}
-
-	// Make a host that listens on the given multiaddress
-	//var bootstrapPeers []peer.AddrInfo
-	//bootstrapPeers := IPFS_PEERS
-	//ha, err := makeRoutedHost(1234, 0, bootstrapPeers, "global")
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-
-	// Set a stream handler on host A. /echo/1.0.0 is
-	// a user-defined protocol name.
-	ha := p.routedHost
-	ha.SetStreamHandler("/echo/1.0.0", func(s network.Stream) {
+	p.routedHost.SetStreamHandler("/echo/1.0.0", func(s network.Stream) {
 		log.Println("Got a new stream!")
 		if err := doEcho(s); err != nil {
 			log.Println(err)
@@ -147,22 +125,17 @@ func RunClient(input string) {
 		}
 	})
 
-	peerid, err := peer.Decode(input)
+	id, err := peer.Decode(peerID)
 	if err != nil {
-		log.Fatalln(err)
+		return err
 	}
 
-	// peerinfo := peer.AddrInfo{ID: peerid}
-	log.Println("opening stream")
-	// make a new stream from host B to host A
-	// it should be handled on host A by the handler we set above because
-	// we use the same /echo/1.0.0 protocol
-	s, err := ha.NewStream(context.Background(), peerid, "/echo/1.0.0")
-
+	s, err := p.routedHost.NewStream(context.Background(), id, "/echo/1.0.0")
 	if err != nil {
-		log.Fatalln(err)
+		return err
 	}
 
+	// Echo hello world
 	_, err = s.Write([]byte("Hello, world!\n"))
 	if err != nil {
 		log.Fatalln(err)
@@ -174,16 +147,14 @@ func RunClient(input string) {
 	}
 
 	log.Printf("read reply: %q\n", out)
+	return nil
 }
 
-func RunServer() {
-	p := NewPeer()
-	err := p.Establish(context.Background(), 1)
-	if err != nil {
-		log.Fatal(err)
+func (p *Peer) Stream() error {
+	if !p.established {
+		return fmt.Errorf("unable to stream, first establish in the mesh")
 	}
-	ha := p.routedHost
-	ha.SetStreamHandler("/echo/1.0.0", func(s network.Stream) {
+	p.routedHost.SetStreamHandler("/echo/1.0.0", func(s network.Stream) {
 		log.Println("Got a new stream!")
 		if err := doEcho(s); err != nil {
 			log.Println(err)
