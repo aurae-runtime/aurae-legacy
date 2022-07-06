@@ -116,13 +116,11 @@ func (p *Peer) Establish(ctx context.Context, offset int) error {
 	p.established = true
 
 	// Bootstrap
-	go func() {
-		err = p.Bootstrap(IPFSPeers)
-		if err != nil {
-			logrus.Errorf("Unable to bootstrap with IPFS: %v", err)
-			p.established = false
-		}
-	}()
+	err = p.Bootstrap(IPFSPeers)
+	if err != nil {
+		logrus.Errorf("Unable to bootstrap with IPFS: %v", err)
+		p.established = false
+	}
 	err = dht.Bootstrap(ctx)
 	if err != nil {
 		return err

@@ -72,7 +72,7 @@ func (p *Peer) Bootstrap(peers []peer.AddrInfo) error {
 	errs := make(chan error, len(peers))
 	var wg sync.WaitGroup
 	for _, addrInfo := range peers {
-		logrus.Debugf("Bootstrapping peer: %s", addrInfo.ID)
+		logrus.Infof("Bootstrapping peer: %s", addrInfo.ID)
 		wg.Add(1)
 		go func(addrInfo peer.AddrInfo) {
 			defer wg.Done()
