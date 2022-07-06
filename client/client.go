@@ -6,6 +6,7 @@ import (
 	p2pgrpc "github.com/kris-nova/aurae/pkg/grpc"
 	"github.com/kris-nova/aurae/pkg/peer"
 	"github.com/kris-nova/aurae/rpc"
+	peer2 "github.com/libp2p/go-libp2p-core/peer"
 
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
@@ -29,13 +30,12 @@ func NewClient() *Client {
 	}
 }
 
-func (c *Client) ConnectPeer(p *peer.Peer) error {
-
+func (c *Client) ConnectPeer(self *peer.Peer, to peer2.ID) error {
 	// Cache the peer
-	c.peer = p
+	c.peer = self
 
-	grpcProto := p2pgrpc.NewGRPCProtocol(context.Background(), p.Host)
-	conn, err := grpcProto.Dial(context.Background(), p.Host.ID(), grpc.WithInsecure(), grpc.WithBlock())
+	grpcProto := p2pgrpc.NewGRPCProtocol(context.Background(), &self.RHost)
+	conn, err := grpcProto.Dial(context.Background(), to, grpc.WithTimeout(time.Second*6), grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		return err
 	}
@@ -67,6 +67,8 @@ func (c *Client) establish(conn grpc.ClientConnInterface) error {
 	//proxy := rpc.NewProxyClient(conn)
 	//c.ProxyClient = proxy
 	c.connected = true
+	logrus.Warnf("Connected to grpc")
+
 	return nil
 }
 

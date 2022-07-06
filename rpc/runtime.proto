@@ -36,21 +36,26 @@ service Runtime {
   rpc Status(StatusReq) returns (StatusResp) {}
 }
 
-// Process is the most basic object in the system.
-// Process is similar to a Pod in Kubernetes, or a
-// Linux process and its subsequent thread pool.
 message Process {
   string name = 1;
   string status = 2;
 }
 
-message StatusReq {
-
+message Connections {
+  string listenSocket = 1;
+  string listenPeerID = 2;
 }
 
+message Peer {
+  string peerID = 1;
+}
+
+message StatusReq {}
+
 message StatusResp {
-  string Field = 1;
+  string Field = 1; // Ready, NotReady, etc
   map<string, Process> ProcessTable = 2;
-  int32 code = 3;
-  string message = 4;
+  map<string, Peer> Peers = 3;
+  int32 code = 10;
+  string message = 12;
 }

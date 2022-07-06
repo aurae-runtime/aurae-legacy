@@ -22,6 +22,7 @@ import (
 	"github.com/kris-nova/aurae"
 	"github.com/kris-nova/aurae/pkg/core"
 	"github.com/kris-nova/aurae/pkg/core/local"
+	p2pgrpc "github.com/kris-nova/aurae/pkg/grpc"
 	"github.com/kris-nova/aurae/pkg/peer"
 	"github.com/kris-nova/aurae/pkg/posix"
 	"github.com/kris-nova/aurae/pkg/proxy"
@@ -74,23 +75,22 @@ func New(socket, localStore string) *Daemon {
 
 func (d *Daemon) Run() error {
 
-	// Step 1. Establish context in the logs.
+	ctx := context.Background()
 
+	// Establish context in the logs.
 	logrus.Infof("Aurae daemon daemon. Version: %s", aurae.Version)
 	logrus.Infof("Aurae Socket [%s]", d.socket)
 	logrus.Infof("Aurae Local  [%s]", d.localStore)
 
-	// Step 2. Establish daemon safety
-
+	// Establish daemon safety
 	quitCh := posix.SignalHandler()
 	go func() {
 		d.runtime = <-quitCh
 	}()
 
-	// Step 3. Establish gRPC server.
-
+	// Establish gRPC server.
 	var err error
-	conn, err := net.Listen("unix", d.socket)
+	socketConn, err := net.Listen("unix", d.socket)
 	if err != nil {
 		if strings.Contains(err.Error(), "bind: address already in use") {
 			logrus.Warningf("Attempting to clean socket from failure!")
@@ -98,7 +98,7 @@ func (d *Daemon) Run() error {
 			if err != nil {
 				return fmt.Errorf("unable to establish socket ownership: %v", err)
 			}
-			conn, err = net.Listen("unix", d.socket)
+			socketConn, err = net.Listen("unix", d.socket)
 			if err != nil {
 				return fmt.Errorf("unable to establish socket connection: %v", err)
 			}
@@ -109,10 +109,11 @@ func (d *Daemon) Run() error {
 	} else {
 		logrus.Infof("Success. Socket acquired.")
 	}
-	defer conn.Close()
+	defer socketConn.Close()
 
+	// Local gRPC server
+	logrus.Infof("Starting [SOCKET] gRPC Server.")
 	server := grpc.NewServer()
-	logrus.Infof("Starting gRPC Server.")
 
 	// Step 4. Setup the local persistent state.
 	localStateStore := local.NewState(d.localStore)
@@ -121,9 +122,8 @@ func (d *Daemon) Run() error {
 	// Default to getFromMemory=false we can change this later
 	coreSvc.SetGetFromMemory(false)
 
-	// Step 5. Register
+	//
 	rpc.RegisterCoreServer(server, coreSvc)
-
 	rpc.RegisterProxyServer(server, proxy.NewService())
 	rpc.RegisterRuntimeServer(server, runtime.NewService())
 	rpc.RegisterScheduleServer(server, schedule.NewService())
@@ -133,7 +133,7 @@ func (d *Daemon) Run() error {
 	// Step 6. Begin the empty loop by running a small go routine with an emergency cancel
 	serveCancel := make(chan error)
 	go func() {
-		err = server.Serve(conn)
+		err = server.Serve(socketConn)
 		if err != nil {
 			serveCancel <- err
 		}
@@ -150,6 +150,17 @@ func (d *Daemon) Run() error {
 		return fmt.Errorf("unable to join auraespace peer network: %v", err)
 	}
 	d.Self = self
+
+	peerConn := p2pgrpc.NewGRPCProtocol(ctx, &self.RHost)
+	if err != nil {
+		return fmt.Errorf("unable to create peer grpc: %v", err)
+	}
+	server = peerConn.GetGRPCServer()
+	rpc.RegisterCoreServer(server, coreSvc)
+	rpc.RegisterProxyServer(server, proxy.NewService())
+	rpc.RegisterRuntimeServer(server, runtime.NewService())
+	rpc.RegisterScheduleServer(server, schedule.NewService())
+	logrus.Infof("Setting peer grpc: %v", server.GetServiceInfo())
 
 	// Step 7. Dispatch events from the filesystem
 
