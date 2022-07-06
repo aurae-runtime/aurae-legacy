@@ -7,6 +7,7 @@ import (
 	"fmt"
 	ds "github.com/ipfs/go-datastore"
 	dsync "github.com/ipfs/go-datastore/sync"
+	golog "github.com/ipfs/go-log/v2"
 	"github.com/libp2p/go-libp2p"
 	"github.com/libp2p/go-libp2p-core/crypto"
 	"github.com/libp2p/go-libp2p-core/host"
@@ -14,7 +15,6 @@ import (
 	"github.com/libp2p/go-libp2p-core/peer"
 	dht "github.com/libp2p/go-libp2p-kad-dht"
 	rhost "github.com/libp2p/go-libp2p/p2p/host/routed"
-	ma "github.com/multiformats/go-multiaddr"
 	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"log"
@@ -43,6 +43,11 @@ type Peer struct {
 }
 
 func NewPeer() *Peer {
+	golog.SetAllLoggers(golog.LevelPanic)
+	golog.SetupLogging(golog.Config{
+		Stdout: false,
+		Stderr: false,
+	})
 	randSeeder := rand.Reader
 	key, _, err := crypto.GenerateKeyPairWithReader(crypto.RSA, DefaultGenerateKeyPairBits, randSeeder)
 	if err != nil {
@@ -93,20 +98,20 @@ func (p *Peer) Establish(ctx context.Context, offset int) error {
 	}
 
 	// Build host multiaddress
-	hostAddr, _ := ma.NewMultiaddr(fmt.Sprintf("/ipfs/%s", routedHost.ID().Pretty()))
+	//hostAddr, _ := ma.NewMultiaddr(fmt.Sprintf("/ipfs/%s", routedHost.ID().Pretty()))
 
 	// Now we can build a full multiaddress to reach this host
 	// by encapsulating both addresses:
 	// addr := routedHost.Addrs()[0]
-	addrs := routedHost.Addrs()
-	log.Println("I can be reached at:")
-	for _, addr := range addrs {
-		log.Println(addr.Encapsulate(hostAddr))
-	}
+	//addrs := routedHost.Addrs()
+	////log.Println("I can be reached at:")
+	//for _, addr := range addrs {
+	//	//log.Println(addr.Encapsulate(hostAddr))
+	//}
 
 	// targetF = Pretty()
 	//log.Printf("Now run \"aurae -d %s%s\" on a different terminal\n",  routedHost.ID().Pretty())
-	log.Printf("ID: %s", routedHost.ID().Pretty())
+	logrus.Infof("ID: %s", routedHost.ID().Pretty())
 	p.established = true
 	return nil
 }
@@ -116,9 +121,9 @@ func (p *Peer) To(peerID string) error {
 		return fmt.Errorf("unable to stream, first establish in the mesh")
 	}
 	p.routedHost.SetStreamHandler("/echo/1.0.0", func(s network.Stream) {
-		log.Println("Got a new stream!")
+		//log.Println("Got a new stream!")
 		if err := doEcho(s); err != nil {
-			log.Println(err)
+			//log.Println(err)
 			s.Reset()
 		} else {
 			s.Close()
@@ -138,15 +143,16 @@ func (p *Peer) To(peerID string) error {
 	// Echo hello world
 	_, err = s.Write([]byte("Hello, world!\n"))
 	if err != nil {
-		log.Fatalln(err)
+		return err
 	}
 
 	out, err := ioutil.ReadAll(s)
 	if err != nil {
-		log.Fatalln(err)
+		return err
 	}
 
-	log.Printf("read reply: %q\n", out)
+	//log.Printf("read reply: %q\n", out)
+	logrus.Infof("%q", out)
 	return nil
 }
 
