@@ -18,8 +18,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/kris-nova/aurae/pkg/peer"
-	"github.com/sirupsen/logrus"
+	zpeer "github.com/kris-nova/aurae/pkg/peer/peer"
 	"github.com/urfave/cli/v2"
 )
 
@@ -37,13 +36,8 @@ func Peer() *cli.Command {
 			//if err != nil {
 			//	return err
 			//}
-			svc := peer.Self()
-			err := svc.Establish()
-			if err != nil {
-				return err
-			}
-			for {
-			}
+			zpeer.RunServer()
+			return nil
 		},
 		Subcommands: []*cli.Command{
 			{
@@ -52,24 +46,12 @@ func Peer() *cli.Command {
 				UsageText: `aurae peer to <addr>`,
 				Flags:     GlobalFlags([]cli.Flag{}),
 				Action: func(c *cli.Context) error {
-					addr := c.Args().Get(0)
-					if addr == "" {
+					input := c.Args().Get(0)
+					if input == "" {
 						return fmt.Errorf("usage: aurae peer to <addr>")
 					}
-					//key, err := crypto.KeyFromPath(run.key)
-					//if err != nil {
-					//	return err
-					//}
-					svc := peer.Self()
-					err := svc.Establish()
-					if err != nil {
-						return err
-					}
-					stream, err := svc.ToPeerAddr(addr)
-					if err != nil {
-						return err
-					}
-					logrus.Infof("Connected! Stream: %s", stream.ID())
+					zpeer.RunClient(input)
+
 					return nil
 				},
 			},

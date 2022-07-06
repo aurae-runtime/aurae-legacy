@@ -1,27 +1,22 @@
-package main
+package zpeer
 
 import (
 	"bufio"
 	"context"
 	"crypto/rand"
-	"flag"
 	"fmt"
-	"io"
-	"io/ioutil"
-	"log"
-	mrand "math/rand"
-	"os"
-
 	"github.com/libp2p/go-libp2p"
 	"github.com/libp2p/go-libp2p-core/crypto"
 	"github.com/libp2p/go-libp2p-core/host"
 	"github.com/libp2p/go-libp2p-core/network"
 	"github.com/libp2p/go-libp2p-core/peer"
+	"io"
+	"io/ioutil"
+	"log"
+	mrand "math/rand"
 
 	ds "github.com/ipfs/go-datastore"
 	dsync "github.com/ipfs/go-datastore/sync"
-	golog "github.com/ipfs/go-log/v2"
-
 	dht "github.com/libp2p/go-libp2p-kad-dht"
 	rhost "github.com/libp2p/go-libp2p/p2p/host/routed"
 	ma "github.com/multiformats/go-multiaddr"
@@ -96,41 +91,30 @@ func makeRoutedHost(listenPort int, randseed int64, bootstrapPeers []peer.AddrIn
 		log.Println(addr.Encapsulate(hostAddr))
 	}
 
-	log.Printf("Now run \"./routed-echo -l %d -d %s%s\" on a different terminal\n", listenPort+1, routedHost.ID().Pretty(), globalFlag)
-
+	// targetF = Pretty()
+	//log.Printf("Now run \"aurae -d %s%s\" on a different terminal\n",  routedHost.ID().Pretty())
+	log.Printf("ID: %s", routedHost.ID().Pretty())
 	return routedHost, nil
 }
 
-func main() {
-	// LibP2P code uses golog to log messages. They log with different
-	// string IDs (i.e. "swarm"). We can control the verbosity level for
-	// all loggers with:
-	golog.SetAllLoggers(golog.LevelInfo) // Change to INFO for extra info
+func RunClient(input string) {
+	//golog.SetAllLoggers(golog.LevelInfo) // Change to INFO for extra info
 
 	// Parse options from the command line
-	listenF := flag.Int("l", 0, "wait for incoming connections")
-	target := flag.String("d", "", "target peer to dial")
-	seed := flag.Int64("seed", 0, "set random seed for id generation")
-	global := flag.Bool("global", false, "use global ipfs peers for bootstrapping")
-	flag.Parse()
-
-	if *listenF == 0 {
-		log.Fatal("Please provide a port to bind on with -l")
-	}
+	//listenF := flag.Int("l", 0, "wait for incoming connections")
+	//target := flag.String("d", "", "target peer to dial")
+	//seed := flag.Int64("seed", 0, "set random seed for id generation")
+	//global := flag.Bool("global", false, "use global ipfs peers for bootstrapping")
+	//flag.Parse()
+	//
+	//if *listenF == 0 {
+	//	log.Fatal("Please provide a port to bind on with -l")
+	//}
 
 	// Make a host that listens on the given multiaddress
-	var bootstrapPeers []peer.AddrInfo
-	var globalFlag string
-	if *global {
-		log.Println("using global bootstrap")
-		bootstrapPeers = IPFS_PEERS
-		globalFlag = " -global"
-	} else {
-		log.Println("using local bootstrap")
-		bootstrapPeers = getLocalPeerInfo()
-		globalFlag = ""
-	}
-	ha, err := makeRoutedHost(*listenF, *seed, bootstrapPeers, globalFlag)
+	//var bootstrapPeers []peer.AddrInfo
+	bootstrapPeers := IPFS_PEERS
+	ha, err := makeRoutedHost(1234, 0, bootstrapPeers, "global")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -147,25 +131,10 @@ func main() {
 		}
 	})
 
-	if *target == "" {
-		log.Println("listening for connections")
-		select {} // hang forever
-	}
-	/**** This is where the listener code ends *****/
-
-	fmt.Println()
-	fmt.Println(*target)
-	fmt.Println()
-
-	peerid, err := peer.Decode(*target)
+	peerid, err := peer.Decode(input)
 	if err != nil {
 		log.Fatalln(err)
 	}
-
-	fmt.Println()
-	fmt.Println(peerid)
-	fmt.Println()
-	os.Exit(1)
 
 	// peerinfo := peer.AddrInfo{ID: peerid}
 	log.Println("opening stream")
@@ -189,6 +158,24 @@ func main() {
 	}
 
 	log.Printf("read reply: %q\n", out)
+}
+
+func RunServer() {
+	bootstrapPeers := IPFS_PEERS
+	ha, err := makeRoutedHost(1235, 0, bootstrapPeers, "global")
+	if err != nil {
+		log.Fatal(err)
+	}
+	ha.SetStreamHandler("/echo/1.0.0", func(s network.Stream) {
+		log.Println("Got a new stream!")
+		if err := doEcho(s); err != nil {
+			log.Println(err)
+			s.Reset()
+		} else {
+			s.Close()
+		}
+	})
+	select {} // hang forever
 }
 
 // doEcho reads a line of data from a stream and writes it back
