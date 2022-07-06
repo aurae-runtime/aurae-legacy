@@ -26,7 +26,6 @@ import (
 	dsync "github.com/ipfs/go-datastore/sync"
 	golog "github.com/ipfs/go-log/v2"
 	"github.com/kris-nova/aurae/pkg/common"
-	crypto2 "github.com/kris-nova/aurae/pkg/crypto"
 	"github.com/kris-nova/aurae/pkg/name"
 	"github.com/libp2p/go-libp2p"
 	"github.com/libp2p/go-libp2p-core/crypto"
@@ -75,11 +74,6 @@ func NewPeer(n name.Name) *Peer {
 	logrus.Infof("New Peer: %s", n.String())
 	runtimeID := uuid.New()
 	logrus.Debugf("New Peer Runtime ID: %s", runtimeID.String())
-
-	key, err = crypto2.KeyFromPath(fmt.Sprintf("%s/.ssh/%s", common.HomeDir(), crypto2.DefaultAuraePrivateKeyName))
-	if err != nil {
-		panic("unable to load key")
-	}
 
 	return &Peer{
 		Name:        n,
@@ -137,7 +131,7 @@ func (p *Peer) To(peerID string) error {
 	if !p.established {
 		return fmt.Errorf("unable to stream, first establish in the mesh")
 	}
-	p.RHost.SetStreamHandler("/echo/1.0.0", func(s network.Stream) {
+	p.RHost.SetStreamHandler(AuraeStreamProtocol(), func(s network.Stream) {
 		if err := doEcho(s); err != nil {
 			s.Reset()
 		} else {
@@ -150,7 +144,7 @@ func (p *Peer) To(peerID string) error {
 		return err
 	}
 
-	s, err := p.RHost.NewStream(context.Background(), id, "/echo/1.0.0")
+	s, err := p.RHost.NewStream(context.Background(), id, AuraeStreamProtocol())
 	if err != nil {
 		return err
 	}
@@ -173,7 +167,7 @@ func (p *Peer) Stream() error {
 	if !p.established {
 		return fmt.Errorf("unable to stream, first establish in the mesh")
 	}
-	p.RHost.SetStreamHandler("/echo/1.0.0", func(s network.Stream) {
+	p.RHost.SetStreamHandler(AuraeStreamProtocol(), func(s network.Stream) {
 		logrus.Infof("Received new stream: %s", s.ID())
 		if err := doEcho(s); err != nil {
 			log.Println(err)
