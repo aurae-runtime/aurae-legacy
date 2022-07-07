@@ -49,6 +49,15 @@ func TestMain(m *testing.M) {
 		fmt.Sprintf("unable to establish p2: %v", err)
 		os.Exit(2)
 	}
+	//d := daemon.New("/run/aurae.peer.test.sock", "/tmp/aurae")
+	//go func() {
+	//	err := d.Run()
+	//	if err != nil {
+	//		fmt.Sprintf("unable to run daemon: %v", err)
+	//		os.Exit(3)
+	//	}
+	//}()
+
 	os.Exit(m.Run())
 }
 

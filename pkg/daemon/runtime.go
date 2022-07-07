@@ -154,10 +154,10 @@ func (d *Daemon) Run() error {
 	if err != nil {
 		return fmt.Errorf("unable to join auraespace peer network: %v", err)
 	}
-	go self.Stream()
+	go self.HandshakeServe()
 	d.Self = self
 
-	peerConn := p2pgrpc.NewGRPCProtocol(ctx, &self.RHost)
+	peerConn := p2pgrpc.NewGRPCProtocol(ctx, self.Host())
 	if err != nil {
 		return fmt.Errorf("unable to create peer grpc: %v", err)
 	}

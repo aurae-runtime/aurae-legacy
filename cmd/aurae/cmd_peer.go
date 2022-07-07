@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"github.com/kris-nova/aurae/pkg/name"
 	peer "github.com/kris-nova/aurae/pkg/peer"
+	peer2 "github.com/libp2p/go-libp2p-core/peer"
 	"github.com/urfave/cli/v2"
 	"os"
 )
@@ -46,7 +47,7 @@ func Peer() *cli.Command {
 			if err != nil {
 				return err
 			}
-			return p.Stream()
+			return p.HandshakeServe()
 		},
 		Subcommands: []*cli.Command{
 			{
@@ -68,7 +69,8 @@ func Peer() *cli.Command {
 					if err != nil {
 						return err
 					}
-					return p.To(input)
+					peerID, _ := peer2.Decode(input)
+					return p.Handshake(peerID)
 				},
 			},
 		},
