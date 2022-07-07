@@ -17,7 +17,6 @@
 package peer
 
 import (
-	"bufio"
 	"context"
 	"crypto/rand"
 	"fmt"
@@ -26,16 +25,18 @@ import (
 	dsync "github.com/ipfs/go-datastore/sync"
 	golog "github.com/ipfs/go-log/v2"
 	"github.com/kris-nova/aurae/pkg/common"
+	p2pgrpc "github.com/kris-nova/aurae/pkg/grpc"
 	"github.com/kris-nova/aurae/pkg/name"
+	"github.com/kris-nova/aurae/rpc"
 	"github.com/libp2p/go-libp2p"
 	"github.com/libp2p/go-libp2p-core/crypto"
 	"github.com/libp2p/go-libp2p-core/host"
-	"github.com/libp2p/go-libp2p-core/network"
 	"github.com/libp2p/go-libp2p-core/peer"
 	dht "github.com/libp2p/go-libp2p-kad-dht"
 	rhost "github.com/libp2p/go-libp2p/p2p/host/routed"
 	"github.com/sirupsen/logrus"
-	"io"
+	"google.golang.org/grpc"
+	"time"
 )
 
 const (
@@ -47,15 +48,19 @@ const (
 var emptyKey crypto.PrivKey = &crypto.Ed25519PrivateKey{}
 
 type Peer struct {
-	uniqKey crypto.PrivKey
-	Name    name.Name
+	uniqKey     crypto.PrivKey
+	established bool
+	Name        name.Name
 	//Peers       map[string]*Peer
-	Host  host.Host
-	RHost rhost.RoutedHost
+	host host.Host
 	//DNS         *NameService
 	//internalDNS mdns.Service
-	RuntimeID   uuid.UUID
-	established bool
+
+	localSocket string
+	rpc.CoreClient
+	rpc.RuntimeClient
+	rpc.ScheduleClient
+	rpc.ProxyClient
 }
 
 func NewPeer(n name.Name) *Peer {
@@ -84,12 +89,54 @@ func NewPeer(n name.Name) *Peer {
 		Name:        n,
 		uniqKey:     key,
 		established: false,
-		RuntimeID:   runtimeID,
 	}
 }
 
 func Self() *Peer {
 	return NewPeer(name.New(common.Self))
+}
+
+func (p *Peer) Host() host.Host {
+	return p.host
+}
+
+func (p *Peer) ConnectPeer(to peer.ID) error {
+
+	grpcProto := p2pgrpc.NewGRPCProtocol(context.Background(), p.Host())
+	conn, err := grpcProto.Dial(context.Background(), to, grpc.WithTimeout(time.Second*3), grpc.WithInsecure(), grpc.WithBlock())
+	if err != nil {
+		return err
+	}
+	return p.clientConnect(conn)
+}
+
+func (p *Peer) ConnectSock(sock string) error {
+
+	// Cache the socket
+	p.localSocket = sock
+
+	logrus.Warnf("mTLS disabled. running insecure.")
+	conn, err := grpc.Dial(fmt.Sprintf("passthrough:///unix://%s", p.localSocket),
+		grpc.WithInsecure(), grpc.WithTimeout(time.Second*3))
+	if err != nil {
+		return err
+	}
+	return p.clientConnect(conn)
+}
+
+func (p *Peer) clientConnect(conn grpc.ClientConnInterface) error {
+	// Establish the connection from the conn
+	core := rpc.NewCoreClient(conn)
+	p.CoreClient = core
+	runtime := rpc.NewRuntimeClient(conn)
+	p.RuntimeClient = runtime
+	schedule := rpc.NewScheduleClient(conn)
+	p.ScheduleClient = schedule
+	proxy := rpc.NewProxyClient(conn)
+	p.ProxyClient = proxy
+	logrus.Warnf("Connected to grpc")
+
+	return nil
 }
 
 func (p *Peer) Establish(ctx context.Context, offset int) error {
@@ -101,7 +148,6 @@ func (p *Peer) Establish(ctx context.Context, offset int) error {
 	if err != nil {
 		return err
 	}
-	p.Host = basicHost
 
 	// [DHT]
 	//
@@ -111,7 +157,7 @@ func (p *Peer) Establish(ctx context.Context, offset int) error {
 
 	// Routed Host
 	routedHost := rhost.Wrap(basicHost, dht)
-	p.RHost = *routedHost
+	p.host = routedHost
 	p.established = true
 
 	// Bootstrap
@@ -128,57 +174,4 @@ func (p *Peer) Establish(ctx context.Context, offset int) error {
 	// ID
 	logrus.Infof("ID: %s", routedHost.ID().Pretty())
 	return nil
-}
-
-func (p *Peer) To(peerID string) error {
-	if !p.established {
-		return fmt.Errorf("unable to stream, first establish in the mesh")
-	}
-	p.RHost.SetStreamHandler(AuraeStreamProtocol(), Handshake)
-
-	id, err := peer.Decode(peerID)
-	if err != nil {
-		return err
-	}
-
-	logrus.Infof("Trying NewStream: %s", id)
-	s, err := p.RHost.NewStream(context.Background(), id, AuraeStreamProtocol())
-	if err != nil {
-		return fmt.Errorf("unable to create new stream: %v", err)
-	}
-
-	_, err = s.Write([]byte(AuraeProtocolHandshakeRequest))
-	if err != nil {
-		return fmt.Errorf("handshake failure write: %v", err)
-	}
-	response, err := io.ReadAll(s)
-	if err != nil {
-		return fmt.Errorf("handshake failure read: %v", err)
-	}
-	if string(response) != AuraeProtocolHandshakeResponse {
-		return fmt.Errorf("handshake failure validate: %s", string(response))
-	}
-	logrus.Infof("Aurae handshake success!")
-
-	return nil
-}
-
-func (p *Peer) Stream() error {
-	if !p.established {
-		return fmt.Errorf("unable to stream, first establish in the mesh")
-	}
-	p.RHost.SetStreamHandler(AuraeStreamProtocol(), Handshake)
-	select {} // hang forever
-}
-
-func doEcho(s network.Stream) error {
-	buf := bufio.NewReader(s)
-	str, err := buf.ReadString('\n')
-	if err != nil {
-		return err
-	}
-
-	logrus.Infof("Read: %s", str)
-	_, err = s.Write([]byte(str))
-	return err
 }

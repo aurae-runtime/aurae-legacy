@@ -76,8 +76,8 @@ func (p *Peer) Bootstrap(peers []peer.AddrInfo) error {
 		wg.Add(1)
 		go func(addrInfo peer.AddrInfo) {
 			defer wg.Done()
-			p.RHost.Peerstore().AddAddrs(addrInfo.ID, addrInfo.Addrs, peerstore.PermanentAddrTTL)
-			if err := p.RHost.Connect(ctx, addrInfo); err != nil {
+			p.host.Peerstore().AddAddrs(addrInfo.ID, addrInfo.Addrs, peerstore.PermanentAddrTTL)
+			if err := p.host.Connect(ctx, addrInfo); err != nil {
 				errs <- err
 				return
 			}
@@ -85,8 +85,6 @@ func (p *Peer) Bootstrap(peers []peer.AddrInfo) error {
 	}
 	wg.Wait()
 
-	// our failure condition is when no connection attempt succeeded.
-	// So drain the errs channel, counting the results.
 	close(errs)
 	count := 0
 	var err error

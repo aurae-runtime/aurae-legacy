@@ -18,11 +18,14 @@ package peer
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"github.com/kris-nova/aurae"
 	"github.com/libp2p/go-libp2p-core/network"
+	"github.com/libp2p/go-libp2p-core/peer"
 	"github.com/libp2p/go-libp2p-core/protocol"
 	"github.com/sirupsen/logrus"
+	"io"
 )
 
 const (
@@ -45,7 +48,43 @@ const (
 	AuraeProtocolHandshakeResponse string = "<--**<<RESPONSE>>**-->\n"
 )
 
-func Handshake(s network.Stream) {
+func (p *Peer) Handshake(id peer.ID) error {
+	if !p.established {
+		return fmt.Errorf("unable to stream, first establish in the mesh")
+	}
+	p.host.SetStreamHandler(AuraeStreamProtocol(), doHandshake)
+
+	logrus.Infof("Trying NewStream: %s", id)
+	s, err := p.host.NewStream(context.Background(), id, AuraeStreamProtocol())
+	if err != nil {
+		return fmt.Errorf("unable to create new stream: %v", err)
+	}
+
+	_, err = s.Write([]byte(AuraeProtocolHandshakeRequest))
+	if err != nil {
+		return fmt.Errorf("handshake failure write: %v", err)
+	}
+	response, err := io.ReadAll(s)
+	if err != nil {
+		return fmt.Errorf("handshake failure read: %v", err)
+	}
+	if string(response) != AuraeProtocolHandshakeResponse {
+		return fmt.Errorf("handshake failure validate: %s", string(response))
+	}
+	logrus.Infof("Aurae handshake success!")
+
+	return nil
+}
+
+func (p *Peer) HandshakeServe() error {
+	if !p.established {
+		return fmt.Errorf("unable to stream, first establish in the mesh")
+	}
+	p.host.SetStreamHandler(AuraeStreamProtocol(), doHandshake)
+	return nil
+}
+
+func doHandshake(s network.Stream) {
 	defer s.Close()
 	buf := bufio.NewReader(s)
 	handshakeStr, err := buf.ReadString('\n')

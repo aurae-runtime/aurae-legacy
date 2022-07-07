@@ -24,10 +24,10 @@ import (
 func (p *Peer) Print() error {
 	con := printer.NewConsole("Peer: %s", p.Name.String())
 	kv1 := printer.NewKeyValueTable("")
-	kv1.AddKeyValue("Peer ID", p.Host.ID())
+	kv1.AddKeyValue("Peer ID", p.host.ID())
 	kv1.AddKeyValue("ServiceName", p.Name.Service())
 	kv1.AddKeyValue("HostName", p.Name.Host())
-	for i, addr := range p.Host.Addrs() {
+	for i, addr := range p.host.Addrs() {
 		key := fmt.Sprintf("Addr%d", i)
 		kv1.AddKeyValue(key, addr.String())
 	}
