@@ -24,7 +24,6 @@ import (
 	ma "github.com/multiformats/go-multiaddr"
 	"github.com/sirupsen/logrus"
 	"log"
-	"sync"
 )
 
 var (
@@ -63,38 +62,37 @@ func convertPeers(peers []string) []peer.AddrInfo {
 	return pinfos
 }
 
+const (
+	MinimumBootstrapPeersToProceed int = 2
+)
+
 func (p *Peer) Bootstrap(peers []peer.AddrInfo) error {
 	ctx := context.Background()
 	if len(peers) < 1 {
 		return fmt.Errorf("not enough peers in peer list to bootstrap")
 	}
 
-	errs := make(chan error, len(peers))
-	var wg sync.WaitGroup
+	logrus.Infof("Bootstrapping with public infrastructure peers (IPFS).")
+
+	successCh := make(chan bool)
+
 	for _, addrInfo := range peers {
-		logrus.Infof("Bootstrapping peer: %s", addrInfo.ID)
-		wg.Add(1)
 		go func(addrInfo peer.AddrInfo) {
-			defer wg.Done()
 			p.host.Peerstore().AddAddrs(addrInfo.ID, addrInfo.Addrs, peerstore.PermanentAddrTTL)
-			if err := p.host.Connect(ctx, addrInfo); err != nil {
-				errs <- err
-				return
+			err := p.host.Connect(ctx, addrInfo)
+			if err != nil {
+				logrus.Warnf("Bootstrap public peer error: %s", err)
+			} else {
+				successCh <- true
+				logrus.Infof("Bootstrap peer success: %s", addrInfo.ID)
 			}
 		}(addrInfo)
 	}
-	wg.Wait()
 
-	close(errs)
-	count := 0
-	var err error
-	for err = range errs {
-		if err != nil {
-			count++
-		}
+	logrus.Infof("Hanging for bootstrap to complete:")
+	for i := 1; i < MinimumBootstrapPeersToProceed; i++ {
+		<-successCh
 	}
-	if count == len(peers) {
-		return fmt.Errorf("failed to bootstrap: %v", err)
-	}
+	logrus.Infof("Bootstrapped.")
 	return nil
 }
