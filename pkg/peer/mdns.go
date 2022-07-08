@@ -19,6 +19,7 @@ package peer
 import (
 	"github.com/kris-nova/aurae/pkg/name"
 	"github.com/libp2p/go-libp2p-core/peer"
+	"github.com/sirupsen/logrus"
 )
 
 type NameService struct {
@@ -32,10 +33,10 @@ type Record struct {
 }
 
 func (s *NameService) HandlePeerFound(info peer.AddrInfo) {
-	//logrus.Infof("Peer discovery: %v", info)
-	//logrus.Warnf("Stateless name mapping with raw addr info: %s", info.String())
+	logrus.Infof("Peer discovery: %v", info)
+	logrus.Warnf("Stateless name mapping with raw addr info: %s", info.String())
 	name := name.New(info.String())
-	//logrus.Infof("Peer registered in DNS registry: [%s]", name.String())
+	logrus.Infof("Peer registered in DNS registry: [%s]", name.String())
 	s.Peers[name.String()] = &Record{
 		Name: name,
 		Info: info,
@@ -47,7 +48,6 @@ func NewNameService() *NameService {
 	dns := &NameService{
 		Peers: make(map[string]*Record),
 	}
-
 	return dns
 }
 
