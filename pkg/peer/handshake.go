@@ -24,6 +24,7 @@ import (
 	"github.com/libp2p/go-libp2p-core/network"
 	"github.com/libp2p/go-libp2p-core/peer"
 	"github.com/libp2p/go-libp2p-core/protocol"
+	"github.com/multiformats/go-multistream"
 	"github.com/sirupsen/logrus"
 	"io"
 )
@@ -34,6 +35,7 @@ const (
 )
 
 func AuraeStreamProtocol() protocol.ID {
+
 	auraeStreamProtocol := fmt.Sprintf(AuraeStreamVersionFormat, aurae.Version)
 	ids := protocol.ConvertFromStrings([]string{auraeStreamProtocol})
 	if len(ids) != 1 {
@@ -54,9 +56,11 @@ func (p *Peer) Handshake(id peer.ID) error {
 	}
 	p.host.SetStreamHandler(AuraeStreamProtocol(), doHandshake)
 
-	logrus.Infof("Trying NewStream: %s", id)
 	s, err := p.host.NewStream(context.Background(), id, AuraeStreamProtocol())
 	if err != nil {
+		if err == multistream.ErrNotSupported {
+			return fmt.Errorf("unable to create handshake stream, handshake server not discovered: enable %s on remote peer", AuraeStreamProtocol())
+		}
 		return fmt.Errorf("unable to create new stream: %v", err)
 	}
 

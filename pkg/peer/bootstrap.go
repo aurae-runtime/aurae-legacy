@@ -72,7 +72,7 @@ func (p *Peer) Bootstrap(peers []peer.AddrInfo) error {
 		return fmt.Errorf("not enough peers in peer list to bootstrap")
 	}
 
-	logrus.Infof("Bootstrapping with public infrastructure peers (IPFS).")
+	//logrus.Infof("Bootstrapping with public infrastructure peers (IPFS).")
 
 	successCh := make(chan bool)
 
@@ -84,15 +84,15 @@ func (p *Peer) Bootstrap(peers []peer.AddrInfo) error {
 				logrus.Debugf("Bootstrap public peer error: %s", err)
 			} else {
 				successCh <- true
-				logrus.Infof("Bootstrap peer success: %s", addrInfo.ID)
+				//logrus.Infof("Bootstrap peer success: %s", addrInfo.ID)
 			}
 		}(addrInfo)
 	}
 
-	logrus.Infof("Hanging for bootstrap to complete:")
+	//logrus.Infof("Hanging for bootstrap to complete:")
 	for i := 1; i < MinimumBootstrapPeersToProceed; i++ {
 		<-successCh
 	}
-	logrus.Infof("Bootstrapped.")
+	//logrus.Infof("Bootstrapped.")
 	return nil
 }

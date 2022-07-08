@@ -18,13 +18,17 @@ package aurae
 
 import "fmt"
 
+const (
+	unknown string = "UNKNOWN"
+)
+
 var (
-	Name        string
-	Version     string
-	Copyright   string
-	License     string
-	AuthorName  string
-	AuthorEmail string
+	Name        string = unknown
+	Version     string = unknown
+	Copyright   string = unknown
+	License     string = unknown
+	AuthorName  string = unknown
+	AuthorEmail string = unknown
 )
 
 func Banner() string {

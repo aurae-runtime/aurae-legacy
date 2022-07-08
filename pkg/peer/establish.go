@@ -16,6 +16,53 @@
 
 package peer
 
+import (
+	"context"
+	"github.com/ipfs/go-datastore"
+	dsync "github.com/ipfs/go-datastore/sync"
+	"github.com/libp2p/go-libp2p"
+	dht "github.com/libp2p/go-libp2p-kad-dht"
+	rhost "github.com/libp2p/go-libp2p/p2p/host/routed"
+	"github.com/sirupsen/logrus"
+)
+
+func (p *Peer) Establish(ctx context.Context, offset int) error {
+
+	// [Host]
+	//
+	// Create a host with the Aurae default options
+	basicHost, err := libp2p.New(DefaultOptions(p.uniqKey, offset)...)
+	if err != nil {
+		return err
+	}
+
+	// [DHT]
+	//
+	// Create a new distributed hash table for storing records
+	dstore := dsync.MutexWrap(datastore.NewMapDatastore())
+	dht := dht.NewDHT(ctx, basicHost, dstore)
+
+	// Routed Host
+	routedHost := rhost.Wrap(basicHost, dht)
+	p.host = routedHost
+	p.established = true
+
+	// Bootstrap
+	err = p.Bootstrap(IPFSPeers)
+	if err != nil {
+		logrus.Errorf("Unable to bootstrap with IPFS: %v", err)
+		p.established = false
+	}
+	err = dht.Bootstrap(ctx)
+	if err != nil {
+		return err
+	}
+
+	// ID
+	logrus.Infof("Established. Peer ID: %s", routedHost.ID().Pretty())
+	return nil
+}
+
 // Establish will join the mesh.
 //
 //
