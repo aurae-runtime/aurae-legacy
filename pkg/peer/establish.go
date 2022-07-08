@@ -21,6 +21,7 @@ import (
 	"github.com/ipfs/go-datastore"
 	dsync "github.com/ipfs/go-datastore/sync"
 	"github.com/libp2p/go-libp2p"
+	"github.com/libp2p/go-libp2p-core/peerstore"
 	dht "github.com/libp2p/go-libp2p-kad-dht"
 	rhost "github.com/libp2p/go-libp2p/p2p/host/routed"
 	"github.com/sirupsen/logrus"
@@ -58,8 +59,16 @@ func (p *Peer) Establish(ctx context.Context, offset int) error {
 		return err
 	}
 
-	// ID
+	// Start Aurae Handshake
+	p.HandshakeServe()
+
 	logrus.Infof("Established. Peer ID: %s", routedHost.ID().Pretty())
+	for _, a := range p.Host().Addrs() {
+		logrus.Infof(" Peerstore: %s", a.String())
+		routedHost.Peerstore().AddAddr(routedHost.ID(), a, peerstore.PermanentAddrTTL)
+	}
+
+	// ID
 	return nil
 }
 

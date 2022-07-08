@@ -75,8 +75,7 @@ func (p *Peer) Handshake(id peer.ID) error {
 	if string(response) != AuraeProtocolHandshakeResponse {
 		return fmt.Errorf("handshake failure validate: %s", string(response))
 	}
-	logrus.Infof("Aurae handshake success!")
-
+	logrus.Infof("Aurae handshake: Success.")
 	return nil
 }
 

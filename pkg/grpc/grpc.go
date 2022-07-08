@@ -35,7 +35,7 @@ func NewGRPCProtocol(ctx context.Context, host host.Host) *GRPCProtocol {
 	go func() {
 		err := grpcServer.Serve(newGrpcListener(grpcProtocol))
 		if err != nil {
-			logrus.Error("unable to start peer grpc server: %v", err)
+			logrus.Errorf("unable to start peer grpc server: %v", err)
 		}
 	}()
 	return grpcProtocol
@@ -48,6 +48,7 @@ func (p *GRPCProtocol) GetGRPCServer() *grpc.Server {
 
 // HandleStream handles an incoming stream.
 func (p *GRPCProtocol) HandleStream(stream network.Stream) {
+	logrus.Infof("[grpc] Stream! %s", stream.ID())
 	select {
 	case <-p.ctx.Done():
 		return
