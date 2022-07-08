@@ -19,9 +19,11 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/kris-nova/aurae/client"
 	"github.com/kris-nova/aurae/pkg/peer"
 	"github.com/kris-nova/aurae/pkg/printer"
 	"github.com/kris-nova/aurae/rpc"
+	peer2peer "github.com/libp2p/go-libp2p-core/peer"
 	"github.com/urfave/cli/v2"
 )
 
@@ -52,15 +54,28 @@ func Status() *cli.Command {
 				return fmt.Errorf("unable to establish host: %s: %v", instance.Name.String(), err)
 			}
 
+			auraeClient := client.NewClient()
 			if isLocal {
 				// Sock
+				err = auraeClient.ConnectSocket(run.socket)
+				if err != nil {
+					return fmt.Errorf("unable to connect to socket: %v", err)
+				}
 			} else {
 				// Peer
+				id, err := peer2peer.Decode(input)
+				if err != nil {
+					return fmt.Errorf("unable to decode input: %v", err)
+				}
+				err = auraeClient.ConnectPeer(instance, id)
+				if err != nil {
+					return fmt.Errorf("unable to connect to peer: %v", err)
+				}
 			}
 
 			var daemonErr error
 
-			statusResp, err := instance.Status(context.Background(), &rpc.StatusReq{})
+			statusResp, err := auraeClient.Status(context.Background(), &rpc.StatusReq{})
 			if err != nil {
 				daemonErr = fmt.Errorf("unable to get status: %v", err)
 			}

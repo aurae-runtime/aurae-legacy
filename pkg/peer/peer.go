@@ -65,7 +65,7 @@ func NewPeer(n name.Name) *Peer {
 		logrus.Errorf("unable to GenerateKeyPair for new peer: %v", err)
 		key = emptyKey
 	}
-	logrus.Infof("New Peer: %s", n.String())
+	logrus.Debugf("New Peer: %s", n.String())
 	runtimeID := uuid.New()
 	logrus.Debugf("New Peer Runtime ID: %s", runtimeID.String())
 

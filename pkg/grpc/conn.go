@@ -17,7 +17,7 @@ type Conn struct {
 func (c *Conn) LocalAddr() net.Addr {
 	addr := c.Stream.Conn().LocalMultiaddr()
 	if na, err := manet.ToNetAddr(addr); err == nil {
-		logrus.Infof("[gRPC] Local Addr: %s", na.String())
+		//logrus.Infof("[gRPC] Local Addr: %s", na.String())
 		return na
 	}
 
@@ -29,7 +29,7 @@ func (c *Conn) LocalAddr() net.Addr {
 func (c *Conn) RemoteAddr() net.Addr {
 	addr := c.Stream.Conn().RemoteMultiaddr()
 	if na, err := manet.ToNetAddr(addr); err == nil {
-		logrus.Infof("[gRPC] Remote Addr: %s", na.String())
+		//logrus.Infof("[gRPC] Remote Addr: %s", na.String())
 		return na
 	}
 

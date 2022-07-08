@@ -48,7 +48,7 @@ func (p *GRPCProtocol) GetGRPCServer() *grpc.Server {
 
 // HandleStream handles an incoming stream.
 func (p *GRPCProtocol) HandleStream(stream network.Stream) {
-	logrus.Infof("[grpc] Stream! %s", stream.ID())
+	//logrus.Infof("[grpc] Stream! %s", stream.ID())
 	select {
 	case <-p.ctx.Done():
 		return

@@ -64,7 +64,7 @@ func (p *Peer) Establish(ctx context.Context, offset int) error {
 
 	logrus.Infof("Established. Peer ID: %s", routedHost.ID().Pretty())
 	for _, a := range p.Host().Addrs() {
-		logrus.Infof(" Peerstore: %s", a.String())
+		//logrus.Infof(" Peerstore: %s", a.String())
 		routedHost.Peerstore().AddAddr(routedHost.ID(), a, peerstore.PermanentAddrTTL)
 	}
 
