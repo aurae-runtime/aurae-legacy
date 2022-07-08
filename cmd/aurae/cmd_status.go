@@ -29,7 +29,7 @@ const (
 	StatusReady   string = "ready"
 	StatusError   string = "error"
 	StatusAlive   string = "alive"
-	StatusUnknwon string = "unknown"
+	StatusUnknown string = "unknown"
 )
 
 func Status() *cli.Command {
@@ -58,46 +58,7 @@ func Status() *cli.Command {
 				// Peer
 			}
 
-			//
-			//// Variables
-			//var auraeClient *client.Client
-			//auraeClient = client.NewClient()
 			var daemonErr error
-			//
-			//// Initalize Peers and Clients
-			//var p *peer.Peer
-			//if input == "" || input == common.Self {
-			//	p = peer.Self()
-			//	err := auraeClient.ConnectSocket(run.socket)
-			//	if err != nil {
-			//		daemonErr = fmt.Errorf("unable to dial self socket: %v", err)
-			//	}
-			//} else {
-			//	//p = peer.Self()
-			//	//err := p.Establish(context.Background(), 0)
-			//	//if err != nil {
-			//	//	daemonErr = fmt.Errorf("unable to establish peer: %v", err)
-			//	//}
-			//	//to, err := peer2peer.Decode(input)
-			//	//if err != nil {
-			//	//	return fmt.Errorf("unable to get peer id: %v", err)
-			//	//}
-			//	//err = auraeClient.ConnectPeer(p, to) // TODO dial to peer
-			//	//if err != nil {
-			//	//	return fmt.Errorf("unable to dial peer: %v", err)
-			//	//}
-			//}
-			//
-			//err := inst.ConnectSocket(run.socket)
-			//if err != nil {
-			//	daemonErr = fmt.Errorf("unable to dial self socket: %v", err)
-			//}
-			////
-			//// Get Status
-			//if auraeClient.RuntimeClient == nil {
-			//	return fmt.Errorf("unable to join aurae net: %v", daemonErr)
-			//}
-			//
 
 			statusResp, err := instance.Status(context.Background(), &rpc.StatusReq{})
 			if err != nil {

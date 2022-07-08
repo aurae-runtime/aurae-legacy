@@ -52,7 +52,7 @@ func (h HamiltonianPath) recursiveCycle(graph *peer.Peer, pos int) bool {
 
 	// Check if this peer already exists in the graph
 	for _, x := range h {
-		if x.RuntimeID == graph.RuntimeID {
+		if x.Name.String() == graph.Name.String() {
 			return true
 		}
 	}
@@ -63,12 +63,12 @@ func (h HamiltonianPath) recursiveCycle(graph *peer.Peer, pos int) bool {
 	// All paths must cycle back to 0 in order for the path
 	// to be a true Ham path.
 	connectsToRoot := false
-	for _, peer := range graph.Peers {
-		if peer.RuntimeID == h[0].RuntimeID {
-			connectsToRoot = true
-		} else {
-			return h.recursiveCycle(peer, pos+1)
-		}
-	}
+	//for _, peer := range graph.Peers {
+	//if peer.RuntimeID == h[0].RuntimeID {
+	//	connectsToRoot = true
+	//} else {
+	//	return h.recursiveCycle(peer, pos+1)
+	//}
+	//}
 	return connectsToRoot
 }
