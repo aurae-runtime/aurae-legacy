@@ -61,6 +61,7 @@ func TestPeer2PeerConnect(t *testing.T) {
 	err = c1.ConnectPeer(p1, p2.Host().ID())
 	if err != nil {
 		t.Errorf("unable to connect client p1 -> p2: %v", err)
+		t.FailNow()
 	}
 
 	_, err = c1.Set(context.Background(), &rpc.SetReq{

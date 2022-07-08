@@ -23,8 +23,6 @@ import (
 	"github.com/kris-nova/aurae/pkg/peer"
 	"github.com/kris-nova/aurae/rpc"
 	peer2peer "github.com/libp2p/go-libp2p-core/peer"
-	"github.com/libp2p/go-libp2p-core/peerstore"
-	"github.com/multiformats/go-multiaddr"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"time"
@@ -54,24 +52,32 @@ func (c *Client) ConnectPeer(self *peer.Peer, to peer2peer.ID) error {
 	}
 	logrus.Infof("Connecting (gRPC) to: %s...", to.String())
 	ctx := context.Background()
+
+	// Hacking START
+	availableProtocols, err := self.Host().Peerstore().GetProtocols(to)
+	if err != nil {
+		return fmt.Errorf("unable to list protocols of remote: %v", err)
+	}
+	if len(availableProtocols) < 1 {
+		return fmt.Errorf("no remote protocols found on remote: %s", to.String())
+	}
+	logrus.Infof("Known remote protocols:")
+	for _, ap := range availableProtocols {
+		logrus.Infof(" - [%s]", ap)
+	}
+	knownPeerAddrs := self.Host().Peerstore().Addrs(to)
+	if len(knownPeerAddrs) < 1 {
+		return fmt.Errorf("no multi addrs found on remote: %s", to.String())
+	}
+	logrus.Infof("Known peer multi addresses:")
+	for _, ma := range knownPeerAddrs {
+		logrus.Infof(" - [%s]", ma.String())
+	}
+
 	grpcProto := p2pgrpc.NewGRPCProtocol(ctx, self.Host())
-	ipfsAddr, err := multiaddr.NewMultiaddr(to.String())
-	if err != nil {
-		return fmt.Errorf("unable to find IPFS multi address to dial: %v", err)
-	}
-	protocolID, err := ipfsAddr.ValueForProtocol(multiaddr.P_IPFS)
-	if err != nil {
-		return fmt.Errorf("unable to calculate value for protocol: %v", err)
-	}
-	peerIDToDial, err := peer2peer.Decode(protocolID)
-	if err != nil {
-		return fmt.Errorf("unable to decode peerIDToDial: %v", err)
-	}
-	targetPeerAddr, _ := multiaddr.NewMultiaddr(fmt.Sprintf("/ipfs/%s", peer2peer.Encode(peerIDToDial)))
-	targetAddr := ipfsAddr.Decapsulate(targetPeerAddr)
-	self.Host().Peerstore().AddAddr(peerIDToDial, targetAddr, peerstore.PermanentAddrTTL)
-	logrus.Infof("NewGRPC with host initialized. Dialing %s...", peerIDToDial)
-	conn, err := grpcProto.Dial(ctx, peerIDToDial, grpc.WithInsecure(), grpc.WithTimeout(time.Second*3), grpc.WithBlock())
+	// Hacking STOP
+
+	conn, err := grpcProto.Dial(ctx, to, grpc.WithInsecure(), grpc.WithTimeout(time.Second*3), grpc.WithBlock())
 	if err != nil {
 		return fmt.Errorf("unable to dial: %v", err)
 	}
