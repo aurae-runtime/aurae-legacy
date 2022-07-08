@@ -18,10 +18,11 @@ package client
 
 import (
 	"context"
+	"github.com/kris-nova/aurae/pkg/core"
+	"github.com/kris-nova/aurae/pkg/core/local"
 	p2pgrpc "github.com/kris-nova/aurae/pkg/grpc"
 	"github.com/kris-nova/aurae/pkg/name"
 	"github.com/kris-nova/aurae/pkg/peer"
-	"github.com/kris-nova/aurae/pkg/runtime"
 	"github.com/kris-nova/aurae/rpc"
 	"testing"
 )
@@ -49,8 +50,9 @@ func TestPeer2PeerConnect(t *testing.T) {
 		t.Errorf("unable to listen p2: %v", err)
 	}
 	server := proto.GetGRPCServer()
-	// server.Serve() is called in NewGRPCProtocol
-	rpc.RegisterRuntimeServer(server, runtime.NewService())
+	// server.Serve() is called in NewGRPCProtocol\
+	rpc.RegisterCoreServer(server,
+		core.NewService(local.NewState("/tmp/aurae.test")))
 
 	// Failing here
 	// Idea 1: Check if we need to server.Serve() the gRPC server
