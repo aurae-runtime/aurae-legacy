@@ -54,16 +54,8 @@ func Status() *cli.Command {
 
 			if isLocal {
 				// Sock
-				err = instance.ConnectSock(run.socket)
-				if err != nil {
-					return fmt.Errorf("unable to connect to local host socket %s: %s: %v", run.socket, instance.Name.String(), err)
-				}
 			} else {
 				// Peer
-				err = instance.ConnectPeerString(input)
-				if err != nil {
-					return fmt.Errorf("unable to connect to peer grpc net %s: %s: %v", input, instance.Name.String(), err)
-				}
 			}
 
 			//
