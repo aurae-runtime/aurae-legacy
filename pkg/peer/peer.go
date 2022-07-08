@@ -100,14 +100,33 @@ func (p *Peer) Host() host.Host {
 	return p.host
 }
 
+func (p *Peer) ConnectPeerString(to string) error {
+	peerID, err := peer.Decode(to)
+	if err != nil {
+		return fmt.Errorf("unable to decode string to peer id: %v", err)
+	}
+	return p.ConnectPeer(peerID)
+}
+
 func (p *Peer) ConnectPeer(to peer.ID) error {
 
+	err := p.Handshake(to) // Not necessarily *required* but it's a good check for basic connectivity
+	if err != nil {
+		return fmt.Errorf("unable to initialize required handshake before grpc: %v", err)
+	}
+
+	logrus.Infof("gRPC Dial to: %s", to.String())
 	grpcProto := p2pgrpc.NewGRPCProtocol(context.Background(), p.Host())
-	conn, err := grpcProto.Dial(context.Background(), to, grpc.WithTimeout(time.Second*3), grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpcProto.Dial(context.Background(), to, grpc.WithTimeout(time.Second*10), grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		return err
 	}
-	return p.clientConnect(conn)
+	err = p.clientConnect(conn)
+	if err != nil {
+		return fmt.Errorf("unable to establish connection: %v", err)
+	}
+
+	return nil
 }
 
 func (p *Peer) ConnectSock(sock string) error {
@@ -119,7 +138,7 @@ func (p *Peer) ConnectSock(sock string) error {
 	conn, err := grpc.Dial(fmt.Sprintf("passthrough:///unix://%s", p.localSocket),
 		grpc.WithInsecure(), grpc.WithTimeout(time.Second*3))
 	if err != nil {
-		return err
+		return fmt.Errorf("failed grpc.Dial local socket: %v", err)
 	}
 	return p.clientConnect(conn)
 }

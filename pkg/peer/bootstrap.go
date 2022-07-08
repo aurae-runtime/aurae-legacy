@@ -81,7 +81,7 @@ func (p *Peer) Bootstrap(peers []peer.AddrInfo) error {
 			p.host.Peerstore().AddAddrs(addrInfo.ID, addrInfo.Addrs, peerstore.PermanentAddrTTL)
 			err := p.host.Connect(ctx, addrInfo)
 			if err != nil {
-				logrus.Warnf("Bootstrap public peer error: %s", err)
+				logrus.Debugf("Bootstrap public peer error: %s", err)
 			} else {
 				successCh <- true
 				logrus.Infof("Bootstrap peer success: %s", addrInfo.ID)

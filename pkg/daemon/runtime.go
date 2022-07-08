@@ -156,6 +156,7 @@ func (d *Daemon) Run() error {
 	}
 	go self.HandshakeServe()
 	d.Self = self
+	logrus.Infof("Starting Auare handshake protocol on peer network")
 
 	peerConn := p2pgrpc.NewGRPCProtocol(ctx, self.Host())
 	if err != nil {
@@ -166,7 +167,9 @@ func (d *Daemon) Run() error {
 	rpc.RegisterProxyServer(server, proxy.NewService())
 	rpc.RegisterRuntimeServer(server, runtime.NewService())
 	rpc.RegisterScheduleServer(server, schedule.NewService())
-	logrus.Infof("Setting peer grpc: %v", server.GetServiceInfo())
+	logrus.Infof("Starting Auare grpc protocol on peer network")
+
+	//logrus.Infof("Setting peer grpc: %v", server.GetServiceInfo())
 
 	// Step 7. Dispatch events from the filesystem
 

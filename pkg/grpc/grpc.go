@@ -5,6 +5,7 @@ import (
 	"github.com/libp2p/go-libp2p-core/host"
 	"github.com/libp2p/go-libp2p-core/network"
 	"github.com/libp2p/go-libp2p-core/protocol"
+	"github.com/sirupsen/logrus"
 
 	"google.golang.org/grpc"
 )
@@ -31,7 +32,12 @@ func NewGRPCProtocol(ctx context.Context, host host.Host) *GRPCProtocol {
 	}
 	host.SetStreamHandler(Protocol, grpcProtocol.HandleStream)
 	// Serve will not return until Accept fails, when the ctx is canceled.
-	go grpcServer.Serve(newGrpcListener(grpcProtocol))
+	go func() {
+		err := grpcServer.Serve(newGrpcListener(grpcProtocol))
+		if err != nil {
+			logrus.Error("unable to start peer grpc server: %v", err)
+		}
+	}()
 	return grpcProtocol
 }
 
