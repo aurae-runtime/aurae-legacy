@@ -46,14 +46,13 @@ func NewClient() *Client {
 }
 
 func (c *Client) ConnectPeer(self *peer.Peer, to peer2peer.ID) error {
-
 	err := self.Handshake(to) // Not necessarily *required* but it's a good check for basic connectivity
 	if err != nil {
 		return fmt.Errorf("unable to initialize required handshake before grpc: %v", err)
 	}
-
-	logrus.Infof("gRPC Dial to: %s", to.String())
+	logrus.Infof("Connecting (gRPC) to: %s...", to.String())
 	grpcProto := p2pgrpc.NewGRPCProtocol(context.Background(), self.Host())
+	logrus.Infof("NewGRPC with host initialized. Dialing...")
 	conn, err := grpcProto.Dial(context.Background(), to, grpc.WithTimeout(time.Second*10), grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		return err
