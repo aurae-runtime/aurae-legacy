@@ -25,6 +25,7 @@ import (
 	"github.com/kris-nova/aurae/rpc"
 	"github.com/libp2p/go-libp2p-core/crypto"
 	"github.com/libp2p/go-libp2p-core/host"
+	mdns "github.com/libp2p/go-libp2p/p2p/discovery/mdns"
 	"github.com/sirupsen/logrus"
 )
 
@@ -41,9 +42,9 @@ type Peer struct {
 	established bool
 	Name        name.Name
 	//Peers       map[string]*Peer
-	host host.Host
-	//DNS         *NameService
-	//internalDNS mdns.Service
+	host        host.Host
+	dns         *NameService
+	internalDNS mdns.Service
 
 	localSocket string
 	rpc.CoreClient

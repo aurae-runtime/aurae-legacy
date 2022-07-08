@@ -23,6 +23,7 @@ import (
 	"github.com/libp2p/go-libp2p"
 	"github.com/libp2p/go-libp2p-core/peerstore"
 	dht "github.com/libp2p/go-libp2p-kad-dht"
+	"github.com/libp2p/go-libp2p/p2p/discovery/mdns"
 	rhost "github.com/libp2p/go-libp2p/p2p/host/routed"
 	"github.com/sirupsen/logrus"
 )
@@ -68,6 +69,15 @@ func (p *Peer) Establish(ctx context.Context, offset int) error {
 		routedHost.Peerstore().AddAddr(routedHost.ID(), a, peerstore.PermanentAddrTTL)
 	}
 
+	// [mDNS]
+	// Here is where we identify ourselves in the mesh.
+	dns := NewNameService()
+	internalDNS := mdns.NewMdnsService(routedHost, p.Name.Service(), dns)
+	internalDNS.Start()
+	p.dns = dns
+	p.internalDNS = internalDNS
+	logrus.Infof("Multicast DNS Established. Hostname: %s", p.Name.Service())
+
 	// ID
 	return nil
 }
@@ -107,15 +117,7 @@ func (p *Peer) Establish(ctx context.Context, offset int) error {
 //		return fmt.Errorf("unable to bootstrap DHT: %v", err)
 //	}
 //
-//	// [mDNS]
-//	// Here is where we identify ourselves in the mesh.
-//	dns := NewNameService()
-//	internalDNS := mdns.NewMdnsService(h, p.Name.Service(), dns)
-//	internalDNS.Start()
-//	p.DNS = dns
-//	p.internalDNS = internalDNS
-//	logrus.Infof("Multicast DNS Established. Hostname: %s", p.Name.Service())
-//
+
 //	// All Peers will respond on the default Aurae Protocol.
 //	// We establish that handler now.
 //	addr := p.Address()

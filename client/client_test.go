@@ -54,11 +54,6 @@ func TestPeer2PeerConnect(t *testing.T) {
 	rpc.RegisterCoreServer(server,
 		core.NewService(local.NewState("/tmp/aurae.test")))
 
-	// Failing here
-	// Idea 1: Check if we need to server.Serve() the gRPC server
-	// Idea 2: Check if the port number offset needs to be plumbed through
-	// Idea 3: Check the net.Conn and net.Dialer used in handshake()
-
 	// gRPC Client (p1 -> p2)
 	err = c1.ConnectPeer(p1, p2.Host().ID())
 	if err != nil {

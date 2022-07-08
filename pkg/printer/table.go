@@ -69,8 +69,7 @@ func (t *Table) Print(w io.Writer) error {
 		if f.i > maxRow {
 			maxRow = f.i
 		}
-
-		headerLine += fmt.Sprintf("%-*s", f.width, color.BlueString(f.Header))
+		headerLine += fmt.Sprintf("%*s", f.width, color.BlueString(f.Header))
 	}
 	headerLine += "\n"
 	fmt.Fprintf(w, headerLine)
@@ -79,13 +78,12 @@ func (t *Table) Print(w io.Writer) error {
 	// Row is the "row" of the fields to print. Start at 0
 	for row := 0; row <= maxRow; row++ {
 		fieldLine := ""
-
 		for i := 0; i <= t.i; i++ {
 			f := t.OrderedFields[i]
 			if f == nil {
 				continue // Sanity check
 			}
-			fieldLine += fmt.Sprintf("%*s", f.width, f.values[row])
+			fieldLine += fmt.Sprintf("%-*s", f.width+1, f.values[row])
 		}
 		fieldLine += "\n"
 		fmt.Fprintf(w, fieldLine)
