@@ -18,80 +18,27 @@ package client
 
 import (
 	"context"
-	"fmt"
-	p2pgrpc "github.com/kris-nova/aurae/pkg/grpc"
+	"github.com/kris-nova/aurae/pkg/name"
 	"github.com/kris-nova/aurae/pkg/peer"
-	"github.com/kris-nova/aurae/rpc"
-	peer2peer "github.com/libp2p/go-libp2p-core/peer"
-	"github.com/sirupsen/logrus"
-	"google.golang.org/grpc"
-	"time"
+	"testing"
 )
 
-type Client struct {
-	rpc.CoreClient
-	rpc.RuntimeClient
-	rpc.ScheduleClient
-	rpc.ProxyClient
-
-	socket    string
-	connected bool
-	peer      *peer.Peer
-}
-
-func NewClient() *Client {
-	return &Client{
-		connected: false,
-	}
-}
-
-func (c *Client) ConnectPeer(self *peer.Peer, to peer2peer.ID) error {
-
-	err := self.Handshake(to) // Not necessarily *required* but it's a good check for basic connectivity
+func TestPeer2PeerConnect(t *testing.T) {
+	var err error
+	p1 := peer.Self()
+	err = p1.Establish(context.Background(), 0)
 	if err != nil {
-		return fmt.Errorf("unable to initialize required handshake before grpc: %v", err)
+		t.Errorf("unable to establish p1: %v", err)
 	}
+	c1 := NewClient()
 
-	logrus.Infof("gRPC Dial to: %s", to.String())
-	grpcProto := p2pgrpc.NewGRPCProtocol(context.Background(), self.Host())
-	conn, err := grpcProto.Dial(context.Background(), to, grpc.WithTimeout(time.Second*10), grpc.WithInsecure(), grpc.WithBlock())
+	p2 := peer.NewPeer(name.New("p2"))
+	err = p2.Establish(context.Background(), 1)
 	if err != nil {
-		return err
+		t.Errorf("unable to establish p1: %v", err)
 	}
-	err = c.establish(conn)
+	err = c1.ConnectPeer(p1, p2.Host().ID())
 	if err != nil {
-		return fmt.Errorf("unable to establish connection: %v", err)
+		t.Errorf("unable to connect client p1 -> p2: %v", err)
 	}
-
-	return nil
-}
-
-func (c *Client) ConnectSocket(sock string) error {
-
-	// Cache the socket
-	c.socket = sock
-
-	logrus.Warnf("mTLS disabled. running insecure.")
-	conn, err := grpc.Dial(fmt.Sprintf("passthrough:///unix://%s", c.socket),
-		grpc.WithInsecure(), grpc.WithTimeout(time.Second*3))
-	if err != nil {
-		return err
-	}
-	return c.establish(conn)
-}
-
-func (c *Client) establish(conn grpc.ClientConnInterface) error {
-	// Establish the connection from the conn
-	core := rpc.NewCoreClient(conn)
-	c.CoreClient = core
-	runtime := rpc.NewRuntimeClient(conn)
-	c.RuntimeClient = runtime
-	schedule := rpc.NewScheduleClient(conn)
-	c.ScheduleClient = schedule
-	proxy := rpc.NewProxyClient(conn)
-	c.ProxyClient = proxy
-	c.connected = true
-	logrus.Warnf("Connected to grpc")
-
-	return nil
 }
