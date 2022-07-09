@@ -17,30 +17,31 @@
 package peer
 
 import (
+	"context"
 	"github.com/kris-nova/aurae/pkg/name"
-	"github.com/libp2p/go-libp2p-core/peer"
-	"github.com/sirupsen/logrus"
-	"sync"
+	"testing"
 )
 
-type NameService struct {
-	AddrInfoCh chan peer.AddrInfo
-	Records    map[name.Name]peer.AddrInfo
-	mtx        sync.Mutex
-}
+func TestPeerMDNSLookup(t *testing.T) {
 
-func (s *NameService) HandlePeerFound(info peer.AddrInfo) {
-	logrus.Debugf("Peer discovery: %v", info)
-	s.mtx.Lock()
-	defer s.mtx.Unlock()
-	s.AddrInfoCh <- info
-}
-
-func NewNameService() *NameService {
-	dns := &NameService{
-		AddrInfoCh: make(chan peer.AddrInfo),
-		Records:    make(map[name.Name]peer.AddrInfo),
-		mtx:        sync.Mutex{},
+	p3 := NewPeer(name.New("beeps@nivenly.com"))
+	err := p3.Establish(context.Background(), 0)
+	if err != nil {
+		t.Errorf("unable to establish beeps@nivenly.com: %v", err)
 	}
-	return dns
+	err = p3.HandshakeServe()
+	if err != nil {
+		t.Errorf("unable to start handshake server on p3: %v", err)
+	}
+
+	p4 := NewPeer(name.New("boops@nivenly.com"))
+	err = p4.Establish(context.Background(), 1)
+	if err != nil {
+		t.Errorf("unable to establish boops@nivenly.com: %v", err)
+	}
+	err = p4.Handshake(p3.Host().ID())
+	if err != nil {
+		t.Errorf("unable to handshake: %v", err)
+	}
+
 }

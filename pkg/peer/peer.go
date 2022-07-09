@@ -22,7 +22,6 @@ import (
 	golog "github.com/ipfs/go-log/v2"
 	"github.com/kris-nova/aurae/pkg/common"
 	"github.com/kris-nova/aurae/pkg/name"
-	"github.com/kris-nova/aurae/rpc"
 	"github.com/libp2p/go-libp2p-core/crypto"
 	"github.com/libp2p/go-libp2p-core/host"
 	mdns "github.com/libp2p/go-libp2p/p2p/discovery/mdns"
@@ -45,12 +44,6 @@ type Peer struct {
 	host        host.Host
 	dns         *NameService
 	internalDNS mdns.Service
-
-	localSocket string
-	rpc.CoreClient
-	rpc.RuntimeClient
-	rpc.ScheduleClient
-	rpc.ProxyClient
 }
 
 func NewPeer(n name.Name) *Peer {

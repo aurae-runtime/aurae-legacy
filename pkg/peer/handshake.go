@@ -50,6 +50,10 @@ const (
 	AuraeProtocolHandshakeResponse string = "<--**<<RESPONSE>>**-->\n"
 )
 
+//func (p *Peer) HandshakeService(n name.Name) error {
+//
+//}
+
 func (p *Peer) Handshake(id peer.ID) error {
 	if !p.established {
 		return fmt.Errorf("unable to stream, first establish in the mesh")

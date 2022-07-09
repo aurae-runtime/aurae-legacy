@@ -42,10 +42,10 @@ func (p *Peer) Establish(ctx context.Context, offset int) error {
 	//
 	// Create a new distributed hash table for storing records
 	dstore := dsync.MutexWrap(datastore.NewMapDatastore())
-	dht := dht.NewDHT(ctx, basicHost, dstore)
+	distable := dht.NewDHT(ctx, basicHost, dstore)
 
 	// Routed Host
-	routedHost := rhost.Wrap(basicHost, dht)
+	routedHost := rhost.Wrap(basicHost, distable)
 	p.host = routedHost
 	p.established = true
 
@@ -55,13 +55,16 @@ func (p *Peer) Establish(ctx context.Context, offset int) error {
 		logrus.Errorf("Unable to bootstrap with IPFS: %v", err)
 		p.established = false
 	}
-	err = dht.Bootstrap(ctx)
+	err = distable.Bootstrap(ctx)
 	if err != nil {
 		return err
 	}
 
 	// Start Aurae Handshake
-	p.HandshakeServe()
+	err = p.HandshakeServe()
+	if err != nil {
+		return err
+	}
 
 	logrus.Infof("Established. Peer ID: %s", routedHost.ID().Pretty())
 	for _, a := range p.Host().Addrs() {
@@ -70,12 +73,15 @@ func (p *Peer) Establish(ctx context.Context, offset int) error {
 	}
 
 	// [mDNS]
-	// Here is where we identify ourselves in the mesh.
 	dns := NewNameService()
-	internalDNS := mdns.NewMdnsService(routedHost, p.Name.Service(), dns)
-	internalDNS.Start()
+	dnsSvc := mdns.NewMdnsService(routedHost, p.Name.Service(), dns)
+	err = dnsSvc.Start()
+	if err != nil {
+		return err
+	}
 	p.dns = dns
-	p.internalDNS = internalDNS
+	go p.identify()
+
 	logrus.Infof("Multicast DNS Established. Hostname: %s", p.Name.Service())
 
 	// ID
