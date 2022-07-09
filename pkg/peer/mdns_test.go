@@ -24,6 +24,7 @@ import (
 
 func TestPeerMDNSLookup(t *testing.T) {
 
+	// + 0
 	p3 := NewPeer(name.New("beeps@nivenly.com"))
 	err := p3.Establish(context.Background(), 0)
 	if err != nil {
@@ -34,6 +35,7 @@ func TestPeerMDNSLookup(t *testing.T) {
 		t.Errorf("unable to start handshake server on p3: %v", err)
 	}
 
+	// + 1
 	p4 := NewPeer(name.New("boops@nivenly.com"))
 	err = p4.Establish(context.Background(), 1)
 	if err != nil {
