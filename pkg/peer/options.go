@@ -36,7 +36,8 @@ func DefaultOptions(key crypto.PrivKey, offset int) []p2p.Option {
 		p2p.Identity(key),
 
 		// EnableAutoRelay for performance reasons in the circuit.
-		//p2p.EnableAutoRelay(),
+		// This is also suggested for the NAT hole punching.
+		p2p.EnableAutoRelay(),
 
 		//p2p.ListenAddrs(
 		// Listen on ipv4, choose an available port
@@ -53,8 +54,9 @@ func DefaultOptions(key crypto.PrivKey, offset int) []p2p.Option {
 		p2p.DefaultTransports,
 		p2p.DefaultMuxers,
 		p2p.DefaultSecurity,
-		p2p.EnableNATService(),
-		p2p.EnableHolePunching(),
+		p2p.EnableNATService(),   // Convenience service for peers
+		p2p.NATPortMap(),         // Try to open a port in the network firewall using UPnP
+		p2p.EnableHolePunching(), // STUN hole punching
 	}
 
 }
