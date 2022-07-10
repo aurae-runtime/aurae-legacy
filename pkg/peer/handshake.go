@@ -24,6 +24,8 @@ import (
 	"github.com/libp2p/go-libp2p-core/network"
 	"github.com/libp2p/go-libp2p-core/peer"
 	"github.com/libp2p/go-libp2p-core/protocol"
+	"github.com/libp2p/go-libp2p/p2p/protocol/holepunch"
+	"github.com/libp2p/go-libp2p/p2p/protocol/identify"
 	"github.com/multiformats/go-multistream"
 	"github.com/sirupsen/logrus"
 	"io"
@@ -71,6 +73,21 @@ func (p *Peer) Handshake(id peer.ID) error {
 		if err == multistream.ErrNotSupported {
 			return fmt.Errorf("unable to create handshake stream, handshake server not discovered: enable %s on remote peer", AuraeStreamProtocol())
 		}
+
+		// Try hole punching
+		iSvc, err := identify.NewIDService(p.host, nil)
+		if err != nil {
+			return fmt.Errorf("[identify] unable to connect through hole punching: %v", err)
+		}
+		hpSvc, err := holepunch.NewService(p.host, iSvc)
+		if err != nil {
+			return fmt.Errorf("[holepunch] unable to connect through hole punching: %v", err)
+		}
+		err = hpSvc.DirectConnect(addrInfo.ID)
+		if err != nil {
+			return fmt.Errorf("[holepunch] unable to direct connect")
+		}
+		logrus.Warnf("Direct connect successful, but nothing to do.")
 		return fmt.Errorf("unable to create new stream: %v", err)
 	}
 
