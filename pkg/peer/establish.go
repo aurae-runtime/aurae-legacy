@@ -84,7 +84,6 @@ func (p *Peer) Establish(ctx context.Context, offset int) error {
 
 	logrus.Infof("Multicast DNS Established. Hostname: %s", p.Name.Service())
 
-	// ID
 	return nil
 }
 
