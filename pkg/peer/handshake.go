@@ -61,14 +61,14 @@ func (p *Peer) Handshake(id peer.ID) error {
 		return fmt.Errorf("unable to stream, first establish in the mesh")
 	}
 
-	addrInfo, err := p.router.FindPeer(context.Background(), id)
-	if err != nil {
-		logrus.Warnf("unable to find peer via router: %v", err)
-	}
+	//addrInfo, err := p.router.FindPeer(context.Background(), id)
+	//if err != nil {
+	//	logrus.Warnf("unable to find peer via router: %v", err)
+	//}
 
 	p.host.SetStreamHandler(AuraeStreamProtocol(), doHandshake)
 
-	s, err := p.host.NewStream(context.Background(), addrInfo.ID, AuraeStreamProtocol())
+	s, err := p.host.NewStream(context.Background(), id, AuraeStreamProtocol())
 	if err != nil {
 		if err == multistream.ErrNotSupported {
 			return fmt.Errorf("unable to create handshake stream, handshake server not discovered: enable %s on remote peer", AuraeStreamProtocol())
@@ -83,7 +83,7 @@ func (p *Peer) Handshake(id peer.ID) error {
 		if err != nil {
 			return fmt.Errorf("[holepunch] unable to connect through hole punching: %v", err)
 		}
-		err = hpSvc.DirectConnect(addrInfo.ID)
+		err = hpSvc.DirectConnect(id)
 		if err != nil {
 			return fmt.Errorf("[holepunch] unable to direct connect")
 		}
