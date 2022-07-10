@@ -42,11 +42,12 @@ func (p *Peer) Establish(ctx context.Context, offset int) error {
 	//
 	// Create a new distributed hash table for storing records
 	dstore := dsync.MutexWrap(datastore.NewMapDatastore())
-	distable := dht.NewDHT(ctx, basicHost, dstore)
+	router := dht.NewDHT(ctx, basicHost, dstore)
 
 	// Routed Host
-	routedHost := rhost.Wrap(basicHost, distable)
+	routedHost := rhost.Wrap(basicHost, router)
 	p.host = routedHost
+	p.router = router
 	p.established = true
 
 	// Bootstrap
@@ -55,7 +56,7 @@ func (p *Peer) Establish(ctx context.Context, offset int) error {
 		logrus.Errorf("Unable to bootstrap with IPFS: %v", err)
 		p.established = false
 	}
-	err = distable.Bootstrap(ctx)
+	err = router.Bootstrap(ctx)
 	if err != nil {
 		return err
 	}
@@ -66,7 +67,6 @@ func (p *Peer) Establish(ctx context.Context, offset int) error {
 		return err
 	}
 
-	logrus.Infof("Established. Peer ID: %s", routedHost.ID().Pretty())
 	for _, a := range p.Host().Addrs() {
 		//logrus.Infof(" Peerstore: %s", a.String())
 		routedHost.Peerstore().AddAddr(routedHost.ID(), a, peerstore.PermanentAddrTTL)
@@ -82,7 +82,28 @@ func (p *Peer) Establish(ctx context.Context, offset int) error {
 	p.dns = dns
 	go p.identify()
 
+	{
+		// This system is used to identify peers. These likely are from
+		// a public bootstrap or from other peers in the mesh.
+		//
+		// For example "QmaCpDMGvV2BGHeYERUEnRQAwe3N8SzbUtfsmvsqQLuvuJ"
+		// is a well known public peer.
+		if len(router.RoutingTable().ListPeers()) > 0 {
+
+			for _, rtPeer := range router.RoutingTable().ListPeers() {
+				logrus.Infof("Routing Table Peer: %s", rtPeer.String())
+			}
+		}
+		if len(router.RoutingTable().GetPeerInfos()) > 0 {
+			for _, rtPeer := range router.RoutingTable().GetPeerInfos() {
+				logrus.Infof("Routing Table PeerInfo: %s", rtPeer.Id)
+			}
+		}
+	}
+
+	// Logs and Output
 	logrus.Infof("Multicast DNS Established. Hostname: %s", p.Name.Service())
+	logrus.Infof("Established Public Routable ID: %s", router.PeerID())
 
 	return nil
 }

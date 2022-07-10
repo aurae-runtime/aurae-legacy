@@ -53,7 +53,9 @@ func DefaultOptions(key crypto.PrivKey, offset int) []p2p.Option {
 		p2p.DefaultTransports,
 		p2p.DefaultMuxers,
 		p2p.DefaultSecurity,
+		p2p.EnableNATService(),
 		p2p.NATPortMap(),
+		p2p.EnableHolePunching(nil),
 	}
 
 }

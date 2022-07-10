@@ -21,6 +21,6 @@ import "github.com/sirupsen/logrus"
 func (p *Peer) identify() {
 	for {
 		peerAddrInfo := <-p.dns.AddrInfoCh
-		logrus.Infof("Peer identify: %s@%s", p.Name.Service(), peerAddrInfo.String())
+		logrus.Debugf("Peer identify: %s@%s", p.Name.Service(), peerAddrInfo.String())
 	}
 }

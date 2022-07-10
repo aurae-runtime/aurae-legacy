@@ -24,6 +24,8 @@ import (
 	"github.com/kris-nova/aurae/pkg/name"
 	"github.com/libp2p/go-libp2p-core/crypto"
 	"github.com/libp2p/go-libp2p-core/host"
+	"github.com/libp2p/go-libp2p-core/peer"
+	dht "github.com/libp2p/go-libp2p-kad-dht"
 	mdns "github.com/libp2p/go-libp2p/p2p/discovery/mdns"
 	"github.com/sirupsen/logrus"
 )
@@ -41,9 +43,15 @@ type Peer struct {
 	established bool
 	Name        name.Name
 	//Peers       map[string]*Peer
-	host        host.Host
+	host host.Host
+
+	// DNS
 	dns         *NameService
 	internalDNS mdns.Service
+
+	// Routing
+	router      *dht.IpfsDHT
+	routableIDs []peer.ID
 }
 
 func NewPeer(n name.Name) *Peer {
