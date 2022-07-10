@@ -47,7 +47,9 @@ func Peer() *cli.Command {
 			if err != nil {
 				return err
 			}
-			return p.HandshakeServe()
+			p.HandshakeServe()
+			select {}
+			return nil
 		},
 		Subcommands: []*cli.Command{
 			{
