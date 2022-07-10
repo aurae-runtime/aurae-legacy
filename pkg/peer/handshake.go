@@ -75,7 +75,7 @@ func (p *Peer) Handshake(id peer.ID) error {
 		}
 
 		// Try hole punching
-		iSvc, err := identify.NewIDService(p.host, nil)
+		iSvc, err := identify.NewIDService(p.host)
 		if err != nil {
 			return fmt.Errorf("[identify] unable to connect through hole punching: %v", err)
 		}
