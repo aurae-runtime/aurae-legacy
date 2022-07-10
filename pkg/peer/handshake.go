@@ -61,10 +61,10 @@ func (p *Peer) Handshake(id peer.ID) error {
 		return fmt.Errorf("unable to stream, first establish in the mesh")
 	}
 
-	addrInfo, err := p.router.FindPeer(context.Background(), id)
-	if err != nil {
-		return fmt.Errorf("unable to find peer via router: %v", err)
-	}
+	//addrInfo, err := p.router.FindPeer(context.Background(), id)
+	//if err != nil {
+	//	return fmt.Errorf("unable to find peer via router: %v", err)
+	//}
 
 	p.host.SetStreamHandler(AuraeStreamProtocol(), doHandshake)
 
