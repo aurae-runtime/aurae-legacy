@@ -23,3 +23,16 @@ Additionally after `auraed` has registered certificate material it will, by defa
 ```
 
 This empty loop status of the daemon is it's default and most stable state. Once the loop is `healthy` work and capabilities can be registered to the daemon and the system can be composed at runtime.
+
+## Capabilities API
+
+Capabilities are similar to subsystems and will come with various sub-resources that can be implemented and registered against the empty loop.
+
+ - Ingress
+ - Runtime
+ - Schedule
+ - Storage
+ - Network
+ - Firewall
+ 
+ 
