@@ -35,4 +35,30 @@ Capabilities are similar to subsystems and will come with various sub-resources 
  - Network
  - Firewall
  
+ ## Aurae connection Syntax
+ 
+ Imagine an `nginx` server running on a node in the network.
+ 
+ ```
+ <entity>@<peer>@<domain>
+ ```
+ 
+ Where domain is a registered domain that allows peers to identify each other in the public internet.
+
+ 
+ ## Relationship with POSIX
+ 
+The project will be responsible for maintaing various POSIX compliant CLI tools.
+ 
+These will leverage the `auare.sock` as a UNIX pipe which can be managed in a traditional POSIX environment.
+
+We will house a series of improved Core utils that can be leveraged with Aurae nodes
+
+```
+auraefs # Used to mount filesystems that are registered with the `Storage` capability
+ascp    # Traditional scp but leverages the aurae syntax
+assh    # Traditional ssh but leverages the aurae socket for connections to nodes
+```
+
+ 
  
