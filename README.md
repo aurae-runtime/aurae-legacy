@@ -16,10 +16,11 @@ For reliability purposes `auraed` will *always* start. However without TLS certi
 
 Additionally after `auraed` has registered certificate material it will, by default, do nothing other than expose its registered endpoints over gRPC on a Unix Domain Socket. 
 
+We only have 2 primary flags, that have reasonable defaults.
+
 ``` 
-/run/aurae.sock
-/pki/aurae.pem
-/pki/aurae.pub
+ --sock (default: "/run/aurae.sock")
+ --key  (default: "home/user/.ssh/id_aura")
 ```
 
 This empty loop status of the daemon is it's default and most stable state. Once the loop is `healthy` work and capabilities can be registered to the daemon and the system can be composed at runtime.
