@@ -29,12 +29,29 @@ This empty loop status of the daemon is it's default and most stable state. Once
 
 Capabilities are similar to subsystems and will come with various sub-resources that can be implemented and registered against the empty loop.
 
- - Ingress
+### Compute 
+
  - Runtime
  - Schedule
- - Storage
+ - Observe
+
+### Storage
+
+ - Mount
  - Network
+ - Object
+ - File
+ - Secrets
+
+### Network
+
+ - Ingress
+ - Egress 
+ - Peer
  - Firewall
+
+
+
  
  ## Aurae connection Syntax
  
