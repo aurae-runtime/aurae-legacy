@@ -10,11 +10,13 @@ Experimental peer-to-peer application runtime.
 
 ## Empty Loop Architecture
 
+> Everything and nothing all at once.
+
 Minimal scope for `auraed` which runs as PID 1 on a Linux kernel and will ultimately replace `systemd`. 
 
 For reliability purposes `auraed` will *always* start. However without TLS certificate material in place and registered with the daemon it will be an empty loop. 
 
-Additionally after `auraed` has registered certificate material it will, by default, do nothing other than expose its registered endpoints over gRPC on a Unix Domain Socket. 
+Additionally, after `auraed` has registered certificate material it will, by default, do nothing other than expose its registered endpoints over gRPC on a Unix Domain Socket. 
 
 We only have 2 primary flags, that have reasonable defaults.
 
@@ -24,6 +26,24 @@ We only have 2 primary flags, that have reasonable defaults.
 ```
 
 This empty loop status of the daemon is it's default and most stable state. Once the loop is `healthy` work and capabilities can be registered to the daemon and the system can be composed at runtime.
+
+## Spaces 
+
+Aurae maintains a strict isolation boundary between two spaces that is seperated by the aurae socket API.
+
+ - Daemon space
+ - Aurae space 
+
+Deamon space is most closely related to what Linux refers to as "kernel space". 
+The daemon is responsible for executing various tasks on behalf of clients of the system.
+Unlike Linux, the daemon space is not limited to the some constraints of a hardware kernel. 
+Memory management, process management, IPC, and basic operating system functionality is assumed.
+
+Aurae space is most closely related to what Linux refers to as "User space".
+This is the part of the system that is destined for users of the system. 
+Here is where applications exist, and where multitenancy is enforced.
+
+First Principal: Everything in Aurae space exists in an isolation zone and MUST access the system via the local unix domain socket.
 
 ## Capabilities API
 
@@ -49,9 +69,6 @@ Capabilities are similar to subsystems and will come with various sub-resources 
  - Egress 
  - Peer
  - Firewall
-
-
-
  
  ## Aurae connection Syntax
  
