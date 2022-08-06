@@ -22,11 +22,19 @@ import (
 )
 
 type QueryResult struct {
-	Client
+	*Client
 	name.Name
 	context.Context
 }
 
+// Query returns an uninitialized client, and can be used
+// for easily bootstrapping client command line programs.
 func Query(input string) (*QueryResult, error) {
-	return nil, nil
+	nm := name.New(input)
+	client := NewClient()
+	return &QueryResult{
+		Client:  client,
+		Name:    nm,
+		Context: context.Background(),
+	}, nil
 }

@@ -43,6 +43,10 @@ func Run() *cli.Command {
 			x := query.Client
 			name := query.Name
 			ctx := query.Context
+			err = x.ConnectSocket(run.socket)
+			if err != nil {
+				return fmt.Errorf("unable to connect: %s", err)
+			}
 			logrus.Debug("Running: %s", name.String())
 
 			runResp, err := x.Run(ctx, &rpc.RunReq{})
