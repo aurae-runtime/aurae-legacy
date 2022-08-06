@@ -49,7 +49,9 @@ func Run() *cli.Command {
 			}
 			logrus.Debug("Running: %s", name.String())
 
-			runResp, err := x.Run(ctx, &rpc.RunReq{})
+			runResp, err := x.Run(ctx, &rpc.RunReq{
+				Name: name.String(),
+			})
 			if err != nil {
 				return fmt.Errorf("unable to run: %s", err)
 			}

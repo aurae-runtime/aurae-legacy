@@ -57,7 +57,7 @@ message Peer {
 // Run (WIP)
 
 message RunReq {
-  string Image = 1;
+  string Name = 1;
 }
 
 message RunResp {

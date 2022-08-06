@@ -19,12 +19,22 @@ package runtime
 import (
 	"context"
 	"github.com/kris-nova/aurae/rpc"
+	"github.com/sirupsen/logrus"
 )
 
 var _ rpc.RuntimeServer = &Service{}
 
 type Service struct {
 	rpc.UnimplementedRuntimeServer
+}
+
+func (s Service) Run(ctx context.Context, in *rpc.RunReq) (*rpc.RunResp, error) {
+	// Spoof a response for now
+	logrus.Debugf("Running image: %s", in.Name)
+	return &rpc.RunResp{
+		Code:    1,
+		Message: "Success",
+	}, nil
 }
 
 func (s Service) Status(ctx context.Context, in *rpc.StatusReq) (*rpc.StatusResp, error) {
