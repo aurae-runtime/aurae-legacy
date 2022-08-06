@@ -25,6 +25,8 @@ import (
 func RunContainer(name string) error {
 	//return nil
 	// func ExecuteFirecracker(vm *api.VM, fcIfaces firecracker.NetworkInterfaces) (err error) {
+
+	//client := firecracker.NewClient("/run/firecracker.socket", logrus.NewEntry(logrus.New()), true)
 	vm := &ignite.VM{}
 	vm.SetName(name)
 	return container.ExecuteFirecracker(vm, firecracker.NetworkInterfaces{})

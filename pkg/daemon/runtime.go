@@ -17,6 +17,7 @@
 package daemon
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"github.com/kris-nova/aurae"
@@ -34,12 +35,14 @@ import (
 	"google.golang.org/grpc"
 	"net"
 	"os"
+	"os/exec"
 	"strings"
 )
 
 const (
 	DefaultSocketLocationLinux     string = "/run/aurae.sock"
 	DefaultLocalStateLocationLinux string = "/var/aurae"
+	DefaultFirecrackerExecutable   string = "/bin/aurae-firecracker"
 )
 
 // Daemon is an aurae systemd style daemon.
@@ -171,21 +174,30 @@ func (d *Daemon) Run() error {
 	rpc.RegisterScheduleServer(server, schedule.NewService())
 	logrus.Debugf("Starting Auare grpc protocol on peer network")
 
-	//logrus.Infof("Setting peer grpc: %v", server.GetServiceInfo())
-
-	// Step 7. Dispatch events from the filesystem
-
-	// need to configure events directories/paths
-	//err := d.Dispatch()
-	//if err != nil {
-	//	logrus.Errorf("Dispatch failure: %v", err)
-	//	logrus.Errorf("Shutting down.")
-	//	d.daemon = false
-	//}
-
-	// Step 7. Begin the daemon loop.
-
-	logrus.Infof("Daemon running...")
+	// Run the firecracker daemon
+	// TODO this is a big fucking deal
+	// TODO we need to manage logs, stderr, stdout, etc, etc
+	// TODO nova come clean this up and probably pull it into its own file
+	err = os.Remove("/run/firecracker.socket") // TODO pull this up to config and do a check
+	cmd := exec.Command(DefaultFirecrackerExecutable)
+	stdout := &bytes.Buffer{}
+	stderr := &bytes.Buffer{}
+	cmd.Stdout = stdout
+	cmd.Stderr = stderr
+	err = cmd.Start()
+	if err != nil {
+		return fmt.Errorf("unable to start firecracker: %s", err)
+	}
+	go func() {
+		err = cmd.Wait()
+		if err != nil {
+			logrus.Warningf("Firecracker runtime: %v", err)
+		}
+		logrus.Info(stdout.String())
+		logrus.Warnf(stderr.String())
+	}()
+	logrus.Infof("Firecracker hypervisor running...")
+	logrus.Infof("Aurae daemon running...")
 	for d.runtime {
 		select {
 		case err := <-serveCancel:
