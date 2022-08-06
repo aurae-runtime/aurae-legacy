@@ -48,7 +48,6 @@ func Run() *cli.Command {
 				return fmt.Errorf("unable to connect: %s", err)
 			}
 			logrus.Debug("Running: %s", name.String())
-
 			runResp, err := x.Run(ctx, &rpc.RunReq{
 				Name: name.String(),
 			})
