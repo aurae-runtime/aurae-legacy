@@ -16,7 +16,11 @@
 
 package runtime
 
-func RunContainer(name string) error {
-	return nil
-	//return container.ExecuteFirecracker(nil, nil)
+import "testing"
+
+func TestRunContainer(t *testing.T) {
+	err := RunContainer("nginx")
+	if err != nil {
+		t.Errorf("unable to run nginx")
+	}
 }
