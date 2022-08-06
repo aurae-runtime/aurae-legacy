@@ -126,5 +126,4 @@ func Preloader() {
 		logrus.SetLevel(logrus.InfoLevel)
 	}
 	run.socket = common.Expand(run.socket)
-
 }
