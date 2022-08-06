@@ -162,5 +162,5 @@ func (c *Service) SetGetFromMemory(x bool) {
 	c.mtx.Lock()
 	defer c.mtx.Unlock()
 	getFromMemory = x
-	logrus.Infof("GetFromMemory: %t", x)
+	logrus.Debugf("GetFromMemory: %t", x)
 }

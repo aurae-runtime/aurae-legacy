@@ -79,9 +79,11 @@ func (d *Daemon) Run() error {
 	ctx := context.Background()
 
 	// Establish context in the logs.
+	logrus.Infof("----------------------------------------------------")
 	logrus.Infof("Aurae daemon daemon. Version: %s", aurae.Version)
 	logrus.Infof("Aurae Socket [%s]", d.socket)
 	logrus.Infof("Aurae Local  [%s]", d.localStore)
+	logrus.Infof("----------------------------------------------------")
 
 	// Establish daemon safety
 	quitCh := posix.SignalHandler()
@@ -108,12 +110,12 @@ func (d *Daemon) Run() error {
 			return err
 		}
 	} else {
-		logrus.Infof("Success. Socket acquired.")
+		logrus.Debugf("Success. Socket acquired.")
 	}
 	defer socketConn.Close()
 
 	// Local gRPC server
-	logrus.Infof("Starting [SOCKET] gRPC Server.")
+	logrus.Debugf("Starting [SOCKET] gRPC Server.")
 	server := grpc.NewServer()
 
 	// Step 4. Setup the local persistent state.
@@ -129,7 +131,7 @@ func (d *Daemon) Run() error {
 	rpc.RegisterRuntimeServer(server, runtime.NewService())
 	rpc.RegisterScheduleServer(server, schedule.NewService())
 
-	logrus.Infof("Registering Core Services.")
+	logrus.Debugf("Registering Core Services.")
 
 	// Step 6. Begin the empty loop by running a small go routine with an emergency cancel
 	serveCancel := make(chan error)
@@ -156,7 +158,7 @@ func (d *Daemon) Run() error {
 	}
 	go self.HandshakeServe()
 	d.Self = self
-	logrus.Infof("Starting Auare handshake protocol on peer network")
+	logrus.Debugf("Starting Auare handshake protocol on peer network")
 
 	peerConn := p2pgrpc.NewGRPCProtocol(ctx, self.Host())
 	if err != nil {
@@ -167,7 +169,7 @@ func (d *Daemon) Run() error {
 	rpc.RegisterProxyServer(server, proxy.NewService())
 	rpc.RegisterRuntimeServer(server, runtime.NewService())
 	rpc.RegisterScheduleServer(server, schedule.NewService())
-	logrus.Infof("Starting Auare grpc protocol on peer network")
+	logrus.Debugf("Starting Auare grpc protocol on peer network")
 
 	//logrus.Infof("Setting peer grpc: %v", server.GetServiceInfo())
 
@@ -183,6 +185,7 @@ func (d *Daemon) Run() error {
 
 	// Step 7. Begin the daemon loop.
 
+	logrus.Infof("Daemon running...")
 	for d.runtime {
 		select {
 		case err := <-serveCancel:

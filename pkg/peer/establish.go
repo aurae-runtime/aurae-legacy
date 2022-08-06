@@ -91,19 +91,19 @@ func (p *Peer) Establish(ctx context.Context, offset int) error {
 		if len(router.RoutingTable().ListPeers()) > 0 {
 
 			for _, rtPeer := range router.RoutingTable().ListPeers() {
-				logrus.Infof("Routing Table Peer: %s", rtPeer.String())
+				logrus.Debugf("Routing Table Peer: %s", rtPeer.String())
 			}
 		}
 		if len(router.RoutingTable().GetPeerInfos()) > 0 {
 			for _, rtPeer := range router.RoutingTable().GetPeerInfos() {
-				logrus.Infof("Routing Table PeerInfo: %s", rtPeer.Id)
+				logrus.Debugf("Routing Table PeerInfo: %s", rtPeer.Id)
 			}
 		}
 	}
 
 	// Logs and Output
-	logrus.Infof("Multicast DNS Established. Hostname: %s", p.Name.Service())
-	logrus.Infof("Established Public Routable ID: %s", router.PeerID())
+	logrus.Debugf("Multicast DNS Established. Hostname: %s", p.Name.Service())
+	logrus.Infof("Peer Network Established. %s@%s", p.Name.Service(), router.PeerID())
 
 	return nil
 }

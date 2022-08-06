@@ -81,22 +81,14 @@ func main() {
 		HideVersion:          false,
 
 		Action: func(c *cli.Context) error {
+			// Arbitrary (non-error) pre load
+			Preloader()
 			d := daemon.New(run.socket, run.localStore)
 			return d.Run()
 		},
 	}
 
 	var err error
-
-	// Load environment variables
-	err = Environment()
-	if err != nil {
-		logrus.Error(err)
-		os.Exit(99)
-	}
-
-	// Arbitrary (non-error) pre load
-	Preloader()
 
 	// Runtime
 	err = app.Run(os.Args)
@@ -124,6 +116,9 @@ func GlobalFlags(c []cli.Flag) []cli.Flag {
 			Aliases:     []string{"sock"},
 			Destination: &run.socket,
 			Value:       daemon.DefaultSocketLocationLinux,
+			EnvVars: []string{
+				"AURAE_SOCKET",
+			},
 		},
 		&cli.StringFlag{
 			Name:        "local",
@@ -132,6 +127,7 @@ func GlobalFlags(c []cli.Flag) []cli.Flag {
 			Value:       daemon.DefaultLocalStateLocationLinux,
 		},
 	}
+
 	for _, gf := range g {
 		c = append(c, gf)
 	}
@@ -147,4 +143,6 @@ func Preloader() {
 	} else {
 		logrus.SetLevel(logrus.InfoLevel)
 	}
+	run.socket = common.Expand(run.socket)
+	run.localStore = common.Expand(run.localStore)
 }
