@@ -14,66 +14,43 @@
  *                                                                           *
 \*===========================================================================*/
 
-syntax = "proto3";
+package main
 
-option go_package = "github.com/kris-nova/aurae/rpc";
+import (
+	"fmt"
+	"github.com/kris-nova/aurae/client"
+	"github.com/kris-nova/aurae/rpc"
+	"github.com/sirupsen/logrus"
+	"github.com/urfave/cli/v2"
+)
 
-package aurae;
+func Run() *cli.Command {
+	return &cli.Command{
+		Name:      "run",
+		Usage:     "Run a container image.",
+		UsageText: `aurae run <query>`,
+		Flags:     GlobalFlags([]cli.Flag{}),
+		Action: func(c *cli.Context) error {
+			Preloader()
+			input := c.Args().Get(0)
+			if input == "" {
+				return fmt.Errorf("Usage: aure run <image>. \nempty container image string")
+			}
+			query, err := client.Query(input)
+			if err != nil {
+				return fmt.Errorf("invalid query: %s", err)
+			}
+			x := query.Client
+			name := query.Name
+			ctx := query.Context
+			logrus.Debug("Running: %s", name.String())
 
-// Runtime is where the magic happens.
-//
-// All of the runtime methods that are exposed to the client live here.
-//
-// Runtime assumes the scope of a single Aurae stack. Runtime methods
-// are ways of directly interfacing with runtime processes managed with
-// Aurae.
-service Runtime {
-
-  // These will mostly likely resemble systemctl
-
-  // rpc Start (StartReq) returns (StartResp) {}
-  // rpc Stop (StopReq) returns (StopResp) {}
-  rpc Status(StatusReq) returns (StatusResp) {}
-  rpc Run(RunReq) returns (RunResp) {}
-
-}
-
-// Common
-
-message Process {
-  string name = 1;
-  string status = 2;
-}
-
-message Connections {
-  string listenSocket = 1;
-  string listenPeerID = 2;
-}
-
-message Peer {
-  string peerID = 1;
-}
-
-// Run (WIP)
-
-message RunReq {
-  string Image = 1;
-}
-
-message RunResp {
-  int32 Code = 10;
-  string Message = 12;
-}
-
-
-// Status (WIP)
-
-message StatusReq {}
-
-message StatusResp {
-  string Field = 1; // Ready, NotReady, etc
-  map<string, Process> ProcessTable = 2;
-  map<string, Peer> Peers = 3;
-  int32 Code = 10;
-  string Message = 12;
+			runResp, err := x.Run(ctx, &rpc.RunReq{})
+			if err != nil {
+				return fmt.Errorf("unable to run: %s", err)
+			}
+			logrus.Infof(runResp.String())
+			return nil
+		},
+	}
 }

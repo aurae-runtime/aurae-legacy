@@ -25,6 +25,7 @@ type RuntimeClient interface {
 	// rpc Start (StartReq) returns (StartResp) {}
 	// rpc Stop (StopReq) returns (StopResp) {}
 	Status(ctx context.Context, in *StatusReq, opts ...grpc.CallOption) (*StatusResp, error)
+	Run(ctx context.Context, in *RunReq, opts ...grpc.CallOption) (*RunResp, error)
 }
 
 type runtimeClient struct {
@@ -44,6 +45,15 @@ func (c *runtimeClient) Status(ctx context.Context, in *StatusReq, opts ...grpc.
 	return out, nil
 }
 
+func (c *runtimeClient) Run(ctx context.Context, in *RunReq, opts ...grpc.CallOption) (*RunResp, error) {
+	out := new(RunResp)
+	err := c.cc.Invoke(ctx, "/aurae.Runtime/Run", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // RuntimeServer is the server API for Runtime service.
 // All implementations must embed UnimplementedRuntimeServer
 // for forward compatibility
@@ -51,6 +61,7 @@ type RuntimeServer interface {
 	// rpc Start (StartReq) returns (StartResp) {}
 	// rpc Stop (StopReq) returns (StopResp) {}
 	Status(context.Context, *StatusReq) (*StatusResp, error)
+	Run(context.Context, *RunReq) (*RunResp, error)
 	mustEmbedUnimplementedRuntimeServer()
 }
 
@@ -60,6 +71,9 @@ type UnimplementedRuntimeServer struct {
 
 func (UnimplementedRuntimeServer) Status(context.Context, *StatusReq) (*StatusResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Status not implemented")
+}
+func (UnimplementedRuntimeServer) Run(context.Context, *RunReq) (*RunResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Run not implemented")
 }
 func (UnimplementedRuntimeServer) mustEmbedUnimplementedRuntimeServer() {}
 
@@ -92,6 +106,24 @@ func _Runtime_Status_Handler(srv interface{}, ctx context.Context, dec func(inte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Runtime_Run_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RunReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RuntimeServer).Run(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/aurae.Runtime/Run",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RuntimeServer).Run(ctx, req.(*RunReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Runtime_ServiceDesc is the grpc.ServiceDesc for Runtime service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -102,6 +134,10 @@ var Runtime_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Status",
 			Handler:    _Runtime_Status_Handler,
+		},
+		{
+			MethodName: "Run",
+			Handler:    _Runtime_Run_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
