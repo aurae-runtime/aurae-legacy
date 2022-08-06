@@ -22,6 +22,10 @@ require (
 	google.golang.org/protobuf v1.28.0
 )
 
+replace github.com/vishvananda/netlink => github.com/twelho/netlink v1.1.1-ageing
+
+replace github.com/go-logr/logr => github.com/go-logr/logr v0.4.0
+
 require (
 	github.com/PuerkitoBio/purell v1.1.1 // indirect
 	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578 // indirect
