@@ -33,7 +33,6 @@ type Client struct {
 	rpc.RuntimeClient
 	rpc.ScheduleClient
 	rpc.ProxyClient
-
 	socket    string
 	connected bool
 	peer      *peer.Peer

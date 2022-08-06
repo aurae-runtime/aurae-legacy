@@ -66,6 +66,7 @@ func main() {
 			//Peer(),
 			Status(),
 			Run(),
+			Capability(),
 			//Cert(),
 		},
 		Flags:                GlobalFlags([]cli.Flag{}),

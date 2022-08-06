@@ -58,8 +58,8 @@ func main() {
 		},
 		Copyright: aurae.Copyright,
 		HelpName:  aurae.Copyright,
-		Usage:     "Simple, secure distributed system for application teams.",
-		UsageText: `aurae <options> <command>`,
+		Usage:     "Aurae runtime daemon.",
+		UsageText: `auraed <options>`,
 		Commands:  []*cli.Command{
 			// ----------------------------------------
 			// [ STUB ]

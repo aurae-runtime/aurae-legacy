@@ -28,6 +28,9 @@ license       ?=  MIT
 year          ?=  2022
 copyright     ?=  Copyright (c) $(year)
 
+firecrackerversion  =  1.1.1
+firecrackertarball  =  firecracker-v$(firecrackerversion)-x86_64.tgz
+
 compile: gen aurae auraed auraefs ## Compile for the local architecture ⚙
 
 .PHONY: aurae
@@ -96,6 +99,18 @@ clean: ## Clean your artifacts 🧼
 	rm -rvf rpc/*.pb.*
 	rm -rvf bin/*
 
+# auare-firecracker
+# auare-firecracker-jailer
+# auare-firecracker-rebase-snap
+# auare-firecracker-seccompiler-bin
+firecracker: ## Install firecracker for Aurae (x86)
+	@echo "Installing Firecracker $(firecrackerversion)..."
+	@if [ ! -f $(firecrackertarball) ]; then wget https://github.com/firecracker-microvm/firecracker/releases/download/v$(firecrackerversion)/firecracker-v$(firecrackerversion)-x86_64.tgz; fi
+	@tar -xzf $(firecrackertarball)
+	cd release-v$(firecrackerversion)-x86_64 && cp -v firecracker-v* /bin/auare-firecracker
+	cd release-v$(firecrackerversion)-x86_64 && cp -v jailer* /bin/aurae-firecracker-jailer
+	cd release-v$(firecrackerversion)-x86_64 && cp -v rebase-snap* /bin/aurae-firecracker-rebase-snap
+	cd release-v$(firecrackerversion)-x86_64 && cp -v seccompiler-bin* /bin/aurae-firecracker-seccompiler-bin
 
 .PHONY: help
 help:  ## 🤔 Show help messages for make targets
