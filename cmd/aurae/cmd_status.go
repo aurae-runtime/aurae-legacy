@@ -41,6 +41,7 @@ func Status() *cli.Command {
 		UsageText: `aurae status <options>`,
 		Flags:     GlobalFlags([]cli.Flag{}),
 		Action: func(c *cli.Context) error {
+			Preloader()
 			input := c.Args().Get(0)
 			var instance *peer.Peer
 			isLocal := false

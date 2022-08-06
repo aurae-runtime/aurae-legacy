@@ -44,6 +44,7 @@ func Cert() *cli.Command {
 				UsageText: `aurae cert`,
 				Flags:     GlobalFlags([]cli.Flag{}),
 				Action: func(c *cli.Context) error {
+					Preloader()
 					privKey, pubKey, err := crypto.GenerateKeyPair(crypto.Ed25519, 2048)
 					if err != nil {
 						return err

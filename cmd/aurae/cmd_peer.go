@@ -42,6 +42,7 @@ func Peer() *cli.Command {
 			},
 		}),
 		Action: func(c *cli.Context) error {
+			Preloader()
 			//key, err := crypto.KeyFromPath(run.key)
 			//if err != nil {
 			//	return err

@@ -79,17 +79,6 @@ func main() {
 	}
 
 	var err error
-
-	// Load environment variables
-	err = Environment()
-	if err != nil {
-		logrus.Error(err)
-		os.Exit(99)
-	}
-
-	// Arbitrary (non-error) pre load
-	Preloader()
-
 	// Runtime
 	err = app.Run(os.Args)
 	if err != nil {
@@ -110,6 +99,9 @@ func GlobalFlags(c []cli.Flag) []cli.Flag {
 			Aliases:     []string{"sock"},
 			Destination: &run.socket,
 			Value:       daemon.DefaultSocketLocationLinux,
+			EnvVars: []string{
+				"AURAE_SOCKET",
+			},
 		},
 		&cli.StringFlag{
 			Name:        "key",
@@ -133,4 +125,6 @@ func Preloader() {
 	} else {
 		logrus.SetLevel(logrus.InfoLevel)
 	}
+	run.socket = common.Expand(run.socket)
+
 }

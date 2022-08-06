@@ -39,6 +39,7 @@ func Set() *cli.Command {
 			},
 		}),
 		Action: func(c *cli.Context) error {
+			Preloader()
 			key := c.Args().Get(0)
 			val := c.Args().Get(1)
 			if key == "" {

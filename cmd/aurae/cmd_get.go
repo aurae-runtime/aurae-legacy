@@ -39,6 +39,7 @@ func Get() *cli.Command {
 			},
 		}),
 		Action: func(c *cli.Context) error {
+			Preloader()
 			key := c.Args().Get(0)
 			if key == "" {
 				return fmt.Errorf("usage: aurae get <key>")
