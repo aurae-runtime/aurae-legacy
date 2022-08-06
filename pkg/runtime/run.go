@@ -20,6 +20,6 @@ import (
 	"github.com/weaveworks/ignite/pkg/container"
 )
 
-func RunContainer() {
-	container.ExecuteFirecracker()
+func RunContainer() error {
+	return container.ExecuteFirecracker(nil, nil)
 }
