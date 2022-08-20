@@ -20,7 +20,7 @@ option go_package = "github.com/kris-nova/aurae/rpc/rpc";
 
 package aurae;
 
-service Capability {
+service Runtime {
 
     rpc RunContainer(RunContainerRequest) returns (RunContainerResponse) {}
 

@@ -58,11 +58,11 @@ func main() {
 		HelpName:  aurae.Copyright,
 		Usage:     "Simple, secure distributed system for application teams.",
 		UsageText: `aurae <options> <command>`,
-		Commands:  []*cli.Command{
-			//Get(),
-			//Set(),
-			//List(),
-			//Remove(),
+		Commands: []*cli.Command{
+			Get(),
+			Set(),
+			List(),
+			Remove(),
 			//Peer(),
 			//Status(),
 			//Run(),

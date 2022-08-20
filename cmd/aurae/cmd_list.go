@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"github.com/fatih/color"
 	"github.com/kris-nova/aurae/client"
-	"github.com/kris-nova/aurae/pkg/daemon"
 	"github.com/kris-nova/aurae/rpc/rpc"
 	"github.com/urfave/cli/v2"
 )
@@ -31,14 +30,7 @@ func List() *cli.Command {
 		Name:      "list",
 		Usage:     "List aurae values.",
 		UsageText: `aurae list <key>`,
-		Flags: GlobalFlags([]cli.Flag{
-			&cli.StringFlag{
-				Name:        "socket",
-				Aliases:     []string{"sock"},
-				Destination: &run.socket,
-				Value:       daemon.DefaultSocketLocationLinux,
-			},
-		}),
+		Flags:     GlobalFlags([]cli.Flag{}),
 		Action: func(c *cli.Context) error {
 			Preloader()
 			key := c.Args().Get(0)

@@ -14,21 +14,24 @@
  *                                                                           *
 \*===========================================================================*/
 
-package main
+syntax = "proto3";
 
-import (
-	"github.com/urfave/cli/v2"
-)
+option go_package = "github.com/kris-nova/aurae/rpc/rpc";
 
-func Run() *cli.Command {
-	return &cli.Command{
-		Name:      "run",
-		Usage:     "Run a container image.",
-		UsageText: `aurae run <query>`,
-		Flags:     GlobalFlags([]cli.Flag{}),
-		Action: func(c *cli.Context) error {
-			Preloader()
-			return nil
-		},
-	}
+package aurae;
+
+service Register {
+
+    rpc AdoptSocket(AdoptSocketRequest) returns (AdoptSocketResponse) {}
+
+}
+
+message AdoptSocketRequest {
+  string Path = 1;
+  string Name = 2;
+}
+
+message AdoptSocketResponse {
+  int32 Code = 10;
+  string Message = 12;
 }
