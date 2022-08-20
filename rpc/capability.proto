@@ -1,0 +1,36 @@
+/*===========================================================================*\
+ *           MIT License Copyright (c) 2022 Kris Nóva <kris@nivenly.com>     *
+ *                                                                           *
+ *                ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓                *
+ *                ┃   ███╗   ██╗ ██████╗ ██╗   ██╗ █████╗   ┃                *
+ *                ┃   ████╗  ██║██╔═████╗██║   ██║██╔══██╗  ┃                *
+ *                ┃   ██╔██╗ ██║██║██╔██║██║   ██║███████║  ┃                *
+ *                ┃   ██║╚██╗██║████╔╝██║╚██╗ ██╔╝██╔══██║  ┃                *
+ *                ┃   ██║ ╚████║╚██████╔╝ ╚████╔╝ ██║  ██║  ┃                *
+ *                ┃   ╚═╝  ╚═══╝ ╚═════╝   ╚═══╝  ╚═╝  ╚═╝  ┃                *
+ *                ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛                *
+ *                                                                           *
+ *                       This machine kills fascists.                        *
+ *                                                                           *
+\*===========================================================================*/
+
+syntax = "proto3";
+
+option go_package = "github.com/kris-nova/aurae/rpc/rpc";
+
+package aurae;
+
+service Capability {
+
+    rpc RunContainer(RunContainerRequest) returns (RunContainerResponse) {}
+
+}
+
+message RunContainerRequest {
+  string Name = 1;
+}
+
+message RunContainerResponse {
+  int32 Code = 10;
+  string Message = 12;
+}
