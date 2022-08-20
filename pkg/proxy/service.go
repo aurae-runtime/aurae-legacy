@@ -31,7 +31,7 @@ var _ rpc.ProxyServer = &Service{}
 
 // Service is the main proxy name for managing peer-to-peer connections.
 //
-// This will implement the proxy server methods defined in rpc/proxy.proto
+// This will implement the proxy server methods defined in rpc/network.proto
 type Service struct {
 	newRandomReader newRandomReader
 	rpc.UnimplementedProxyServer

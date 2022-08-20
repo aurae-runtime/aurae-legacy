@@ -25,7 +25,7 @@ import (
 	"sync"
 )
 
-var _ rpc.CoreServer = &Service{}
+var _ rpc.DatabaseServer = &Service{}
 
 const (
 	CoreCode_OKAY   int32 = 0
@@ -41,7 +41,7 @@ var (
 
 type Service struct {
 	mtx sync.Mutex
-	rpc.UnimplementedCoreServer
+	rpc.UnimplementedDatabaseServer
 
 	store CoreServicer
 }

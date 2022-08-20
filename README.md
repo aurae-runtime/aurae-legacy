@@ -44,31 +44,6 @@ This is the part of the system that is destined for users of the system.
 Here is where applications exist, and where multitenancy is enforced.
 
 First Principal: Everything in Aurae space exists in an isolation zone and MUST access the system via the local unix domain socket.
-
-## Capabilities API
-
-Capabilities are similar to subsystems and will come with various sub-resources that can be implemented and registered against the empty loop.
-
-### Compute 
-
- - Runtime
- - Schedule
- - Observe
-
-### Storage
-
- - Mount
- - Network
- - Object
- - File
- - Secrets
-
-### Network
-
- - Ingress
- - Egress 
- - Peer
- - Firewall
  
  ## Aurae connection Syntax
  

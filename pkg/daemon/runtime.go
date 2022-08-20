@@ -17,14 +17,11 @@
 package daemon
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"github.com/kris-nova/aurae"
 	"github.com/kris-nova/aurae/pkg/core"
 	"github.com/kris-nova/aurae/pkg/core/local"
-	p2pgrpc "github.com/kris-nova/aurae/pkg/grpc"
-	"github.com/kris-nova/aurae/pkg/name"
 	"github.com/kris-nova/aurae/pkg/peer"
 	"github.com/kris-nova/aurae/pkg/posix"
 	"github.com/kris-nova/aurae/pkg/proxy"
@@ -35,7 +32,6 @@ import (
 	"google.golang.org/grpc"
 	"net"
 	"os"
-	"os/exec"
 	"strings"
 )
 
@@ -77,9 +73,7 @@ func New(socket, localStore string) *Daemon {
 	}
 }
 
-func (d *Daemon) Run() error {
-
-	ctx := context.Background()
+func (d *Daemon) Run(ctx context.Context) error {
 
 	// Establish context in the logs.
 	logrus.Infof("----------------------------------------------------")
@@ -129,7 +123,7 @@ func (d *Daemon) Run() error {
 	coreSvc.SetGetFromMemory(false)
 
 	//
-	rpc.RegisterCoreServer(server, coreSvc)
+	rpc.RegisterDatabaseServer(server, coreSvc)
 	rpc.RegisterProxyServer(server, proxy.NewService())
 	rpc.RegisterRuntimeServer(server, runtime.NewService())
 	rpc.RegisterScheduleServer(server, schedule.NewService())
@@ -145,58 +139,56 @@ func (d *Daemon) Run() error {
 		}
 	}()
 
-	// Step 7. Peer host and initialize peer to peer network.
-	//instanceKey, err := crypto.KeyFromPath(d.keypath)
-	//if err != nil {
-	//	return fmt.Errorf("invalid private key: %s: %v", d.keypath, err)
-	//}
-	hostname, err := os.Hostname()
-	if err != nil {
-		return fmt.Errorf("unable to calculate hostname: %v", err)
-	}
-	self := peer.NewPeer(name.New(hostname))
-	err = self.Establish(context.Background(), 1)
-	if err != nil {
-		return fmt.Errorf("unable to join auraespace peer network: %v", err)
-	}
-	go self.HandshakeServe()
-	d.Self = self
-	logrus.Debugf("Starting Auare handshake protocol on peer network")
+	// Decouple peer-to-peer from Aurae daemon
 
-	peerConn := p2pgrpc.NewGRPCProtocol(ctx, self.Host())
-	if err != nil {
-		return fmt.Errorf("unable to create peer grpc: %v", err)
-	}
-	server = peerConn.GetGRPCServer()
-	rpc.RegisterCoreServer(server, coreSvc)
-	rpc.RegisterProxyServer(server, proxy.NewService())
-	rpc.RegisterRuntimeServer(server, runtime.NewService())
-	rpc.RegisterScheduleServer(server, schedule.NewService())
-	logrus.Debugf("Starting Auare grpc protocol on peer network")
+	//hostname, err := os.Hostname()
+	//if err != nil {
+	//	return fmt.Errorf("unable to calculate hostname: %v", err)
+	//}
+	//self := peer.NewPeer(name.New(hostname))
+	//err = self.Establish(context.Background(), 1)
+	//if err != nil {
+	//	return fmt.Errorf("unable to join auraespace peer network: %v", err)
+	//}
+	//go self.HandshakeServe()
+	//d.Self = self
+	//logrus.Debugf("Starting Auare handshake protocol on peer network")
+	//
+	//peerConn := p2pgrpc.NewGRPCProtocol(ctx, self.Host())
+	//if err != nil {
+	//	return fmt.Errorf("unable to create peer grpc: %v", err)
+	//}
+	//server = peerConn.GetGRPCServer()
+	//rpc.RegisterCoreServer(server, coreSvc)
+	//rpc.RegisterProxyServer(server, proxy.NewService())
+	//rpc.RegisterRuntimeServer(server, runtime.NewService())
+	//rpc.RegisterScheduleServer(server, schedule.NewService())
+	//logrus.Debugf("Starting Auare grpc protocol on peer network")
 
 	// Run the firecracker daemon
 	// TODO this is a big fucking deal
 	// TODO we need to manage logs, stderr, stdout, etc, etc
 	// TODO nova come clean this up and probably pull it into its own file
-	err = os.Remove("/run/firecracker.socket") // TODO pull this up to config and do a check
-	cmd := exec.Command(DefaultFirecrackerExecutable)
-	stdout := &bytes.Buffer{}
-	stderr := &bytes.Buffer{}
-	cmd.Stdout = stdout
-	cmd.Stderr = stderr
-	err = cmd.Start()
-	if err != nil {
-		return fmt.Errorf("unable to start firecracker: %s", err)
-	}
-	go func() {
-		err = cmd.Wait()
-		if err != nil {
-			logrus.Warningf("Firecracker runtime: %v", err)
-		}
-		logrus.Info(stdout.String())
-		logrus.Warnf(stderr.String())
-	}()
-	logrus.Infof("Firecracker hypervisor running...")
+	//err = os.Remove("/run/firecracker.socket") // TODO pull this up to config and do a check
+	//cmd := exec.Command(DefaultFirecrackerExecutable)
+	//stdout := &bytes.Buffer{}
+	//stderr := &bytes.Buffer{}
+	//cmd.Stdout = stdout
+	//cmd.Stderr = stderr
+	//err = cmd.Start()
+	//if err != nil {
+	//	return fmt.Errorf("unable to start firecracker: %s", err)
+	//}
+	//go func() {
+	//	err = cmd.Wait()
+	//	if err != nil {
+	//		logrus.Warningf("Firecracker runtime: %v", err)
+	//	}
+	//	logrus.Info(stdout.String())
+	//	logrus.Warnf(stderr.String())
+	//}()
+	//logrus.Infof("Firecracker hypervisor running...")
+
 	logrus.Infof("Aurae daemon running...")
 	for d.runtime {
 		select {

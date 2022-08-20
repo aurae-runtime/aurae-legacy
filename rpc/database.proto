@@ -20,19 +20,7 @@ option go_package = "github.com/kris-nova/aurae/rpc/rpc";
 
 package aurae;
 
-// Core is the most core interface for Aurae data interactions.
-//
-// All of these methods are a simplified version of the POSIX filesystem
-// interface.
-//
-// Using these basic methods, and a few guarantees we are able to build
-// POSIX compliant filesystems, as well as very quickly interact with a
-// basic key/value data store.
-//
-// The Core interface is modular in nature, and can be backed by
-// a variety of data storage mechanisms, each with their own features and
-// guarantees.
-service Core {
+service Database {
   rpc Set (SetReq) returns (SetResp) {}
   rpc Get (GetReq) returns (GetResp) {}
   rpc List (ListReq) returns (ListResp) {}

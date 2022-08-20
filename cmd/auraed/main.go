@@ -17,6 +17,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"github.com/kris-nova/aurae/pkg/common"
 	"github.com/kris-nova/aurae/pkg/crypto"
@@ -84,7 +85,8 @@ func main() {
 			// Arbitrary (non-error) pre load
 			Preloader()
 			d := daemon.New(run.socket, run.localStore)
-			return d.Run()
+			ctx := context.Background()
+			return d.Run(ctx)
 		},
 	}
 

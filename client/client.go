@@ -29,7 +29,7 @@ import (
 )
 
 type Client struct {
-	rpc.CoreClient
+	rpc.DatabaseClient
 	rpc.RuntimeClient
 	rpc.ScheduleClient
 	rpc.ProxyClient
@@ -101,8 +101,8 @@ func (c *Client) ConnectSocket(sock string) error {
 
 func (c *Client) establish(conn grpc.ClientConnInterface) error {
 	// Establish the connection from the conn
-	core := rpc.NewCoreClient(conn)
-	c.CoreClient = core
+	db := rpc.NewDatabaseClient(conn)
+	c.DatabaseClient = db
 	runtime := rpc.NewRuntimeClient(conn)
 	c.RuntimeClient = runtime
 	schedule := rpc.NewScheduleClient(conn)
