@@ -48,7 +48,7 @@ func main() {
 	}
 
 	app := &cli.App{
-		Name:     aurae.Name,
+		Name:     "auraed",
 		Version:  aurae.Version,
 		Compiled: time.Now(),
 		Authors: []*cli.Author{
