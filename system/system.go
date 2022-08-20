@@ -16,12 +16,6 @@
 
 package system
 
-type System struct {
-
-	// RunContainer is the main executive system capability
-	//
-	// - ECS
-	// - Pods
-	// - Processes
-	RunContainer CapRunContainer
+// Aurae is the main system that Aurae represents
+type Aurae struct {
 }

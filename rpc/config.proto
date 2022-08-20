@@ -20,60 +20,51 @@ option go_package = "github.com/kris-nova/aurae/rpc/rpc";
 
 package aurae;
 
-// Runtime is where the magic happens.
-//
-// All of the runtime methods that are exposed to the client live here.
-//
-// Runtime assumes the scope of a single Aurae stack. Runtime methods
-// are ways of directly interfacing with runtime processes managed with
-// Aurae.
-service Runtime {
-
-  // These will mostly likely resemble systemctl
-
-  // rpc Start (StartReq) returns (StartResp) {}
-  // rpc Stop (StopReq) returns (StopResp) {}
-  rpc Status(StatusReq) returns (StatusResp) {}
-  rpc Run(RunReq) returns (RunResp) {}
-
+// Config is a key/value store that resembles a Linux filesystem
+service Config {
+  rpc Set (SetReq) returns (SetResp) {}
+  rpc Get (GetReq) returns (GetResp) {}
+  rpc List (ListReq) returns (ListResp) {}
+  rpc Remove (RemoveReq) returns (RemoveResp) {}
 }
 
-// Common
+message SetReq {
+  string key = 1;
+  string val = 2;
+}
 
-message Process {
+message SetResp {
+  int32 code = 1;
+}
+
+message GetReq {
+  string key = 1;
+}
+
+message GetResp {
+  string val = 1;
+  int32 code = 2;
+}
+
+message RemoveReq {
+  string key = 1;
+}
+
+message RemoveResp {
+  int32 code = 1;
+}
+
+
+message ListReq {
+  string key = 1;
+}
+
+message Node {
   string name = 1;
-  string status = 2;
+  bool file = 2;
 }
 
-message Connections {
-  string listenSocket = 1;
-  string listenPeerID = 2;
-}
-
-message Peer {
-  string peerID = 1;
-}
-
-// Run (WIP)
-
-message RunReq {
-  string Name = 1;
-}
-
-message RunResp {
-  int32 Code = 10;
-  string Message = 12;
-}
-
-
-// Status (WIP)
-
-message StatusReq {}
-
-message StatusResp {
-  string Field = 1; // Ready, NotReady, etc
-  map<string, Process> ProcessTable = 2;
-  map<string, Peer> Peers = 3;
-  int32 Code = 10;
-  string Message = 12;
+message ListResp {
+  map<string, Node> entries = 1;
+  int32 code = 2;
 }

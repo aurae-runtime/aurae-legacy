@@ -17,11 +17,7 @@
 package main
 
 import (
-	"context"
-	"fmt"
-	"github.com/kris-nova/aurae/client"
 	"github.com/kris-nova/aurae/pkg/daemon"
-	"github.com/kris-nova/aurae/rpc/rpc"
 	"github.com/urfave/cli/v2"
 )
 
@@ -40,23 +36,6 @@ func Get() *cli.Command {
 		}),
 		Action: func(c *cli.Context) error {
 			Preloader()
-			key := c.Args().Get(0)
-			if key == "" {
-				return fmt.Errorf("usage: aurae get <key>")
-			}
-
-			auraeClient := client.NewClient()
-			err := auraeClient.ConnectSocket(run.socket)
-			if err != nil {
-				return err
-			}
-			getResp, err := auraeClient.Get(context.Background(), &rpc.GetReq{
-				Key: key,
-			})
-			if err != nil {
-				return err
-			}
-			fmt.Println(getResp.Val)
 			return nil
 		},
 	}

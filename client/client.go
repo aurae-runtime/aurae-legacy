@@ -29,10 +29,10 @@ import (
 )
 
 type Client struct {
-	rpc.DatabaseClient
-	rpc.RuntimeClient
-	rpc.ScheduleClient
-	rpc.ProxyClient
+	rpc.ConfigClient
+	//rpc.RuntimeClient
+	//rpc.ScheduleClient
+	//rpc.ProxyClient
 	socket    string
 	connected bool
 	peer      *peer.Peer
@@ -101,14 +101,14 @@ func (c *Client) ConnectSocket(sock string) error {
 
 func (c *Client) establish(conn grpc.ClientConnInterface) error {
 	// Establish the connection from the conn
-	db := rpc.NewDatabaseClient(conn)
-	c.DatabaseClient = db
-	runtime := rpc.NewRuntimeClient(conn)
-	c.RuntimeClient = runtime
-	schedule := rpc.NewScheduleClient(conn)
-	c.ScheduleClient = schedule
-	proxy := rpc.NewProxyClient(conn)
-	c.ProxyClient = proxy
+	cfg := rpc.NewConfigClient(conn)
+	c.ConfigClient = cfg
+	//runtime := rpc.NewRuntimeClient(conn)
+	//c.RuntimeClient = runtime
+	//schedule := rpc.NewScheduleClient(conn)
+	//c.ScheduleClient = schedule
+	//proxy := rpc.NewProxyClient(conn)
+	//c.ProxyClient = proxy
 	c.connected = true
 	return nil
 }

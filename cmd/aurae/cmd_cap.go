@@ -30,7 +30,7 @@ func Capability() *cli.Command {
 		UsageText: `aurae run <query>`,
 		Flags:     GlobalFlags([]cli.Flag{}),
 		Action: func(c *cli.Context) error {
-			cli.ShowSubcommandHelpAndExit(c, 0)
+			Preloader()
 			return nil
 		},
 		Subcommands: []*cli.Command{

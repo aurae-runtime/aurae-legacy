@@ -17,12 +17,7 @@
 package main
 
 import (
-	"context"
-	"fmt"
-	"github.com/kris-nova/aurae/client"
-	"github.com/kris-nova/aurae/pkg/core"
 	"github.com/kris-nova/aurae/pkg/daemon"
-	"github.com/kris-nova/aurae/rpc/rpc"
 	"github.com/urfave/cli/v2"
 )
 
@@ -41,26 +36,6 @@ func Remove() *cli.Command {
 		}),
 		Action: func(c *cli.Context) error {
 			Preloader()
-			key := c.Args().Get(0)
-			if key == "" {
-				return fmt.Errorf("usage: aurae remove <key>")
-			}
-
-			auraeClient := client.NewClient()
-			err := auraeClient.ConnectSocket(run.socket)
-			if err != nil {
-				return err
-			}
-			removeResp, err := auraeClient.Remove(context.Background(), &rpc.RemoveReq{
-				Key: key,
-			})
-			if err != nil {
-				return err
-			}
-
-			if removeResp.Code != core.CoreCode_OKAY {
-				return fmt.Errorf("unable to remove")
-			}
 			return nil
 		},
 	}

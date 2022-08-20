@@ -33,7 +33,7 @@ func Cert() *cli.Command {
 		UsageText: `aurae cert`,
 		Flags:     GlobalFlags([]cli.Flag{}),
 		Action: func(c *cli.Context) error {
-			cli.ShowSubcommandHelp(c)
+			Preloader()
 			return nil
 		},
 		Subcommands: []*cli.Command{

@@ -24,10 +24,6 @@ import (
 	"github.com/kris-nova/aurae/pkg/core/local"
 	"github.com/kris-nova/aurae/pkg/peer"
 	"github.com/kris-nova/aurae/pkg/posix"
-	"github.com/kris-nova/aurae/pkg/proxy"
-	"github.com/kris-nova/aurae/pkg/runtime"
-	"github.com/kris-nova/aurae/pkg/schedule"
-	"github.com/kris-nova/aurae/rpc/rpc"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"net"
@@ -127,15 +123,17 @@ func (d *Daemon) Run(ctx context.Context) error {
 	//
 	// proto rpc implementation
 	// these are subject to change as capabilities improve
-	rpc.RegisterDatabaseServer(server, coreSvc)
-	rpc.RegisterProxyServer(server, proxy.NewService())
-	rpc.RegisterRuntimeServer(server, runtime.NewService())
-	rpc.RegisterScheduleServer(server, schedule.NewService())
-	logrus.Debugf("Registering Core Services.")
+	//rpc.RegisterDatabaseServer(server, coreSvc)
+	//rpc.RegisterProxyServer(server, proxy.NewService())
+	//rpc.RegisterRuntimeServer(server, runtime.NewService())
+	//rpc.RegisterScheduleServer(server, schedule.NewService())
+	//logrus.Debugf("Registering Core Services.")
 	//
 	//
 	//
 	//
+
+	logrus.Debugf("Accepting requests.")
 
 	// Step 6. Begin the empty loop by running a small go routine with an emergency cancel
 	serveCancel := make(chan error)

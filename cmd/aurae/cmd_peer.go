@@ -43,27 +43,6 @@ func Peer() *cli.Command {
 		}),
 		Action: func(c *cli.Context) error {
 			Preloader()
-			//key, err := crypto.KeyFromPath(run.key)
-			//if err != nil {
-			//	return err
-			//}
-			var nameStr string
-			if run.name == "" {
-				hostname, err := os.Hostname()
-				if err != nil {
-					return fmt.Errorf("unable to calculate hostname: %v", err)
-				}
-				nameStr = hostname
-			} else {
-				nameStr = run.name
-			}
-			p := peer.NewPeer(name.New(nameStr))
-			err := p.Establish(context.Background(), 1)
-			if err != nil {
-				return err
-			}
-			p.HandshakeServe()
-			select {}
 			return nil
 		},
 		Subcommands: []*cli.Command{
