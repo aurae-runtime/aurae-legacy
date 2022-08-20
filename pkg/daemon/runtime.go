@@ -123,12 +123,19 @@ func (d *Daemon) Run(ctx context.Context) error {
 	coreSvc.SetGetFromMemory(false)
 
 	//
+	//
+	//
+	// proto rpc implementation
+	// these are subject to change as capabilities improve
 	rpc.RegisterDatabaseServer(server, coreSvc)
 	rpc.RegisterProxyServer(server, proxy.NewService())
 	rpc.RegisterRuntimeServer(server, runtime.NewService())
 	rpc.RegisterScheduleServer(server, schedule.NewService())
-
 	logrus.Debugf("Registering Core Services.")
+	//
+	//
+	//
+	//
 
 	// Step 6. Begin the empty loop by running a small go routine with an emergency cancel
 	serveCancel := make(chan error)

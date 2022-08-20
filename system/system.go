@@ -14,52 +14,14 @@
  *                                                                           *
 \*===========================================================================*/
 
-package main
+package system
 
-import (
-	"github.com/urfave/cli/v2"
-)
+type System struct {
 
-func Capability() *cli.Command {
-	return &cli.Command{
-		Name: "capability",
-		Aliases: []string{
-			"system",
-		},
-		Usage:     "The Aurare Capabilities API",
-		UsageText: `aurae run <query>`,
-		Flags:     GlobalFlags([]cli.Flag{}),
-		Action: func(c *cli.Context) error {
-			cli.ShowSubcommandHelpAndExit(c, 0)
-			return nil
-		},
-		Subcommands: []*cli.Command{
-			{
-				Name: "get",
-				Aliases: []string{
-					"system",
-				},
-				Usage:     "The Aurare Capabilities API",
-				UsageText: `aurae system get <options>`,
-				Flags:     GlobalFlags([]cli.Flag{}),
-				Action: func(c *cli.Context) error {
-					cli.ShowSubcommandHelpAndExit(c, 0)
-					return nil
-				},
-			},
-			{
-				Name: "set",
-				Aliases: []string{
-					"system",
-				},
-				Usage:     "The Aurare Capabilities API",
-				UsageText: `aurae system set <options>`,
-				Flags:     GlobalFlags([]cli.Flag{}),
-				Action: func(c *cli.Context) error {
-					cli.ShowSubcommandHelpAndExit(c, 0)
-					return nil
-				},
-			},
-		},
-	}
+	// RunContainer is the main executive system capability
+	//
+	// - ECS
+	// - Pods
+	// - Processes
+	RunContainer CapRunContainer
 }
