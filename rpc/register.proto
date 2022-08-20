@@ -28,7 +28,7 @@ service Register {
 
 message AdoptSocketRequest {
   string Path = 1;
-  string Name = 2;
+  string ComponentUniqueName = 2;
 }
 
 message AdoptSocketResponse {

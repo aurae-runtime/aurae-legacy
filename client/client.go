@@ -31,7 +31,7 @@ import (
 type Client struct {
 	rpc.ConfigClient
 	rpc.RuntimeClient
-	//rpc.ScheduleClient
+	rpc.RegisterClient
 	//rpc.ProxyClient
 	socket    string
 	connected bool
@@ -105,8 +105,8 @@ func (c *Client) establish(conn grpc.ClientConnInterface) error {
 	c.ConfigClient = cfg
 	runtime := rpc.NewRuntimeClient(conn)
 	c.RuntimeClient = runtime
-	//schedule := rpc.NewScheduleClient(conn)
-	//c.ScheduleClient = schedule
+	register := rpc.NewRegisterClient(conn)
+	c.RegisterClient = register
 	//proxy := rpc.NewProxyClient(conn)
 	//c.ProxyClient = proxy
 	c.connected = true

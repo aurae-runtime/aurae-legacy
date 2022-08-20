@@ -45,7 +45,7 @@ func main() {
 		Usage:   "Show the version.",
 	}
 	app := &cli.App{
-		Name:     aurae.Name,
+		Name:     "aurae",
 		Version:  aurae.Version,
 		Compiled: time.Now(),
 		Authors: []*cli.Author{
@@ -63,11 +63,8 @@ func main() {
 			Set(),
 			List(),
 			Remove(),
-			//Peer(),
-			//Status(),
-			//Run(),
-			//Capability(),
-			//Cert(),
+			Adopt(),
+			Status(),
 		},
 		Flags:                GlobalFlags([]cli.Flag{}),
 		EnableBashCompletion: true,
