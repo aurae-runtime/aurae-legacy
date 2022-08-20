@@ -17,7 +17,11 @@
 package main
 
 import (
+	"context"
+	"fmt"
+	"github.com/kris-nova/aurae/client"
 	"github.com/kris-nova/aurae/pkg/daemon"
+	"github.com/kris-nova/aurae/rpc/rpc"
 	"github.com/urfave/cli/v2"
 )
 
@@ -36,6 +40,27 @@ func Set() *cli.Command {
 		}),
 		Action: func(c *cli.Context) error {
 			Preloader()
+			key := c.Args().Get(0)
+			val := c.Args().Get(1)
+			if key == "" {
+				return fmt.Errorf("usage: aurae set <key> <value>")
+			}
+			if val == "" {
+				return fmt.Errorf("usage: aurae set <key> <value>")
+			}
+
+			auraeClient := client.NewClient()
+			err := auraeClient.ConnectSocket(run.socket)
+			if err != nil {
+				return err
+			}
+			_, err = auraeClient.Set(context.Background(), &rpc.SetReq{
+				Key: key,
+				Val: val,
+			})
+			if err != nil {
+				return err
+			}
 			return nil
 		},
 	}
