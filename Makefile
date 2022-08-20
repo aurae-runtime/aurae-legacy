@@ -77,9 +77,9 @@ gen: generate ## Alias for generate
 generate: ## Will generate Go code from auraefs .proto files
 	@echo "Generating..."
 	protoc \
-	--go_out=. \
+	--go_out=./rpc \
 	--go_opt=paths=source_relative \
-	--go-grpc_out=. \
+	--go-grpc_out=./rpc \
 	--go-grpc_opt=paths=source_relative \
 	rpc/*.proto
 

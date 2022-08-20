@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"github.com/kris-nova/aurae/client"
 	"github.com/kris-nova/aurae/pkg/daemon"
-	"github.com/kris-nova/aurae/rpc"
+	"github.com/kris-nova/aurae/rpc/rpc"
 	"github.com/urfave/cli/v2"
 )
 

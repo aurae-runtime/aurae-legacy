@@ -21,7 +21,7 @@ import (
 	"fmt"
 	p2pgrpc "github.com/kris-nova/aurae/pkg/grpc"
 	"github.com/kris-nova/aurae/pkg/peer"
-	"github.com/kris-nova/aurae/rpc"
+	"github.com/kris-nova/aurae/rpc/rpc"
 	peer2peer "github.com/libp2p/go-libp2p-core/peer"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"

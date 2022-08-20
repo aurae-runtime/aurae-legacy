@@ -19,7 +19,7 @@ package core
 import (
 	"context"
 	"github.com/kris-nova/aurae/pkg/core/local"
-	"github.com/kris-nova/aurae/rpc"
+	"github.com/kris-nova/aurae/rpc/rpc"
 	"testing"
 )
 

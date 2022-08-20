@@ -23,7 +23,7 @@ import (
 	p2pgrpc "github.com/kris-nova/aurae/pkg/grpc"
 	"github.com/kris-nova/aurae/pkg/name"
 	"github.com/kris-nova/aurae/pkg/peer"
-	"github.com/kris-nova/aurae/rpc"
+	"github.com/kris-nova/aurae/rpc/rpc"
 	"testing"
 )
 

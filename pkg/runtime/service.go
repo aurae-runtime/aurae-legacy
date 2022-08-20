@@ -18,7 +18,7 @@ package runtime
 
 import (
 	"context"
-	"github.com/kris-nova/aurae/rpc"
+	"github.com/kris-nova/aurae/rpc/rpc"
 	"github.com/sirupsen/logrus"
 )
 

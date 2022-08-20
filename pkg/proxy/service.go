@@ -20,7 +20,7 @@ import (
 	"context"
 	crand "crypto/rand"
 	"github.com/kris-nova/aurae/pkg/core"
-	"github.com/kris-nova/aurae/rpc"
+	"github.com/kris-nova/aurae/rpc/rpc"
 	"github.com/sirupsen/logrus"
 	"io"
 	mrand "math/rand"

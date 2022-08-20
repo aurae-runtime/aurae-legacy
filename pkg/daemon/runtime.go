@@ -30,7 +30,7 @@ import (
 	"github.com/kris-nova/aurae/pkg/proxy"
 	"github.com/kris-nova/aurae/pkg/runtime"
 	"github.com/kris-nova/aurae/pkg/schedule"
-	"github.com/kris-nova/aurae/rpc"
+	"github.com/kris-nova/aurae/rpc/rpc"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"net"

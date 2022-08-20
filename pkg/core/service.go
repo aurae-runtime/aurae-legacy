@@ -20,7 +20,7 @@ import (
 	"context"
 	"github.com/kris-nova/aurae/pkg/common"
 	"github.com/kris-nova/aurae/pkg/core/memfs"
-	"github.com/kris-nova/aurae/rpc"
+	"github.com/kris-nova/aurae/rpc/rpc"
 	"github.com/sirupsen/logrus"
 	"sync"
 )

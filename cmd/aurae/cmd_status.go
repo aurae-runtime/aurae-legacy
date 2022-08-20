@@ -22,7 +22,7 @@ import (
 	"github.com/kris-nova/aurae/client"
 	"github.com/kris-nova/aurae/pkg/peer"
 	"github.com/kris-nova/aurae/pkg/printer"
-	"github.com/kris-nova/aurae/rpc"
+	"github.com/kris-nova/aurae/rpc/rpc"
 	peer2peer "github.com/libp2p/go-libp2p-core/peer"
 	"github.com/urfave/cli/v2"
 )

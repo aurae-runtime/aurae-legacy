@@ -16,7 +16,7 @@
 
 package schedule
 
-import "github.com/kris-nova/aurae/rpc"
+import "github.com/kris-nova/aurae/rpc/rpc"
 
 var _ rpc.ScheduleServer = &Service{}
 

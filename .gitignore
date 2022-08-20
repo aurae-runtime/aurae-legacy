@@ -7,3 +7,4 @@ release
 id_ed25519*
 firecracker-*.tgz
 release-v*
+rpc/rpc/*
