@@ -24,6 +24,7 @@ import (
 	"github.com/kris-nova/aurae/pkg/core/local"
 	"github.com/kris-nova/aurae/pkg/peer"
 	"github.com/kris-nova/aurae/pkg/posix"
+	"github.com/kris-nova/aurae/rpc/rpc"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"net"
@@ -123,7 +124,7 @@ func (d *Daemon) Run(ctx context.Context) error {
 	//
 	// proto rpc implementation
 	// these are subject to change as capabilities improve
-	//rpc.RegisterDatabaseServer(server, coreSvc)
+	rpc.RegisterConfigServer(server, coreSvc)
 	//rpc.RegisterProxyServer(server, proxy.NewService())
 	//rpc.RegisterRuntimeServer(server, runtime.NewService())
 	//rpc.RegisterScheduleServer(server, schedule.NewService())
