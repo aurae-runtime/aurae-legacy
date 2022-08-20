@@ -96,6 +96,7 @@ test-auraefs:
 clean: ## Clean your artifacts 🧼
 	@echo "Cleaning..."
 	rm -rvf release/*
+	rm -rvf rpc/rpc/*
 	rm -rvf rpc/*.pb.*
 	rm -rvf bin/*
 
