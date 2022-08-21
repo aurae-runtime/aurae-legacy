@@ -23,6 +23,7 @@ import (
 	"github.com/kris-nova/aurae/pkg/registry"
 	"github.com/kris-nova/aurae/rpc/rpc"
 	"github.com/kris-nova/aurae/system"
+	"github.com/sirupsen/logrus"
 	"os"
 )
 
@@ -65,6 +66,7 @@ func (s *Service) AdoptSocket(ctx context.Context, in *rpc.AdoptSocketRequest) (
 		}, nil
 	}
 
+	logrus.Infof("Success. Registered socket: %s [%s]", name, path)
 	return &rpc.AdoptSocketResponse{
 		Message: fmt.Sprintf("Success. Registered socket: %s [%s]", name, path),
 		Code:    common.ResponseCode_OKAY,
