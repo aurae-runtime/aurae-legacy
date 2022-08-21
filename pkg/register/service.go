@@ -33,6 +33,64 @@ type Service struct {
 	rpc.UnimplementedRegisterServer
 }
 
+func (s *Service) AdoptService(ctx context.Context, in *rpc.AdoptServiceRequest) (*rpc.AdoptServiceResponse, error) {
+
+	name := in.UniqueComponentName
+
+	// Check if registered
+	if newFunc, ok := registry.ServiceRegistry[name]; ok {
+
+		// Check if already loaded
+		a := system.AuraeInstance()
+		if _, ok := a.ServiceComponents[name]; ok {
+			return &rpc.AdoptServiceResponse{
+				Message: fmt.Sprintf("Already registered: %s", name),
+				Code:    common.ResponseCode_REJECT,
+			}, nil
+		}
+
+		// Load this service
+		serviceInstance := newFunc()
+		err := serviceInstance.Start()
+		if err != nil {
+			return &rpc.AdoptServiceResponse{
+				Message: fmt.Sprintf("Unable to adopt service: %s: %v", name, err),
+				Code:    common.ResponseCode_ERROR,
+			}, nil
+		}
+		a.ServiceComponents[name] = serviceInstance
+	} else {
+		return &rpc.AdoptServiceResponse{
+			Message: fmt.Sprintf("Service not found in registry: %s", name),
+			Code:    common.ResponseCode_ERROR,
+		}, nil
+	}
+
+	logrus.Infof("Success. Registered service: %s", name)
+	return &rpc.AdoptServiceResponse{
+		Message: fmt.Sprintf("Success. Registered socket: %s", name),
+		Code:    common.ResponseCode_OKAY,
+	}, nil
+}
+
+func (s *Service) AbandonService(ctx context.Context, in *rpc.AbandonServiceRequest) (*rpc.AbandonServiceResponse, error) {
+	name := in.UniqueComponentName
+
+	a := system.AuraeInstance()
+	if _, ok := a.SocketComponents[name]; ok {
+		delete(a.SocketComponents, name)
+		logrus.Infof("Success. Abandoned service: %s", name)
+		return &rpc.AbandonServiceResponse{
+			Message: fmt.Sprintf("Stopped service: %s", name),
+			Code:    common.ResponseCode_OKAY,
+		}, nil
+	}
+	return &rpc.AbandonServiceResponse{
+		Message: fmt.Sprintf("Service not found in registry: %s", name),
+		Code:    common.ResponseCode_REJECT,
+	}, nil
+}
+
 func (s *Service) AbandonSocket(ctx context.Context, in *rpc.AbandonSocketRequest) (*rpc.AbandonSocketResponse, error) {
 	name := in.UniqueComponentName
 

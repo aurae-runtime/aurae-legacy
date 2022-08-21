@@ -46,7 +46,7 @@ func (e *Exec) Stop() error {
 	return nil
 }
 
-func NewExec() *Exec {
+func NewExec() system.Service {
 	return &Exec{
 		name: Name,
 	}

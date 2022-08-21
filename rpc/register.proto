@@ -55,10 +55,7 @@ message AbandonSocketResponse {
 
 // Services
 
-message AdoptServiceRequest {
-  string Path = 1;
-  string UniqueComponentName = 2;
-}
+message AdoptServiceRequest { string UniqueComponentName = 2; }
 
 message AdoptServiceResponse {
   int32 Code = 10;
