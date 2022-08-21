@@ -23,6 +23,7 @@ import (
 	"github.com/kris-nova/aurae/pkg/registry"
 	"github.com/kris-nova/aurae/rpc/rpc"
 	"github.com/kris-nova/aurae/system"
+	"os"
 )
 
 var _ rpc.RegisterServer = &Service{}
@@ -45,6 +46,25 @@ func (s *Service) AdoptSocket(ctx context.Context, in *rpc.AdoptSocketRequest) (
 			Code:    common.ResponseCode_ERROR,
 		}, nil
 	}
+
+	// Check if a valid socket exists at this location
+	stat, err := os.Stat(path)
+	if err != nil {
+		return &rpc.AdoptSocketResponse{
+			Message: fmt.Sprintf("Unable to stat file type: %s: %v", path, err),
+			Code:    common.ResponseCode_ERROR,
+		}, nil
+	}
+
+	// Srwxr-xr-x    Example socket with "S" and other permissions
+	// S---------    Example os.ModeSocket with "S" only
+	if stat.Mode()&os.ModeSocket == 0 {
+		return &rpc.AdoptSocketResponse{
+			Message: fmt.Sprintf("File not of type socket: %s: %v", path, err),
+			Code:    common.ResponseCode_ERROR,
+		}, nil
+	}
+
 	return &rpc.AdoptSocketResponse{
 		Message: fmt.Sprintf("Success. Registered socket: %s [%s]", name, path),
 		Code:    common.ResponseCode_OKAY,

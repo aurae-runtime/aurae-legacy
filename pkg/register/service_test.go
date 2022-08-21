@@ -19,6 +19,7 @@ package register
 import (
 	"context"
 	"fmt"
+	"github.com/kris-nova/aurae/pkg/common"
 	"github.com/kris-nova/aurae/providers/tsocket"
 	"github.com/kris-nova/aurae/rpc/rpc"
 	"net"
@@ -44,9 +45,12 @@ func TestService_AdoptSocket(t *testing.T) {
 		UniqueComponentName: tsocket.Name,
 	})
 	if err != nil {
-		t.Errorf("unable to adopt socket: %v", err)
+		t.Errorf("error running service: %v", err)
 	}
-	t.Logf("Adopted tsocket: %v", resp.Message)
+	// Assert the code
+	if resp.Code != common.ResponseCode_OKAY {
+		t.Errorf("failure testing tsocket: %v", resp.Message)
+	}
 }
 
 func TestService_AdoptSocketSadPath(t *testing.T) {
@@ -55,10 +59,13 @@ func TestService_AdoptSocketSadPath(t *testing.T) {
 		Path:                "/bad/socket/path",
 		UniqueComponentName: tsocket.Name,
 	})
-	if err == nil {
-		t.Errorf("expected error adopting bad socket")
+	if err != nil {
+		t.Errorf("error running service: %v", err)
 	}
-	t.Logf("Rejected bad socket: %v", resp.Message)
+	// Assert the code
+	if resp.Code != common.ResponseCode_ERROR {
+		t.Errorf("expected error from service")
+	}
 }
 
 func TestService_AdoptSocketSadName(t *testing.T) {
@@ -67,8 +74,11 @@ func TestService_AdoptSocketSadName(t *testing.T) {
 		Path:                tsocket.Path,
 		UniqueComponentName: "bad/name",
 	})
-	if err == nil {
-		t.Errorf("expected error adopting bad socket")
+	if err != nil {
+		t.Errorf("error running service: %v", err)
 	}
-	t.Logf("Rejected bad socket: %v", resp.Message)
+	// Assert the code
+	if resp.Code != common.ResponseCode_ERROR {
+		t.Errorf("expected error from service")
+	}
 }
