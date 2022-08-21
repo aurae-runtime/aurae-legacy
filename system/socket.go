@@ -14,4 +14,13 @@
  *                                                                           *
 \*===========================================================================*/
 
-package hypervisor
+package system
+
+type SocketStatus struct {
+}
+
+type Socket interface {
+	Path() string
+	Name() string
+	Status() *SocketStatus
+}
