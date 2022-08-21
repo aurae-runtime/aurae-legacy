@@ -59,8 +59,6 @@ func (t *Table) Print(w io.Writer) error {
 		fmt.Fprintf(w, "%s\n", color.GreenString(t.Title))
 	}
 
-	drawLine("─")
-
 	// Print the Headers first
 	headerLine := " " // Offset a single space
 	maxRow := 0       // maxRow is dynamically calculated as we print the headers

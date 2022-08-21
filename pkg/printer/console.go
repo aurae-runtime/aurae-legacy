@@ -56,6 +56,9 @@ func (c *Console) PrintStderr() error {
 }
 
 func (c *Console) Print(w io.Writer) error {
+
+	fmt.Fprintf(w, drawLine("━"))
+
 	// Title
 	if c.Title != "" {
 		col := color.New(color.Bold, color.FgGreen)
@@ -63,16 +66,22 @@ func (c *Console) Print(w io.Writer) error {
 	}
 
 	// Printers
+	fmt.Fprintf(w, drawLine("─"))
 	for i := 0; i <= c.i; i++ {
 		p := c.OrderedPrinters[i]
 		if p == nil {
 			continue
 		}
 		err := p.Print(w)
+		fmt.Fprintf(w, drawLine("─"))
+
 		if err != nil {
 			return err
 		}
 	}
+
+	//fmt.Fprintf(w, drawLine("━"))
+
 	return nil
 }
 
