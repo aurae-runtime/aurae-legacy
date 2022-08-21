@@ -84,7 +84,7 @@ func (s *Service) AdoptSocket(ctx context.Context, in *rpc.AdoptSocketRequest) (
 
 	// Check if exists in registry, adopt if found
 	if newFunc, ok := registry.SocketRegistry[name]; ok {
-		socketInstance := newFunc(name, path)
+		socketInstance := newFunc()
 		err := socketInstance.Adopt()
 		if err != nil {
 			return &rpc.AdoptSocketResponse{
