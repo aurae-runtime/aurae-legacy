@@ -64,6 +64,7 @@ func main() {
 			List(),
 			Remove(),
 			Adopt(),
+			Close(),
 			Status(),
 		},
 		Flags:                GlobalFlags([]cli.Flag{}),
