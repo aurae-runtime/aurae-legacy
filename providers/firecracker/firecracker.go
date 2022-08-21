@@ -33,6 +33,10 @@ type Firecracker struct {
 	name string
 }
 
+func (f *Firecracker) Close() error {
+	return nil
+}
+
 func (f *Firecracker) Path() string {
 	return f.path
 }

@@ -33,6 +33,24 @@ type Service struct {
 	rpc.UnimplementedRegisterServer
 }
 
+func (s *Service) AbandonSocket(ctx context.Context, in *rpc.AbandonSocketRequest) (*rpc.AbandonSocketResponse, error) {
+	name := in.UniqueComponentName
+
+	a := system.AuraeInstance()
+	if _, ok := a.Sockets[name]; ok {
+		delete(a.Sockets, name)
+		return &rpc.AbandonSocketResponse{
+			Message: fmt.Sprintf("Closed socket: %s", name),
+			Code:    common.ResponseCode_OKAY,
+		}, nil
+	}
+
+	return &rpc.AbandonSocketResponse{
+		Message: fmt.Sprintf("Socket not found in registry: %s", name),
+		Code:    common.ResponseCode_REJECT,
+	}, nil
+}
+
 func (s *Service) AdoptSocket(ctx context.Context, in *rpc.AdoptSocketRequest) (*rpc.AdoptSocketResponse, error) {
 	name := in.UniqueComponentName
 	path := in.Path

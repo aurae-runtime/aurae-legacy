@@ -38,6 +38,44 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
+func TestService_AbandonSocket(t *testing.T) {
+	svc := NewService()
+	resp, err := svc.AdoptSocket(context.Background(), &rpc.AdoptSocketRequest{
+		Path:                tsocket.Path,
+		UniqueComponentName: tsocket.Name,
+	})
+	if err != nil {
+		t.Errorf("error running service: %v", err)
+	}
+	// Assert the code
+	if resp.Code != common.ResponseCode_OKAY {
+		t.Errorf("failure testing tsocket: %v", resp.Message)
+	}
+	// Now close it
+	resp2, err := svc.AbandonSocket(context.Background(), &rpc.AbandonSocketRequest{
+		Path:                tsocket.Path,
+		UniqueComponentName: tsocket.Name,
+	})
+	if err != nil {
+		t.Errorf("error running service: %v", err)
+	}
+	if resp2.Code != common.ResponseCode_OKAY {
+		t.Errorf("failure testing tsocket: %v", resp2.Message)
+	}
+
+	// Now close it and confirm this is rejected because nothing exists
+	resp3, err := svc.AbandonSocket(context.Background(), &rpc.AbandonSocketRequest{
+		Path:                tsocket.Path,
+		UniqueComponentName: tsocket.Name,
+	})
+	if err != nil {
+		t.Errorf("error running service: %v", err)
+	}
+	if resp3.Code != common.ResponseCode_REJECT {
+		t.Errorf("failure testing tsocket: %v", resp2.Message)
+	}
+}
+
 func TestService_AdoptSocket(t *testing.T) {
 	svc := NewService()
 	resp, err := svc.AdoptSocket(context.Background(), &rpc.AdoptSocketRequest{

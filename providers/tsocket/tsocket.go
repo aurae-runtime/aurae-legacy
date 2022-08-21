@@ -33,6 +33,10 @@ type TSocket struct {
 	name string
 }
 
+func (f *TSocket) Close() error {
+	return nil
+}
+
 func (f *TSocket) Path() string {
 	return f.path
 }
