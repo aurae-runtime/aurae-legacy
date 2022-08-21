@@ -14,11 +14,11 @@
  *                                                                           *
 \*===========================================================================*/
 
-package core
+package config
 
 import (
 	"context"
-	"github.com/kris-nova/aurae/pkg/core/empty"
+	"github.com/kris-nova/aurae/pkg/config/empty"
 	"github.com/kris-nova/aurae/rpc/rpc"
 	"strings"
 	"testing"

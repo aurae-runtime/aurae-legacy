@@ -25,19 +25,29 @@ type Aurae struct {
 
 	// SocketComponents are currently adopted sockets by unique name.
 	// SocketComponents can provide N capabilities to Aurae.
-	SocketComponents map[string]Socket `json:"-"`
+	SocketComponents map[string]Socket
+
+	// ServiceComponents are compiled in services part of Aurae.
+	// ServiceComponents can provide N capabilities to Aurae.
+	ServiceComponents map[string]Service
 
 	// CapRunVirtualMachine enables Aurae to run as a VM hypervisor.
 	// A single Socket instance is required to provide the underlying
 	// support for launching virtual machines.
 	//
 	// Example: Firecracker socket /var/run/firecracker.socket
-	CapRunVirtualMachine Socket `json:"name"`
+	CapRunVirtualMachine Socket
+
+	CapRunProcess Service
+
+	CapRunContainer Socket
 }
 
 type AuraeSafe struct {
 	SocketComponents     map[string]string `json:"SocketComponents"`
 	CapRunVirtualMachine bool              `json:"CapRunVirtualMachine"`
+	CapRunContainer      bool              `json:"CapRunContainer"`
+	CapRunProcess        bool              `json:"CapRunProcess"`
 }
 
 // AuraeToSafe is the conversion logic to a read-only instance of Aurae (primarily used to transmitting status).
@@ -51,6 +61,12 @@ func AuraeToSafe(a *Aurae) *AuraeSafe {
 	}
 	if a.CapRunVirtualMachine != nil {
 		safe.CapRunVirtualMachine = true
+	}
+	if a.CapRunContainer != nil {
+		safe.CapRunVirtualMachine = true
+	}
+	if a.CapRunProcess != nil {
+		safe.CapRunProcess = true
 	}
 	return safe
 }

@@ -14,61 +14,40 @@
  *                                                                           *
 \*===========================================================================*/
 
-package firecracker
+package exec
 
 import (
-	"context"
-	"fmt"
-	crack "github.com/firecracker-microvm/firecracker-go-sdk"
-	"github.com/kris-nova/aurae"
 	"github.com/kris-nova/aurae/system"
-	"github.com/sirupsen/logrus"
 )
 
 const (
-	Path string = "/var/run/firecracker.socket"
-	Name string = "firecracker"
+	Name string = "exec"
 )
 
-var _ system.Socket = &Firecracker{}
+var _ system.Service = &Exec{}
 
-type Firecracker struct {
-	path   string
-	name   string
-	client *crack.Client
+type Exec struct {
+	name string
 }
 
-func (f *Firecracker) Adopt() error {
-	client := crack.NewClient(f.path, logrus.NewEntry(logrus.New()), false)
-	resp, err := client.GetMmds(context.Background())
-	if err != nil {
-		return fmt.Errorf("unable to adopt firecracker: %v", err)
-	}
-	logrus.Infof("%v", resp.Payload)
+func (e *Exec) Name() string {
+	return e.name
+}
+
+func (e *Exec) Status() *system.ServiceStatus {
+	return &system.ServiceStatus{}
+}
+
+func (e *Exec) Start() error {
 	return nil
 }
 
-func (f *Firecracker) Close() error {
+func (e *Exec) Stop() error {
 	return nil
 }
 
-func (f *Firecracker) Path() string {
-	return f.path
-}
-
-func (f *Firecracker) Name() string {
-	return f.name
-}
-
-func (f *Firecracker) Status() *system.SocketStatus {
-	return &system.SocketStatus{
-		Message: aurae.Unknown,
-	}
-}
-
-func NewFirecracker() system.Socket {
-	return &Firecracker{
-		path: Path,
+func NewExec() *Exec {
+	return &Exec{
 		name: Name,
 	}
 }

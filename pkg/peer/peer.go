@@ -73,7 +73,7 @@ func NewPeer(n name.Name) *Peer {
 
 	// Linux specific
 	// This can fix the log line about UDP sizing
-	//sysctl.Set("net.core.rmem_max", "2500000")
+	//sysctl.Set("net.config.rmem_max", "2500000")
 	// Linux specific
 
 	return &Peer{

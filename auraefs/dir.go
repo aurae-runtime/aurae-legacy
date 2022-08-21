@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"github.com/hanwen/go-fuse/v2/fs"
 	"github.com/hanwen/go-fuse/v2/fuse"
-	"github.com/kris-nova/aurae/pkg/core"
+	"github.com/kris-nova/aurae/pkg/config"
 	"github.com/kris-nova/aurae/rpc/rpc"
 	"github.com/sirupsen/logrus"
 	"path"
@@ -63,11 +63,11 @@ func (n *Dir) NewSubFile(ctx context.Context, name string, data []byte) (uint64,
 		Key: name, // No trailing slash (file)
 	})
 	if err != nil {
-		logrus.Warningf("Unable to Set on Aurae core daemon: %v", err)
+		logrus.Warningf("Unable to Set on Aurae config daemon: %v", err)
 		return 0, nil
 	}
-	if setResp.Code != core.CoreCode_OKAY {
-		logrus.Warningf("Failure to Set on Aurae core daemon: %v", setResp)
+	if setResp.Code != config.CoreCode_OKAY {
+		logrus.Warningf("Failure to Set on Aurae config daemon: %v", setResp)
 		return 0, nil
 	}
 
@@ -90,11 +90,11 @@ func (n *Dir) NewSubDir(ctx context.Context, name string) (uint64, *Dir) {
 		Key: fmt.Sprintf("%s/", name), // Trailing slash (dir)
 	})
 	if err != nil {
-		logrus.Warningf("Unable to Set on Aurae core daemon: %v", err)
+		logrus.Warningf("Unable to Set on Aurae config daemon: %v", err)
 		return 0, nil
 	}
-	if setResp.Code != core.CoreCode_OKAY {
-		logrus.Warningf("Failure to Set on Aurae core daemon: %v", setResp)
+	if setResp.Code != config.CoreCode_OKAY {
+		logrus.Warningf("Failure to Set on Aurae config daemon: %v", setResp)
 		return 0, nil
 	}
 

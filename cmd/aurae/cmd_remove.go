@@ -20,7 +20,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/kris-nova/aurae/client"
-	"github.com/kris-nova/aurae/pkg/core"
+	"github.com/kris-nova/aurae/pkg/config"
 	"github.com/kris-nova/aurae/pkg/daemon"
 	"github.com/kris-nova/aurae/rpc/rpc"
 	"github.com/urfave/cli/v2"
@@ -58,7 +58,7 @@ func Remove() *cli.Command {
 				return err
 			}
 
-			if removeResp.Code != core.CoreCode_OKAY {
+			if removeResp.Code != config.CoreCode_OKAY {
 				return fmt.Errorf("unable to remove")
 			}
 			return nil

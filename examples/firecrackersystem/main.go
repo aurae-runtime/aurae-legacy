@@ -14,34 +14,33 @@
  *                                                                           *
 \*===========================================================================*/
 
-package auraefs
+package main
 
 import (
 	"context"
-	"github.com/hanwen/go-fuse/v2/fs"
-	"github.com/kris-nova/aurae/pkg/config"
+	"fmt"
+	"github.com/kris-nova/aurae/client"
+	"github.com/kris-nova/aurae/pkg/daemon"
 	"github.com/kris-nova/aurae/rpc/rpc"
-	"github.com/sirupsen/logrus"
-	"syscall"
 )
 
-var _ fs.NodeRmdirer = &Dir{}
-
-func (n *Dir) Rmdir(ctx context.Context, name string) syscall.Errno {
-	logrus.Debugf("%s --[d]--> Rmdir()", n.path)
-	if c == nil {
-		return 0
-	}
-	rmResp, err := c.Remove(ctx, &rpc.RemoveReq{
-		Key: name,
-	})
+func runtime() error {
+	x := client.NewClient()
+	err := x.ConnectSocket(daemon.DefaultSocketLocationLinux)
 	if err != nil {
-		logrus.Warningf("Unable to Remove on Aurae config daemon: %v", err)
-		return 0
+		return err
 	}
-	if rmResp.Code != config.CoreCode_OKAY {
-		logrus.Warningf("Failure to Remove on Aurae config daemon: %v", rmResp)
-		return 0
+
+	// Schedule firecracker server
+
+	_, err = x.RunContainer(context.TODO(), &rpc.RunContainerRequest{})
+	return err
+}
+
+func main() {
+	err := runtime()
+	if err != nil {
+		fmt.Println("Error running example:")
+		fmt.Printf("%+v\n", err)
 	}
-	return 0
 }

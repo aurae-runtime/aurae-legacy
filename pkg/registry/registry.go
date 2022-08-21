@@ -17,8 +17,8 @@
 package registry
 
 import (
-	"github.com/kris-nova/aurae/providers/firecracker"
-	"github.com/kris-nova/aurae/providers/tsocket"
+	"github.com/kris-nova/aurae/providers/socket/firecracker"
+	"github.com/kris-nova/aurae/providers/socket/tsocket"
 	"github.com/kris-nova/aurae/system"
 )
 

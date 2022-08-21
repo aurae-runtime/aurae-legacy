@@ -14,68 +14,36 @@
  *                                                                           *
 \*===========================================================================*/
 
-package core
+package config
 
-import (
-	"context"
-	"github.com/kris-nova/aurae/pkg/core/local"
-	"github.com/kris-nova/aurae/rpc/rpc"
-	"testing"
-)
+// CoreServicer is the interface that defines the basic methods that all
+// CoreService implementations must use.
+//
+// This is a notable offensive interface as it (by design) has no concept of
+// error handling.
+//
+// The error-less convention exists to provide simple guarantees to the
+// calling code that will guarantee that a database error will not crash the
+// calling code.
+//
+// For atomic data transactions, the best-effort approach will be to call Set()
+// followed quickly by a Get() to ensure the data exists as it was set.
+//
+// Other than this "best-effort" approach there are no persistence guarantees
+// with any of the CoreServicer implementations. At least not through this interface.
+type CoreServicer interface {
 
-const localStateBase = "/tmp/aurae.test"
+	// Get will return a value for a key (if it exists)
+	Get(key string) string
 
-func TestBasicIOLocalSad(t *testing.T) {
-	getFromMemory = false
-	stateStore := local.NewState(localStateBase)
-	db := NewService(stateStore)
+	// Set will set a key to a value
+	Set(key, value string)
 
-	// Set
-	var setResp *rpc.SetResp
-	setResp, err := db.Set(context.Background(), &rpc.SetReq{
-		Key: "",
-		Val: "testBadData",
-	})
-	if err != nil {
-		t.Errorf("unable to Set: %v", err)
-	}
-	if setResp.Code != CoreCode_EMPTY {
-		t.Errorf("Invalid response code. Expected: %d, Actual: %d", CoreCode_OKAY, setResp.Code)
-	}
-}
+	// List is a map[filename]isFile where isFile=true if the dirent is a file, or false
+	// for a directory.
+	List(key string) map[string]bool
 
-func TestBasicIOLocalHappy(t *testing.T) {
-	getFromMemory = false
-
-	stateStore := local.NewState(localStateBase)
-	db := NewService(stateStore)
-
-	// Set
-	var setResp *rpc.SetResp
-	setResp, err := db.Set(context.Background(), &rpc.SetReq{
-		Key: "testKey",
-		Val: "testVal",
-	})
-	if err != nil {
-		t.Errorf("unable to Set: %v", err)
-	}
-	if setResp.Code != CoreCode_OKAY {
-		t.Errorf("Invalid response code. Expected: %d, Actual: %d", CoreCode_OKAY, setResp.Code)
-	}
-
-	// Get
-	var getResp *rpc.GetResp
-	getResp, err = db.Get(context.Background(), &rpc.GetReq{
-		Key: "testKey",
-	})
-	if err != nil {
-		t.Errorf("unable to Get: %v", err)
-	}
-	if getResp.Val != "testVal" {
-		t.Errorf("Database IO inconsistency. Expected: %s, Actual: %s", "testVal", getResp.Val)
-	}
-	if getResp.Code != CoreCode_OKAY {
-		t.Errorf("Invalid response code. Expected: %d, Actual: %d", CoreCode_OKAY, getResp.Code)
-	}
-
+	// Remove is a recursive-by-default function that will remove a given node (unless root)
+	// and all of its children.
+	Remove(key string)
 }

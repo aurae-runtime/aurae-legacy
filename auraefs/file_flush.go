@@ -19,7 +19,7 @@ package auraefs
 import (
 	"context"
 	"github.com/hanwen/go-fuse/v2/fs"
-	"github.com/kris-nova/aurae/pkg/core"
+	"github.com/kris-nova/aurae/pkg/config"
 	"github.com/kris-nova/aurae/rpc/rpc"
 	"github.com/sirupsen/logrus"
 	"syscall"
@@ -37,11 +37,11 @@ func (f *File) Flush(ctx context.Context, fh fs.FileHandle) syscall.Errno {
 		Val: string(f.Data),
 	})
 	if err != nil {
-		logrus.Warningf("Unable to Set on Aurae core daemon: %v", err)
+		logrus.Warningf("Unable to Set on Aurae config daemon: %v", err)
 		return 1
 	}
-	if setResp.Code != core.CoreCode_OKAY {
-		logrus.Warningf("Failure to Set on Aurae core daemon: %v", setResp)
+	if setResp.Code != config.CoreCode_OKAY {
+		logrus.Warningf("Failure to Set on Aurae config daemon: %v", setResp)
 		return 1
 	}
 	//f.Data = []byte("") // Reset the file content on Flush() if we need it again we pull it from the server.

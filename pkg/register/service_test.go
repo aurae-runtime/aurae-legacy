@@ -20,7 +20,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/kris-nova/aurae/pkg/common"
-	"github.com/kris-nova/aurae/providers/tsocket"
+	"github.com/kris-nova/aurae/providers/socket/tsocket"
 	"github.com/kris-nova/aurae/rpc/rpc"
 	"net"
 	"os"

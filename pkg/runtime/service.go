@@ -14,34 +14,38 @@
  *                                                                           *
 \*===========================================================================*/
 
-package auraefs
+package runtime
 
 import (
 	"context"
-	"github.com/hanwen/go-fuse/v2/fs"
-	"github.com/kris-nova/aurae/pkg/config"
+	"github.com/kris-nova/aurae/pkg/common"
 	"github.com/kris-nova/aurae/rpc/rpc"
-	"github.com/sirupsen/logrus"
-	"syscall"
 )
 
-var _ fs.NodeRmdirer = &Dir{}
+var _ rpc.RuntimeServer = &Service{}
 
-func (n *Dir) Rmdir(ctx context.Context, name string) syscall.Errno {
-	logrus.Debugf("%s --[d]--> Rmdir()", n.path)
-	if c == nil {
-		return 0
-	}
-	rmResp, err := c.Remove(ctx, &rpc.RemoveReq{
-		Key: name,
-	})
-	if err != nil {
-		logrus.Warningf("Unable to Remove on Aurae config daemon: %v", err)
-		return 0
-	}
-	if rmResp.Code != config.CoreCode_OKAY {
-		logrus.Warningf("Failure to Remove on Aurae config daemon: %v", rmResp)
-		return 0
-	}
-	return 0
+type Service struct {
+	rpc.UnimplementedRuntimeServer
+}
+
+func (s *Service) RunProcess(ctx context.Context, in *rpc.RunProcessRequest) (*rpc.RunProcessResponse, error) {
+	return &rpc.RunProcessResponse{
+		Code: common.ResponseCode_OKAY,
+	}, nil
+}
+
+func (s *Service) RunContainer(ctx context.Context, in *rpc.RunContainerRequest) (*rpc.RunContainerResponse, error) {
+	return &rpc.RunContainerResponse{
+		Code: common.ResponseCode_OKAY,
+	}, nil
+}
+
+func (s *Service) RunVirtualMachine(ctx context.Context, in *rpc.RunVirtualMachineRequest) (*rpc.RunVirtualMachineResponse, error) {
+	return &rpc.RunVirtualMachineResponse{
+		Code: common.ResponseCode_OKAY,
+	}, nil
+}
+
+func NewService() *Service {
+	return &Service{}
 }

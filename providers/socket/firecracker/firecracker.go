@@ -14,30 +14,71 @@
  *                                                                           *
 \*===========================================================================*/
 
-package main
+package firecracker
 
 import (
 	"context"
 	"fmt"
-	"github.com/kris-nova/aurae/client"
-	"github.com/kris-nova/aurae/pkg/daemon"
-	"github.com/kris-nova/aurae/rpc/rpc"
+	crack "github.com/firecracker-microvm/firecracker-go-sdk"
+	"github.com/kris-nova/aurae"
+	"github.com/kris-nova/aurae/system"
+	"github.com/sirupsen/logrus"
 )
 
-func runtime() error {
-	x := client.NewClient()
-	err := x.ConnectSocket(daemon.DefaultSocketLocationLinux)
-	if err != nil {
-		return err
-	}
-	_, err = x.RunContainer(context.TODO(), &rpc.RunContainerRequest{})
-	return err
+const (
+	Path string = "/var/run/firecracker.socket"
+	Name string = "firecracker"
+)
+
+var _ system.Socket = &Firecracker{}
+
+type Firecracker struct {
+	path   string
+	name   string
+	client *crack.Client
 }
 
-func main() {
-	err := runtime()
+func (f *Firecracker) Adopt() error {
+
+	// Check that firecracker is running
+	client := crack.NewClient(f.path, logrus.NewEntry(logrus.New()), false)
+	resp, err := client.GetMmds(context.Background())
 	if err != nil {
-		fmt.Println("Error running example:")
-		fmt.Printf("%+v\n", err)
+		return fmt.Errorf("unable to adopt firecracker: %v", err)
+	}
+
+	// Register the capabilities we expose
+	if system.AuraeInstance().CapRunVirtualMachine != nil {
+		system.AuraeInstance().CapRunVirtualMachine = f
+	} else {
+		return fmt.Errorf("CapRunVirtualMachine already registered")
+	}
+
+	logrus.Infof("%v", resp.Payload)
+	return nil
+}
+
+func (f *Firecracker) Close() error {
+	return nil
+}
+
+func (f *Firecracker) Path() string {
+	return f.path
+}
+
+func (f *Firecracker) Name() string {
+	return f.name
+}
+
+func (f *Firecracker) Status() *system.SocketStatus {
+	return &system.SocketStatus{
+		Message: aurae.Unknown,
+	}
+}
+
+func NewFirecracker() system.Socket {
+	return &Firecracker{
+		path: Path,
+		name: Name,
 	}
 }

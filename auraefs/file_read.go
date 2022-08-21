@@ -20,7 +20,7 @@ import (
 	"context"
 	"github.com/hanwen/go-fuse/v2/fs"
 	"github.com/hanwen/go-fuse/v2/fuse"
-	"github.com/kris-nova/aurae/pkg/core"
+	"github.com/kris-nova/aurae/pkg/config"
 	"github.com/kris-nova/aurae/rpc/rpc"
 	"github.com/sirupsen/logrus"
 	"syscall"
@@ -39,11 +39,11 @@ func (f *File) Read(ctx context.Context, fh fs.FileHandle, dest []byte, off int6
 		Key: f.path,
 	})
 	if err != nil {
-		logrus.Warningf("Unable to Get on Aurae core daemon: %v", err)
+		logrus.Warningf("Unable to Get on Aurae config daemon: %v", err)
 		return fuse.ReadResultData(f.Data), 0
 	}
-	if getResp.Code != core.CoreCode_OKAY {
-		logrus.Warningf("Failure to Get on Aurae core daemon: %v", getResp)
+	if getResp.Code != config.CoreCode_OKAY {
+		logrus.Warningf("Failure to Get on Aurae config daemon: %v", getResp)
 		return fuse.ReadResultData(f.Data), 0
 	}
 	f.Data = []byte(getResp.Val)

@@ -14,12 +14,12 @@
  *                                                                           *
 \*===========================================================================*/
 
-package core
+package config
 
 import (
 	"context"
 	"github.com/kris-nova/aurae/pkg/common"
-	"github.com/kris-nova/aurae/pkg/core/memfs"
+	"github.com/kris-nova/aurae/pkg/config/memfs"
 	"github.com/kris-nova/aurae/rpc/rpc"
 	"github.com/sirupsen/logrus"
 	"sync"

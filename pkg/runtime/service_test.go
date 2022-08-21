@@ -14,34 +14,17 @@
  *                                                                           *
 \*===========================================================================*/
 
-package auraefs
+package runtime
 
 import (
 	"context"
-	"github.com/hanwen/go-fuse/v2/fs"
-	"github.com/kris-nova/aurae/pkg/config"
 	"github.com/kris-nova/aurae/rpc/rpc"
-	"github.com/sirupsen/logrus"
-	"syscall"
+	"testing"
 )
 
-var _ fs.NodeRmdirer = &Dir{}
+func TestService_RunProcess(t *testing.T) {
 
-func (n *Dir) Rmdir(ctx context.Context, name string) syscall.Errno {
-	logrus.Debugf("%s --[d]--> Rmdir()", n.path)
-	if c == nil {
-		return 0
-	}
-	rmResp, err := c.Remove(ctx, &rpc.RemoveReq{
-		Key: name,
-	})
-	if err != nil {
-		logrus.Warningf("Unable to Remove on Aurae config daemon: %v", err)
-		return 0
-	}
-	if rmResp.Code != config.CoreCode_OKAY {
-		logrus.Warningf("Failure to Remove on Aurae config daemon: %v", rmResp)
-		return 0
-	}
-	return 0
+	svc := NewService()
+	svc.RunProcess(context.Background(), &rpc.RunProcessRequest{})
+
 }

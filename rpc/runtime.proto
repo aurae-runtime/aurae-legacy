@@ -23,13 +23,30 @@ package aurae;
 // TODO what about "app" instead of "container"? Where is the abstraction layer?
 service Runtime {
 
-    rpc RunContainer(RunContainerRequest) returns (RunContainerResponse) {}
-
+  rpc RunProcess(RunProcessRequest) returns (RunProcessResponse) {}
+  rpc RunContainer(RunContainerRequest) returns (RunContainerResponse) {}
+  rpc RunVirtualMachine(RunVirtualMachineRequest)
+      returns (RunVirtualMachineResponse) {}
 }
 
-message RunContainerRequest {
+message RunVirtualMachineRequest { string Name = 1; }
+
+message RunVirtualMachineResponse {
+  int32 Code = 10;
+  string Message = 12;
+}
+
+message RunProcessRequest {
   string Name = 1;
+  string ExecutablePath = 2;
 }
+
+message RunProcessResponse {
+  int32 Code = 10;
+  string Message = 12;
+}
+
+message RunContainerRequest { string Name = 1; }
 
 message RunContainerResponse {
   int32 Code = 10;

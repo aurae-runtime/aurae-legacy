@@ -22,10 +22,16 @@ package aurae;
 
 service Register {
 
-    rpc AdoptSocket(AdoptSocketRequest) returns (AdoptSocketResponse) {}
-    rpc AbandonSocket(AbandonSocketRequest) returns (AbandonSocketResponse) {}
+  // Sockets
+  rpc AdoptSocket(AdoptSocketRequest) returns (AdoptSocketResponse) {}
+  rpc AbandonSocket(AbandonSocketRequest) returns (AbandonSocketResponse) {}
 
+  // Services
+  rpc AdoptService(AdoptServiceRequest) returns (AdoptServiceResponse) {}
+  rpc AbandonService(AbandonServiceRequest) returns (AbandonServiceResponse) {}
 }
+
+// Sockets
 
 message AdoptSocketRequest {
   string Path = 1;
@@ -43,6 +49,28 @@ message AbandonSocketRequest {
 }
 
 message AbandonSocketResponse {
+  int32 Code = 10;
+  string Message = 12;
+}
+
+// Services
+
+message AdoptServiceRequest {
+  string Path = 1;
+  string UniqueComponentName = 2;
+}
+
+message AdoptServiceResponse {
+  int32 Code = 10;
+  string Message = 12;
+}
+
+message AbandonServiceRequest {
+  string Path = 1;
+  string UniqueComponentName = 2;
+}
+
+message AbandonServiceResponse {
   int32 Code = 10;
   string Message = 12;
 }

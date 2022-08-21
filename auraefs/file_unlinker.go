@@ -19,7 +19,7 @@ package auraefs
 import (
 	"context"
 	"github.com/hanwen/go-fuse/v2/fs"
-	"github.com/kris-nova/aurae/pkg/core"
+	"github.com/kris-nova/aurae/pkg/config"
 	"github.com/kris-nova/aurae/rpc/rpc"
 	"github.com/sirupsen/logrus"
 	"path/filepath"
@@ -37,11 +37,11 @@ func (f *File) Unlink(ctx context.Context, name string) syscall.Errno {
 		Key: filepath.Join(f.path, name),
 	})
 	if err != nil {
-		logrus.Warningf("Unable to Remove on Aurae core daemon: %v", err)
+		logrus.Warningf("Unable to Remove on Aurae config daemon: %v", err)
 		return 0
 	}
-	if rmResp.Code != core.CoreCode_OKAY {
-		logrus.Warningf("Failure to Remove on Aurae core daemon: %v", rmResp)
+	if rmResp.Code != config.CoreCode_OKAY {
+		logrus.Warningf("Failure to Remove on Aurae config daemon: %v", rmResp)
 		return 0
 	}
 	return 0

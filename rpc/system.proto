@@ -21,16 +21,14 @@ option go_package = "github.com/kris-nova/aurae/rpc/rpc";
 package aurae;
 
 service System {
-  rpc Status (StatusRequest) returns (StatusResponse) {}
+  rpc Status(StatusRequest) returns (StatusResponse) {}
 }
 
-message StatusRequest {
-}
+message StatusRequest {}
 
 message StatusResponse {
   string AuraeInstanceEncapsulated = 1;
   string Version = 2;
   int32 Code = 10;
   string Message = 12;
-
 }

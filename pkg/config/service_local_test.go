@@ -14,34 +14,68 @@
  *                                                                           *
 \*===========================================================================*/
 
-package auraefs
+package config
 
 import (
 	"context"
-	"github.com/hanwen/go-fuse/v2/fs"
-	"github.com/kris-nova/aurae/pkg/config"
+	"github.com/kris-nova/aurae/pkg/config/local"
 	"github.com/kris-nova/aurae/rpc/rpc"
-	"github.com/sirupsen/logrus"
-	"syscall"
+	"testing"
 )
 
-var _ fs.NodeRmdirer = &Dir{}
+const localStateBase = "/tmp/aurae.test"
 
-func (n *Dir) Rmdir(ctx context.Context, name string) syscall.Errno {
-	logrus.Debugf("%s --[d]--> Rmdir()", n.path)
-	if c == nil {
-		return 0
-	}
-	rmResp, err := c.Remove(ctx, &rpc.RemoveReq{
-		Key: name,
+func TestBasicIOLocalSad(t *testing.T) {
+	getFromMemory = false
+	stateStore := local.NewState(localStateBase)
+	db := NewService(stateStore)
+
+	// Set
+	var setResp *rpc.SetResp
+	setResp, err := db.Set(context.Background(), &rpc.SetReq{
+		Key: "",
+		Val: "testBadData",
 	})
 	if err != nil {
-		logrus.Warningf("Unable to Remove on Aurae config daemon: %v", err)
-		return 0
+		t.Errorf("unable to Set: %v", err)
 	}
-	if rmResp.Code != config.CoreCode_OKAY {
-		logrus.Warningf("Failure to Remove on Aurae config daemon: %v", rmResp)
-		return 0
+	if setResp.Code != CoreCode_EMPTY {
+		t.Errorf("Invalid response code. Expected: %d, Actual: %d", CoreCode_OKAY, setResp.Code)
 	}
-	return 0
+}
+
+func TestBasicIOLocalHappy(t *testing.T) {
+	getFromMemory = false
+
+	stateStore := local.NewState(localStateBase)
+	db := NewService(stateStore)
+
+	// Set
+	var setResp *rpc.SetResp
+	setResp, err := db.Set(context.Background(), &rpc.SetReq{
+		Key: "testKey",
+		Val: "testVal",
+	})
+	if err != nil {
+		t.Errorf("unable to Set: %v", err)
+	}
+	if setResp.Code != CoreCode_OKAY {
+		t.Errorf("Invalid response code. Expected: %d, Actual: %d", CoreCode_OKAY, setResp.Code)
+	}
+
+	// Get
+	var getResp *rpc.GetResp
+	getResp, err = db.Get(context.Background(), &rpc.GetReq{
+		Key: "testKey",
+	})
+	if err != nil {
+		t.Errorf("unable to Get: %v", err)
+	}
+	if getResp.Val != "testVal" {
+		t.Errorf("Database IO inconsistency. Expected: %s, Actual: %s", "testVal", getResp.Val)
+	}
+	if getResp.Code != CoreCode_OKAY {
+		t.Errorf("Invalid response code. Expected: %d, Actual: %d", CoreCode_OKAY, getResp.Code)
+	}
+
 }

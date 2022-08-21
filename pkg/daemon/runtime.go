@@ -20,11 +20,12 @@ import (
 	"context"
 	"fmt"
 	"github.com/kris-nova/aurae"
-	"github.com/kris-nova/aurae/pkg/core"
-	"github.com/kris-nova/aurae/pkg/core/local"
+	"github.com/kris-nova/aurae/pkg/config"
+	"github.com/kris-nova/aurae/pkg/config/local"
 	"github.com/kris-nova/aurae/pkg/peer"
 	"github.com/kris-nova/aurae/pkg/posix"
 	"github.com/kris-nova/aurae/pkg/register"
+	"github.com/kris-nova/aurae/pkg/runtime"
 	system2 "github.com/kris-nova/aurae/pkg/system"
 	"github.com/kris-nova/aurae/rpc/rpc"
 	"github.com/kris-nova/aurae/system"
@@ -107,7 +108,7 @@ func (d *Daemon) Run(ctx context.Context) error {
 
 	// Step 4. Setup the local persistent state.
 	localStateStore := local.NewState(d.localStore)
-	coreSvc := core.NewService(localStateStore)
+	coreSvc := config.NewService(localStateStore)
 
 	// Default to getFromMemory=false we can change this later
 	coreSvc.SetGetFromMemory(false)
@@ -117,6 +118,9 @@ func (d *Daemon) Run(ctx context.Context) error {
 
 	rpc.RegisterRegisterServer(server, register.NewService())
 	logrus.Infof("Register: RegisterServer")
+
+	rpc.RegisterRuntimeServer(server, runtime.NewService())
+	logrus.Infof("Register: RuntimeServer")
 
 	rpc.RegisterSystemServer(server, system2.NewService()) // TODO package name collision
 	logrus.Infof("Register: SystemServer")
@@ -185,8 +189,8 @@ func (d *Daemon) Run(ctx context.Context) error {
 		select {
 		case err := <-serveCancel:
 			if err != nil {
-				logrus.Errorf("Auarae core serving error: %v", err)
-				d.runtime = false // Cancel the daemon during a core serving error
+				logrus.Errorf("Auarae config serving error: %v", err)
+				d.runtime = false // Cancel the daemon during a config serving error
 			}
 		default:
 			// pass
