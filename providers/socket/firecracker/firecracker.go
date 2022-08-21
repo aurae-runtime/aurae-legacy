@@ -48,7 +48,7 @@ func (f *Firecracker) Adopt() error {
 	}
 
 	// Register the capabilities we expose
-	if system.AuraeInstance().CapRunVirtualMachine != nil {
+	if system.AuraeInstance().CapRunVirtualMachine == nil {
 		system.AuraeInstance().CapRunVirtualMachine = f
 	} else {
 		return fmt.Errorf("CapRunVirtualMachine already registered")

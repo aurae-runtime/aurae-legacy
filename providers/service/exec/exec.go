@@ -17,6 +17,7 @@
 package exec
 
 import (
+	"fmt"
 	"github.com/kris-nova/aurae/system"
 )
 
@@ -39,6 +40,11 @@ func (e *Exec) Status() *system.ServiceStatus {
 }
 
 func (e *Exec) Start() error {
+	if system.AuraeInstance().CapRunProcess == nil {
+		system.AuraeInstance().CapRunProcess = e
+	} else {
+		return fmt.Errorf("CapRunProcess already registered")
+	}
 	return nil
 }
 

@@ -20,8 +20,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/kris-nova/aurae/client"
+	"github.com/kris-nova/aurae/pkg/printer"
 	"github.com/kris-nova/aurae/rpc/rpc"
-	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 )
 
@@ -60,8 +60,34 @@ func Adopt() *cli.Command {
 					if err != nil {
 						return err
 					}
-					logrus.Info(resp.Code)
-					logrus.Info(resp.Message)
+					printer.PrintStdout("Adopt Socket", resp)
+					return nil
+				},
+			},
+			{
+				Name:      "service",
+				Usage:     "Adopt service components.",
+				UsageText: `aurae adopt service <name>`,
+				Flags:     GlobalFlags([]cli.Flag{}),
+				Action: func(c *cli.Context) error {
+					Preloader()
+					name := c.Args().Get(0)
+					if name == "" {
+						return fmt.Errorf("usage: aurae adopt service <name>")
+					}
+					ctx := context.Background()
+					auraeClient := client.NewClient()
+					err := auraeClient.ConnectSocket(run.socket)
+					if err != nil {
+						return err
+					}
+					resp, err := auraeClient.AdoptService(ctx, &rpc.AdoptServiceRequest{
+						UniqueComponentName: name,
+					})
+					if err != nil {
+						return err
+					}
+					printer.PrintStdout("Adopt Service", resp)
 					return nil
 				},
 			},

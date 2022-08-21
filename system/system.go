@@ -44,10 +44,12 @@ type Aurae struct {
 }
 
 type AuraeSafe struct {
-	SocketComponents     map[string]string `json:"SocketComponents"`
-	CapRunVirtualMachine bool              `json:"CapRunVirtualMachine"`
-	CapRunContainer      bool              `json:"CapRunContainer"`
-	CapRunProcess        bool              `json:"CapRunProcess"`
+	SocketComponents  map[string]string `json:"SocketComponents"`
+	ServiceComponents map[string]string `json:"ServiceComponents"`
+
+	CapRunVirtualMachine bool `json:"CapRunVirtualMachine"`
+	CapRunContainer      bool `json:"CapRunContainer"`
+	CapRunProcess        bool `json:"CapRunProcess"`
 }
 
 // AuraeToSafe is the conversion logic to a read-only instance of Aurae (primarily used to transmitting status).
@@ -58,6 +60,9 @@ func AuraeToSafe(a *Aurae) *AuraeSafe {
 	}
 	for _, c := range a.SocketComponents {
 		safe.SocketComponents[c.Name()] = c.Path()
+	}
+	for _, p := range a.ServiceComponents {
+		safe.ServiceComponents[p.Name()] = p.Name()
 	}
 	if a.CapRunVirtualMachine != nil {
 		safe.CapRunVirtualMachine = true
@@ -77,7 +82,8 @@ var a *Aurae
 func AuraeInstance() *Aurae {
 	if a == nil {
 		a = &Aurae{
-			SocketComponents: make(map[string]Socket),
+			SocketComponents:  make(map[string]Socket),
+			ServiceComponents: make(map[string]Service),
 		}
 	}
 	return a
