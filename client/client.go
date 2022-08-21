@@ -107,8 +107,8 @@ func (c *Client) establish(conn grpc.ClientConnInterface) error {
 	c.RuntimeClient = runtime
 	register := rpc.NewRegisterClient(conn)
 	c.RegisterClient = register
-	//proxy := rpc.NewProxyClient(conn)
-	//c.ProxyClient = proxy
+	//register := rpc.NewProxyClient(conn)
+	//c.ProxyClient = register
 	c.connected = true
 	return nil
 }

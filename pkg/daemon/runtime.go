@@ -24,6 +24,7 @@ import (
 	"github.com/kris-nova/aurae/pkg/core/local"
 	"github.com/kris-nova/aurae/pkg/peer"
 	"github.com/kris-nova/aurae/pkg/posix"
+	"github.com/kris-nova/aurae/pkg/register"
 	"github.com/kris-nova/aurae/rpc/rpc"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
@@ -77,7 +78,6 @@ func (d *Daemon) Run(ctx context.Context) error {
 	logrus.Infof("Aurae daemon daemon. Version: %s", aurae.Version)
 	logrus.Infof("Aurae Socket [%s]", d.socket)
 	logrus.Infof("Aurae Local  [%s]", d.localStore)
-	logrus.Infof("----------------------------------------------------")
 
 	// Establish daemon safety
 	quitCh := posix.SignalHandler()
@@ -119,24 +119,12 @@ func (d *Daemon) Run(ctx context.Context) error {
 	// Default to getFromMemory=false we can change this later
 	coreSvc.SetGetFromMemory(false)
 
-	//
-	//
-	//
-	// proto rpc implementation
-	// these are subject to change as capabilities improve
 	rpc.RegisterConfigServer(server, coreSvc)
-	//rpc.RegisterProxyServer(server, proxy.NewService())
-	//rpc.RegisterRuntimeServer(server, runtime.NewService())
-	//rpc.RegisterScheduleServer(server, schedule.NewService())
-	//logrus.Debugf("Registering Core Services.")
-	//
-	//
-	//
-	//
+	logrus.Infof("Register: ConfigServer")
 
-	logrus.Debugf("Accepting requests.")
+	rpc.RegisterRegisterServer(server, register.NewService())
+	logrus.Infof("Register: RegisterServer")
 
-	// Step 6. Begin the empty loop by running a small go routine with an emergency cancel
 	serveCancel := make(chan error)
 	go func() {
 		err = server.Serve(socketConn)
@@ -166,7 +154,7 @@ func (d *Daemon) Run(ctx context.Context) error {
 	//}
 	//server = peerConn.GetGRPCServer()
 	//rpc.RegisterCoreServer(server, coreSvc)
-	//rpc.RegisterProxyServer(server, proxy.NewService())
+	//rpc.RegisterProxyServer(server, register.NewService())
 	//rpc.RegisterRuntimeServer(server, runtime.NewService())
 	//rpc.RegisterScheduleServer(server, schedule.NewService())
 	//logrus.Debugf("Starting Auare grpc protocol on peer network")
@@ -194,8 +182,9 @@ func (d *Daemon) Run(ctx context.Context) error {
 	//	logrus.Warnf(stderr.String())
 	//}()
 	//logrus.Infof("Firecracker hypervisor running...")
+	logrus.Infof("----------------------------------------------------")
 
-	logrus.Infof("Aurae daemon running...")
+	logrus.Infof("Listening...")
 	for d.runtime {
 		select {
 		case err := <-serveCancel:

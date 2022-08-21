@@ -20,6 +20,7 @@ option go_package = "github.com/kris-nova/aurae/rpc/rpc";
 
 package aurae;
 
+// TODO what about "app" instead of "container"? Where is the abstraction layer?
 service Runtime {
 
     rpc RunContainer(RunContainerRequest) returns (RunContainerResponse) {}

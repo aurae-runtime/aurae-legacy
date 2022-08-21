@@ -14,71 +14,27 @@
  *                                                                           *
 \*===========================================================================*/
 
-package proxy
+package register
 
 import (
 	"context"
-	crand "crypto/rand"
-	"github.com/kris-nova/aurae/pkg/core"
 	"github.com/kris-nova/aurae/rpc/rpc"
-	"github.com/sirupsen/logrus"
-	"io"
-	mrand "math/rand"
-	"time"
 )
 
-var _ rpc.ProxyServer = &Service{}
+var _ rpc.RegisterServer = &Service{}
 
-// Service is the main proxy name for managing peer-to-peer connections.
-//
-// This will implement the proxy server methods defined in rpc/network.proto
 type Service struct {
-	newRandomReader newRandomReader
-	rpc.UnimplementedProxyServer
+	rpc.UnimplementedRegisterServer
 }
 
-func (s *Service) PeerRequest(ctx context.Context, in *rpc.PeerRequestReq) (*rpc.PeerRequestResp, error) {
+func (s *Service) AdoptSocket(ctx context.Context, in *rpc.AdoptSocketRequest) (*rpc.AdoptSocketResponse, error) {
 
-	return &rpc.PeerRequestResp{
-		Token: "",
-	}, nil
-}
-
-func (s *Service) LocalProxy(ctx context.Context, in *rpc.LocalProxyReq) (*rpc.LocalProxyResp, error) {
-
-	logrus.Infof("Peering with name: %s", in.Hostname)
-	logrus.Infof("Peering with token: %s", in.Token)
-
-	ret := &rpc.LocalProxyResp{
-		Socket:   "/run/todo",
-		Hostname: in.Hostname,
-		Code:     core.CoreCode_REJECT,
-		Message:  "LocalProxy TODO",
+	ret := &rpc.AdoptSocketResponse{
+		Message: "Adopt Socket",
 	}
 	return ret, nil
 }
 
-// NewService will need to seed our cryptography libraries.
 func NewService() *Service {
-	return &Service{
-		//reader: randomReaderSeed,
-		//reader: randomReaderTimeNow,
-		newRandomReader: randomReaderCrypto,
-	}
-}
-
-type newRandomReader func() io.Reader
-
-func randomReaderCrypto() io.Reader {
-	return crand.Reader
-}
-
-func randomReaderTimeNow() io.Reader {
-	return mrand.New(mrand.NewSource(time.Now().Unix()))
-}
-
-var seed int64 = time.Now().Unix()
-
-func randomReaderSeed() io.Reader {
-	return mrand.New(mrand.NewSource(seed))
+	return &Service{}
 }
