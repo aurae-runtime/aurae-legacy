@@ -22,7 +22,7 @@ import (
 	"github.com/kris-nova/aurae/system"
 )
 
-type NewSocket func(path, name string) system.Socket
+type NewSocket func() system.Socket
 
 var (
 	SocketRegistry = map[string]NewSocket{

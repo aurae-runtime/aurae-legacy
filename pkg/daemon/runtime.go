@@ -42,16 +42,6 @@ const (
 )
 
 // Daemon is an aurae systemd style daemon.
-//
-// The daemon will securely mount an shape and
-// expose the filesystem over mTLS gRPC for secure
-// (multi-tenant) IPC over encrypted gRPC in the local
-// userspace.
-//
-// While this methodology does come at a small performance
-// hit, I believe this risk is justified by the secure multi tenancy
-// feature.
-//
 type Daemon struct {
 
 	// Self is the root of the peer to peer digraph.
@@ -65,6 +55,7 @@ type Daemon struct {
 }
 
 func New(socket, localStore string) *Daemon {
+	system.AuraeInstance() // Initialize the singleton
 	return &Daemon{
 		runtime:    true,
 		socket:     socket,
@@ -74,8 +65,6 @@ func New(socket, localStore string) *Daemon {
 }
 
 func (d *Daemon) Run(ctx context.Context) error {
-
-	go system.AuraeInstance() // Initialize the singleton
 
 	// Establish context in the logs.
 	logrus.Infof("----------------------------------------------------")

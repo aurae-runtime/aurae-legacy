@@ -55,9 +55,9 @@ func (f *TSocket) Status() *system.SocketStatus {
 	}
 }
 
-func NewTSocket(path, name string) system.Socket {
+func NewTSocket() system.Socket {
 	return &TSocket{
-		path: path,
-		name: name,
+		path: Path,
+		name: Name,
 	}
 }

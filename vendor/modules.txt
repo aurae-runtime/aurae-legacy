@@ -26,7 +26,6 @@ github.com/btcsuite/btcd/btcec/v2/ecdsa
 github.com/btcsuite/btcd/chaincfg/chainhash
 # github.com/c2h5oh/datasize v0.0.0-20200112174442-28bbd4740fee
 ## explicit
-github.com/c2h5oh/datasize
 # github.com/cespare/xxhash/v2 v2.1.2
 ## explicit; go 1.11
 github.com/cespare/xxhash/v2
@@ -57,7 +56,6 @@ github.com/containernetworking/cni/pkg/version
 github.com/containernetworking/plugins/pkg/ns
 # github.com/containers/image v3.0.2+incompatible
 ## explicit
-github.com/containers/image/docker/reference
 # github.com/coreos/go-systemd/v22 v22.1.0
 ## explicit; go 1.12
 github.com/coreos/go-systemd/v22/dbus
@@ -73,7 +71,6 @@ github.com/decred/dcrd/dcrec/secp256k1/v4
 github.com/decred/dcrd/dcrec/secp256k1/v4/ecdsa
 # github.com/docker/go-connections v0.4.0
 ## explicit
-github.com/docker/go-connections/nat
 # github.com/docker/go-units v0.4.0
 ## explicit
 github.com/docker/go-units
@@ -103,7 +100,6 @@ github.com/francoispqt/gojay
 github.com/fsnotify/fsnotify
 # github.com/go-logr/logr v1.2.3 => github.com/go-logr/logr v0.4.0
 ## explicit; go 1.14
-github.com/go-logr/logr
 # github.com/go-openapi/analysis v0.19.10
 ## explicit; go 1.13
 github.com/go-openapi/analysis
@@ -159,7 +155,6 @@ github.com/gofrs/uuid
 github.com/gogo/protobuf/gogoproto
 github.com/gogo/protobuf/proto
 github.com/gogo/protobuf/protoc-gen-gogo/descriptor
-github.com/gogo/protobuf/sortkeys
 # github.com/golang/protobuf v1.5.2
 ## explicit; go 1.9
 github.com/golang/protobuf/jsonpb
@@ -170,14 +165,8 @@ github.com/golang/protobuf/ptypes/duration
 github.com/golang/protobuf/ptypes/timestamp
 # github.com/google/go-cmp v0.5.8
 ## explicit; go 1.13
-github.com/google/go-cmp/cmp
-github.com/google/go-cmp/cmp/internal/diff
-github.com/google/go-cmp/cmp/internal/flags
-github.com/google/go-cmp/cmp/internal/function
-github.com/google/go-cmp/cmp/internal/value
 # github.com/google/gofuzz v1.1.0
 ## explicit; go 1.12
-github.com/google/gofuzz
 # github.com/google/gopacket v1.1.19
 ## explicit; go 1.12
 github.com/google/gopacket/routing
@@ -186,7 +175,6 @@ github.com/google/gopacket/routing
 github.com/google/uuid
 # github.com/goombaio/namegenerator v0.0.0-20181006234301-989e774b106e
 ## explicit
-github.com/goombaio/namegenerator
 # github.com/gorilla/websocket v1.5.0
 ## explicit; go 1.12
 github.com/gorilla/websocket
@@ -270,7 +258,6 @@ github.com/jbenet/goprocess
 github.com/jbenet/goprocess/context
 # github.com/json-iterator/go v1.1.12
 ## explicit; go 1.12
-github.com/json-iterator/go
 # github.com/klauspost/compress v1.15.1
 ## explicit; go 1.15
 github.com/klauspost/compress
@@ -287,8 +274,6 @@ github.com/klauspost/cpuid/v2
 github.com/koron/go-ssdp
 # github.com/krolaw/dhcp4 v0.0.0-20190909130307-a50d88189771
 ## explicit
-github.com/krolaw/dhcp4
-github.com/krolaw/dhcp4/conn
 # github.com/libp2p/go-buffer-pool v0.0.2
 ## explicit; go 1.12
 github.com/libp2p/go-buffer-pool
@@ -483,10 +468,8 @@ github.com/minio/sha256-simd
 github.com/mitchellh/mapstructure
 # github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd
 ## explicit
-github.com/modern-go/concurrent
 # github.com/modern-go/reflect2 v1.0.2
 ## explicit; go 1.12
-github.com/modern-go/reflect2
 # github.com/mr-tron/base58 v1.2.0
 ## explicit; go 1.12
 github.com/mr-tron/base58/base58
@@ -562,7 +545,6 @@ github.com/onsi/ginkgo/reporters/stenographer/support/go-isatty
 github.com/onsi/ginkgo/types
 # github.com/opencontainers/go-digest v1.0.0
 ## explicit; go 1.13
-github.com/opencontainers/go-digest
 # github.com/opencontainers/runtime-spec v1.0.3-0.20200929063507-e6143ca7d51d
 ## explicit
 github.com/opencontainers/runtime-spec/specs-go
@@ -573,7 +555,6 @@ github.com/opentracing/opentracing-go/ext
 github.com/opentracing/opentracing-go/log
 # github.com/otiai10/copy v1.1.1
 ## explicit; go 1.12
-github.com/otiai10/copy
 # github.com/pbnjay/memory v0.0.0-20210728143218-7b4eea64cf58
 ## explicit; go 1.16
 github.com/pbnjay/memory
@@ -634,18 +615,8 @@ github.com/vishvananda/netlink/nl
 github.com/vishvananda/netns
 # github.com/weaveworks/ignite v0.10.0
 ## explicit; go 1.16
-github.com/weaveworks/ignite/pkg/apis/ignite
-github.com/weaveworks/ignite/pkg/apis/meta/v1alpha1
-github.com/weaveworks/ignite/pkg/constants
-github.com/weaveworks/ignite/pkg/container
-github.com/weaveworks/ignite/pkg/logs
-github.com/weaveworks/ignite/pkg/network
-github.com/weaveworks/ignite/pkg/preflight
-github.com/weaveworks/ignite/pkg/runtime
-github.com/weaveworks/ignite/pkg/util
 # github.com/weaveworks/libgitops v0.0.0-20200611103311-2c871bbbbf0c
 ## explicit; go 1.14
-github.com/weaveworks/libgitops/pkg/runtime
 # github.com/whyrusleeping/go-keyspace v0.0.0-20160322163242-5b898ac5add1
 ## explicit
 github.com/whyrusleeping/go-keyspace
@@ -847,7 +818,6 @@ google.golang.org/protobuf/types/known/durationpb
 google.golang.org/protobuf/types/known/timestamppb
 # gopkg.in/inf.v0 v0.9.1
 ## explicit
-gopkg.in/inf.v0
 # gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7
 ## explicit
 gopkg.in/tomb.v1
@@ -856,38 +826,12 @@ gopkg.in/tomb.v1
 gopkg.in/yaml.v2
 # k8s.io/apimachinery v0.21.0
 ## explicit; go 1.16
-k8s.io/apimachinery/pkg/api/resource
-k8s.io/apimachinery/pkg/apis/meta/v1
-k8s.io/apimachinery/pkg/conversion
-k8s.io/apimachinery/pkg/conversion/queryparams
-k8s.io/apimachinery/pkg/fields
-k8s.io/apimachinery/pkg/labels
-k8s.io/apimachinery/pkg/runtime
-k8s.io/apimachinery/pkg/runtime/schema
-k8s.io/apimachinery/pkg/selection
-k8s.io/apimachinery/pkg/types
-k8s.io/apimachinery/pkg/util/clock
-k8s.io/apimachinery/pkg/util/duration
-k8s.io/apimachinery/pkg/util/errors
-k8s.io/apimachinery/pkg/util/intstr
-k8s.io/apimachinery/pkg/util/json
-k8s.io/apimachinery/pkg/util/naming
-k8s.io/apimachinery/pkg/util/net
-k8s.io/apimachinery/pkg/util/runtime
-k8s.io/apimachinery/pkg/util/sets
-k8s.io/apimachinery/pkg/util/validation
-k8s.io/apimachinery/pkg/util/validation/field
-k8s.io/apimachinery/pkg/util/wait
-k8s.io/apimachinery/pkg/watch
-k8s.io/apimachinery/third_party/forked/golang/reflect
 # k8s.io/klog/v2 v2.8.0
 ## explicit; go 1.13
-k8s.io/klog/v2
 # lukechampine.com/blake3 v1.1.7
 ## explicit; go 1.13
 lukechampine.com/blake3
 # sigs.k8s.io/structured-merge-diff/v4 v4.1.0
 ## explicit; go 1.13
-sigs.k8s.io/structured-merge-diff/v4/value
 # github.com/vishvananda/netlink => github.com/twelho/netlink v1.1.1-ageing
 # github.com/go-logr/logr => github.com/go-logr/logr v0.4.0

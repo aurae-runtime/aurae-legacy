@@ -17,8 +17,12 @@
 package firecracker
 
 import (
+	"context"
+	"fmt"
+	crack "github.com/firecracker-microvm/firecracker-go-sdk"
 	"github.com/kris-nova/aurae"
 	"github.com/kris-nova/aurae/system"
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -29,11 +33,18 @@ const (
 var _ system.Socket = &Firecracker{}
 
 type Firecracker struct {
-	path string
-	name string
+	path   string
+	name   string
+	client *crack.Client
 }
 
 func (f *Firecracker) Adopt() error {
+	client := crack.NewClient(f.path, logrus.NewEntry(logrus.New()), false)
+	resp, err := client.GetMmds(context.Background())
+	if err != nil {
+		return fmt.Errorf("unable to adopt firecracker: %v", err)
+	}
+	logrus.Infof("%v", resp.Payload)
 	return nil
 }
 
@@ -55,9 +66,9 @@ func (f *Firecracker) Status() *system.SocketStatus {
 	}
 }
 
-func NewFirecracker(path, name string) system.Socket {
+func NewFirecracker() system.Socket {
 	return &Firecracker{
-		path: path,
-		name: name,
+		path: Path,
+		name: Name,
 	}
 }

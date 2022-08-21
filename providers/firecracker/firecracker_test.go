@@ -18,6 +18,10 @@ package firecracker
 
 import "testing"
 
-func TestFirecracker_AdoptSocket(t *testing.T) {
-
+func TestFirecracker_Adopt(t *testing.T) {
+	svc := NewFirecracker()
+	err := svc.Adopt()
+	if err != nil {
+		t.Errorf(err.Error())
+	}
 }
