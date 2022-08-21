@@ -37,14 +37,14 @@ func (s *Service) AbandonSocket(ctx context.Context, in *rpc.AbandonSocketReques
 	name := in.UniqueComponentName
 
 	a := system.AuraeInstance()
-	if _, ok := a.Sockets[name]; ok {
-		delete(a.Sockets, name)
+	if _, ok := a.SocketComponents[name]; ok {
+		delete(a.SocketComponents, name)
+		logrus.Infof("Success. Abandoned socket: %s", name)
 		return &rpc.AbandonSocketResponse{
 			Message: fmt.Sprintf("Closed socket: %s", name),
 			Code:    common.ResponseCode_OKAY,
 		}, nil
 	}
-
 	return &rpc.AbandonSocketResponse{
 		Message: fmt.Sprintf("Socket not found in registry: %s", name),
 		Code:    common.ResponseCode_REJECT,
@@ -54,17 +54,6 @@ func (s *Service) AbandonSocket(ctx context.Context, in *rpc.AbandonSocketReques
 func (s *Service) AdoptSocket(ctx context.Context, in *rpc.AdoptSocketRequest) (*rpc.AdoptSocketResponse, error) {
 	name := in.UniqueComponentName
 	path := in.Path
-
-	// Check if exists in registry
-	if newFunc, ok := registry.SocketRegistry[name]; ok {
-		a := system.AuraeInstance()
-		a.Sockets[name] = newFunc(name, path)
-	} else {
-		return &rpc.AdoptSocketResponse{
-			Message: fmt.Sprintf("Socket not found in registry: %s", name),
-			Code:    common.ResponseCode_ERROR,
-		}, nil
-	}
 
 	// Check if a valid socket exists at this location
 	stat, err := os.Stat(path)
@@ -80,6 +69,33 @@ func (s *Service) AdoptSocket(ctx context.Context, in *rpc.AdoptSocketRequest) (
 	if stat.Mode()&os.ModeSocket == 0 {
 		return &rpc.AdoptSocketResponse{
 			Message: fmt.Sprintf("File not of type socket: %s: %v", path, err),
+			Code:    common.ResponseCode_ERROR,
+		}, nil
+	}
+
+	// Check if already loaded
+	a := system.AuraeInstance()
+	if _, ok := a.SocketComponents[name]; ok {
+		return &rpc.AdoptSocketResponse{
+			Message: fmt.Sprintf("Already registered: %s", name),
+			Code:    common.ResponseCode_REJECT,
+		}, nil
+	}
+
+	// Check if exists in registry, adopt if found
+	if newFunc, ok := registry.SocketRegistry[name]; ok {
+		socketInstance := newFunc(name, path)
+		err := socketInstance.Adopt()
+		if err != nil {
+			return &rpc.AdoptSocketResponse{
+				Message: fmt.Sprintf("Unable to adopt socket: %s: %v", name, err),
+				Code:    common.ResponseCode_ERROR,
+			}, nil
+		}
+		a.SocketComponents[name] = socketInstance
+	} else {
+		return &rpc.AdoptSocketResponse{
+			Message: fmt.Sprintf("Socket not found in registry: %s", name),
 			Code:    common.ResponseCode_ERROR,
 		}, nil
 	}

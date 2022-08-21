@@ -37,6 +37,10 @@ func (f *TSocket) Close() error {
 	return nil
 }
 
+func (f *TSocket) Adopt() error {
+	return nil
+}
+
 func (f *TSocket) Path() string {
 	return f.path
 }

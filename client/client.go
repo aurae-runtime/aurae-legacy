@@ -32,7 +32,7 @@ type Client struct {
 	rpc.ConfigClient
 	rpc.RuntimeClient
 	rpc.RegisterClient
-	//rpc.ProxyClient
+	rpc.SystemClient
 	socket    string
 	connected bool
 	peer      *peer.Peer
@@ -107,8 +107,8 @@ func (c *Client) establish(conn grpc.ClientConnInterface) error {
 	c.RuntimeClient = runtime
 	register := rpc.NewRegisterClient(conn)
 	c.RegisterClient = register
-	//register := rpc.NewProxyClient(conn)
-	//c.ProxyClient = register
+	system := rpc.NewSystemClient(conn)
+	c.SystemClient = system
 	c.connected = true
 	return nil
 }

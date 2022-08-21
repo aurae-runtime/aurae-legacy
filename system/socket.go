@@ -24,5 +24,6 @@ type Socket interface {
 	Path() string
 	Name() string
 	Status() *SocketStatus
+	Adopt() error
 	Close() error
 }

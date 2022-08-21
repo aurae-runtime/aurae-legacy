@@ -25,6 +25,7 @@ import (
 	"github.com/kris-nova/aurae/pkg/peer"
 	"github.com/kris-nova/aurae/pkg/posix"
 	"github.com/kris-nova/aurae/pkg/register"
+	system2 "github.com/kris-nova/aurae/pkg/system"
 	"github.com/kris-nova/aurae/rpc/rpc"
 	"github.com/kris-nova/aurae/system"
 	"github.com/sirupsen/logrus"
@@ -127,6 +128,9 @@ func (d *Daemon) Run(ctx context.Context) error {
 
 	rpc.RegisterRegisterServer(server, register.NewService())
 	logrus.Infof("Register: RegisterServer")
+
+	rpc.RegisterSystemServer(server, system2.NewService()) // TODO package name collision
+	logrus.Infof("Register: SystemServer")
 
 	serveCancel := make(chan error)
 	go func() {

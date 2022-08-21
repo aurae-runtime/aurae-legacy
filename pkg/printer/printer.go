@@ -14,57 +14,76 @@
  *                                                                           *
 \*===========================================================================*/
 
-package main
+package printer
 
 import (
-	"context"
 	"fmt"
-	"github.com/kris-nova/aurae/client"
-	"github.com/kris-nova/aurae/pkg/common"
-	"github.com/kris-nova/aurae/pkg/printer"
-	"github.com/kris-nova/aurae/rpc/rpc"
-	"github.com/kris-nova/aurae/system"
-	"github.com/urfave/cli/v2"
+	"reflect"
 )
 
-const (
-	StatusReady   string = "ready"
-	StatusError   string = "error"
-	StatusAlive   string = "alive"
-	StatusUnknown string = "unknown"
-)
+func PrintStdout(title string, v any) {
+	c := AnyToConsole(title, v)
+	c.PrintStdout()
+}
 
-func Status() *cli.Command {
-	return &cli.Command{
-		Name:      "status",
-		Usage:     "Show aurae status.",
-		UsageText: `aurae status <options>`,
-		Flags:     GlobalFlags([]cli.Flag{}),
-		Action: func(c *cli.Context) error {
-			Preloader()
-			ctx := context.Background()
-			auraeClient := client.NewClient()
-			err := auraeClient.ConnectSocket(run.socket)
-			if err != nil {
-				return err
-			}
-			status, err := auraeClient.Status(ctx, &rpc.StatusRequest{})
-			if err != nil {
-				return err
-			}
-			if status.Code == common.ResponseCode_OKAY {
-				auraeInstance, err := system.StringToAuraeSafe(status.AuraeInstanceEncapsulated)
-				if err != nil {
-					printer.PrintStdout("status", status)
-					return fmt.Errorf("unable to marshal aurae status from remote: %v", err)
-				}
-				fmt.Printf("%+v\n", auraeInstance)
-				printer.PrintStdout("status", auraeInstance)
-				return nil
-			}
-			printer.PrintStdout("status", status)
-			return fmt.Errorf("error getting status: %v", status.Message)
-			return nil
-		},
+func PrintStderr(title string, v any) {
+	c := AnyToConsole(title, v)
+	c.PrintStderr()
+}
+
+func AnyToConsole(title string, v interface{}) *Console {
+	c := NewConsole(title)
+	r := reflect.ValueOf(v).Elem()
+	if r.Kind() == reflect.Ptr {
+		r = reflect.Indirect(r)
 	}
+	rType := r.Type()
+
+	// HasLists
+	hasLists := false
+	for i := 0; i < r.NumField(); i++ {
+		f := r.Field(i)
+		if f.Kind() == reflect.Map {
+			hasLists = true
+			break
+		}
+		if f.Kind() == reflect.Slice {
+			hasLists = true
+		}
+	}
+
+	if hasLists {
+		// Table Mode
+		t := NewTable("")
+		for i := 0; i < r.NumField(); i++ {
+			f := r.Field(i)
+			pf := t.NewField(rType.Field(i).Name)
+			if f.Kind() == reflect.Map {
+				if len(f.MapKeys()) == 0 {
+					pf.AddValue("---------")
+				} else {
+					for _, k := range f.MapKeys() {
+						v := f.MapIndex(k)
+						pf.AddValue(fmt.Sprintf("%s:%s", k, v))
+					}
+				}
+			} else {
+				pf.AddValue(f.Interface())
+			}
+			t.AddField(pf)
+
+		}
+		c.AddPrinter(t)
+	} else {
+		// Key Value Mode
+		kv := NewKeyValueTable("")
+		for i := 0; i < r.NumField(); i++ {
+			f := r.Field(i)
+			if f.CanInterface() {
+				kv.AddKeyValue(fmt.Sprintf("%v %v", rType.Field(i).Name, f.Type()), f.Interface())
+			}
+		}
+		c.AddPrinter(kv)
+	}
+	return c
 }

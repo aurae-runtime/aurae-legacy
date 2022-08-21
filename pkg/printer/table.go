@@ -83,7 +83,7 @@ func (t *Table) Print(w io.Writer) error {
 			if f == nil {
 				continue // Sanity check
 			}
-			fieldLine += fmt.Sprintf("%-*s", f.width+1, f.values[row])
+			fieldLine += fmt.Sprintf("%*s", f.width+4, f.values[row])
 		}
 		fieldLine += "\n"
 		fmt.Fprintf(w, fieldLine)
