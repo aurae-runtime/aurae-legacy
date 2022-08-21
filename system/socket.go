@@ -17,6 +17,7 @@
 package system
 
 type SocketStatus struct {
+	Message string
 }
 
 type Socket interface {

@@ -16,27 +16,9 @@
 
 package common
 
-import (
-	"os/user"
-	"strings"
-)
-
 const (
-	Self      string = "self"
-	Localhost string = Self
+	ResponseCode_OKAY   int32 = 0
+	ResponseCode_ERROR  int32 = 1
+	ResponseCode_EMPTY  int32 = 2
+	ResponseCode_REJECT int32 = 3
 )
-
-// HomeDir will return the current user's home directory or empty string
-// on error.
-func HomeDir() string {
-	u, err := user.Current()
-	if err != nil {
-		return ""
-	}
-	return u.HomeDir
-}
-
-// Expand will expand Unix parlance values into a string.
-func Expand(n string) string {
-	return strings.Replace(n, "~", HomeDir(), 1)
-}

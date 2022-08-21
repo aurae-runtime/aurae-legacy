@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"github.com/kris-nova/aurae/client"
 	"github.com/kris-nova/aurae/rpc/rpc"
+	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 )
 
@@ -52,13 +53,15 @@ func Adopt() *cli.Command {
 					if err != nil {
 						return err
 					}
-					_, err = auraeClient.AdoptSocket(ctx, &rpc.AdoptSocketRequest{
+					resp, err := auraeClient.AdoptSocket(ctx, &rpc.AdoptSocketRequest{
 						Path:                path,
-						ComponentUniqueName: name,
+						UniqueComponentName: name,
 					})
 					if err != nil {
 						return err
 					}
+					logrus.Info(resp.Code)
+					logrus.Info(resp.Message)
 					return nil
 				},
 			},

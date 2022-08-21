@@ -16,35 +16,8 @@
 
 package firecracker
 
-import (
-	"github.com/kris-nova/aurae"
-	"github.com/kris-nova/aurae/system"
-)
+import "testing"
 
-var _ system.Socket = &Firecracker{}
+func TestFirecracker_AdoptSocket(t *testing.T) {
 
-type Firecracker struct {
-	path string
-	name string
-}
-
-func (f *Firecracker) Path() string {
-	return f.path
-}
-
-func (f *Firecracker) Name() string {
-	return f.name
-}
-
-func (f *Firecracker) Status() *system.SocketStatus {
-	return &system.SocketStatus{
-		Message: aurae.Unknown,
-	}
-}
-
-func NewFirecracker(path, name string) *Firecracker {
-	return &Firecracker{
-		path: path,
-		name: name,
-	}
 }

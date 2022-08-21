@@ -14,36 +14,41 @@
  *                                                                           *
 \*===========================================================================*/
 
-package firecracker
+package tsocket
 
 import (
 	"github.com/kris-nova/aurae"
 	"github.com/kris-nova/aurae/system"
 )
 
-var _ system.Socket = &Firecracker{}
+var _ system.Socket = &TSocket{}
 
-type Firecracker struct {
+const (
+	Path string = "/tmp/auraetest.sock"
+	Name string = "tsocket"
+)
+
+type TSocket struct {
 	path string
 	name string
 }
 
-func (f *Firecracker) Path() string {
+func (f *TSocket) Path() string {
 	return f.path
 }
 
-func (f *Firecracker) Name() string {
+func (f *TSocket) Name() string {
 	return f.name
 }
 
-func (f *Firecracker) Status() *system.SocketStatus {
+func (f *TSocket) Status() *system.SocketStatus {
 	return &system.SocketStatus{
 		Message: aurae.Unknown,
 	}
 }
 
-func NewFirecracker(path, name string) *Firecracker {
-	return &Firecracker{
+func NewTSocket(path, name string) system.Socket {
+	return &TSocket{
 		path: path,
 		name: name,
 	}

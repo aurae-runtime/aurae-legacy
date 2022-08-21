@@ -14,14 +14,15 @@
  *                                                                           *
 \*===========================================================================*/
 
-package system
+package registry
 
 import (
 	"github.com/kris-nova/aurae/providers/firecracker"
 	"github.com/kris-nova/aurae/providers/tsocket"
+	"github.com/kris-nova/aurae/system"
 )
 
-type NewSocket func(path, name string) Socket
+type NewSocket func(path, name string) system.Socket
 
 var (
 	SocketRegistry = map[string]NewSocket{

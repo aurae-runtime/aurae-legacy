@@ -19,15 +19,15 @@ package aurae
 import "fmt"
 
 const (
-	unknown string = "UNKNOWN"
+	Unknown string = "Unknown"
 )
 
 var (
-	Version     string = unknown
-	Copyright   string = unknown
-	License     string = unknown
-	AuthorName  string = unknown
-	AuthorEmail string = unknown
+	Version     string = Unknown
+	Copyright   string = Unknown
+	License     string = Unknown
+	AuthorName  string = Unknown
+	AuthorEmail string = Unknown
 )
 
 func Banner() string {

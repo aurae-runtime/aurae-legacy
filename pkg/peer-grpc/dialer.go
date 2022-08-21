@@ -1,4 +1,4 @@
-package grpc
+package peer_grpc
 
 import (
 	"context"
@@ -38,5 +38,5 @@ func (p *GRPCProtocol) Dial(ctx context.Context, peerID peer.ID, dialOpts ...grp
 	// Append with Dialer option
 	dialOpsPrepended := append([]grpc.DialOption{p.GetDialOption(ctx)}, dialOpts...)
 	return grpc.Dial(peerID.Pretty(), dialOpsPrepended...)
-	//return grpc.DialContext(ctx, peerID.Pretty(), dialOpsPrepended...)
+	//return peer-grpc.DialContext(ctx, peerID.Pretty(), dialOpsPrepended...)
 }

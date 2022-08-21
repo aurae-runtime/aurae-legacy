@@ -1,4 +1,4 @@
-package grpc
+package peer_grpc
 
 import (
 	"context"

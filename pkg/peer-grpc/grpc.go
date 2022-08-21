@@ -1,4 +1,4 @@
-package grpc
+package peer_grpc
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 )
 
 // Protocol is the GRPC-over-libp2p protocol.
-const Protocol protocol.ID = "/grpc/0.0.1"
+const Protocol protocol.ID = "/peer-grpc/0.0.1"
 
 // GRPCProtocol is the GRPC-transported protocol handler.
 type GRPCProtocol struct {
@@ -35,20 +35,20 @@ func NewGRPCProtocol(ctx context.Context, host host.Host) *GRPCProtocol {
 	go func() {
 		err := grpcServer.Serve(newGrpcListener(grpcProtocol))
 		if err != nil {
-			logrus.Errorf("unable to start peer grpc server: %v", err)
+			logrus.Errorf("unable to start peer peer-grpc server: %v", err)
 		}
 	}()
 	return grpcProtocol
 }
 
-// GetGRPCServer returns the grpc server.
+// GetGRPCServer returns the peer-grpc server.
 func (p *GRPCProtocol) GetGRPCServer() *grpc.Server {
 	return p.grpcServer
 }
 
 // HandleStream handles an incoming stream.
 func (p *GRPCProtocol) HandleStream(stream network.Stream) {
-	//logrus.Infof("[grpc] Stream! %s", stream.ID())
+	//logrus.Infof("[peer-grpc] Stream! %s", stream.ID())
 	select {
 	case <-p.ctx.Done():
 		return

@@ -19,8 +19,8 @@ package client
 import (
 	"context"
 	"fmt"
-	p2pgrpc "github.com/kris-nova/aurae/pkg/grpc"
 	"github.com/kris-nova/aurae/pkg/peer"
+	p2pgrpc "github.com/kris-nova/aurae/pkg/peer-grpc"
 	"github.com/kris-nova/aurae/rpc/rpc"
 	peer2peer "github.com/libp2p/go-libp2p-core/peer"
 	"github.com/sirupsen/logrus"
@@ -47,7 +47,7 @@ func NewClient() *Client {
 func (c *Client) ConnectPeer(self *peer.Peer, to peer2peer.ID) error {
 	err := self.Handshake(to) // Not necessarily *required* but it's a good check for basic connectivity
 	if err != nil {
-		return fmt.Errorf("unable to initialize required handshake before grpc: %v", err)
+		return fmt.Errorf("unable to initialize required handshake before peer-grpc: %v", err)
 	}
 	logrus.Debugf("Connecting (gRPC) to: %s...", to.String())
 	ctx := context.Background()

@@ -26,6 +26,7 @@ import (
 	"github.com/kris-nova/aurae/pkg/posix"
 	"github.com/kris-nova/aurae/pkg/register"
 	"github.com/kris-nova/aurae/rpc/rpc"
+	"github.com/kris-nova/aurae/system"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"net"
@@ -72,6 +73,8 @@ func New(socket, localStore string) *Daemon {
 }
 
 func (d *Daemon) Run(ctx context.Context) error {
+
+	go system.AuraeInstance() // Initialize the singleton
 
 	// Establish context in the logs.
 	logrus.Infof("----------------------------------------------------")
@@ -150,14 +153,14 @@ func (d *Daemon) Run(ctx context.Context) error {
 	//
 	//peerConn := p2pgrpc.NewGRPCProtocol(ctx, self.Host())
 	//if err != nil {
-	//	return fmt.Errorf("unable to create peer grpc: %v", err)
+	//	return fmt.Errorf("unable to create peer peer-grpc: %v", err)
 	//}
 	//server = peerConn.GetGRPCServer()
 	//rpc.RegisterCoreServer(server, coreSvc)
 	//rpc.RegisterProxyServer(server, register.NewService())
 	//rpc.RegisterRuntimeServer(server, runtime.NewService())
 	//rpc.RegisterScheduleServer(server, schedule.NewService())
-	//logrus.Debugf("Starting Auare grpc protocol on peer network")
+	//logrus.Debugf("Starting Auare peer-grpc protocol on peer network")
 
 	// Run the firecracker daemon
 	// TODO this is a big fucking deal

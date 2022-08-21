@@ -20,9 +20,9 @@ import (
 	"context"
 	"github.com/kris-nova/aurae/pkg/core"
 	"github.com/kris-nova/aurae/pkg/core/local"
-	p2pgrpc "github.com/kris-nova/aurae/pkg/grpc"
 	"github.com/kris-nova/aurae/pkg/name"
 	"github.com/kris-nova/aurae/pkg/peer"
+	p2pgrpc "github.com/kris-nova/aurae/pkg/peer-grpc"
 	"github.com/kris-nova/aurae/rpc/rpc"
 	"testing"
 )
@@ -66,7 +66,7 @@ func TestPeer2PeerConnect(t *testing.T) {
 		Val: "boops",
 	})
 	if err != nil {
-		t.Errorf("unable to set key/value over peer to peer grpc: %v", err)
+		t.Errorf("unable to set key/value over peer to peer peer-grpc: %v", err)
 	}
 
 }
