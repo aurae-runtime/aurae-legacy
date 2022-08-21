@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"github.com/fatih/color"
 	"golang.org/x/crypto/ssh/terminal"
+	"golang.org/x/term"
 	"io"
 )
 
@@ -58,6 +59,8 @@ func (t *Table) Print(w io.Writer) error {
 		fmt.Fprintf(w, "%s\n", color.GreenString(t.Title))
 	}
 
+	drawLine("─")
+
 	// Print the Headers first
 	headerLine := " " // Offset a single space
 	maxRow := 0       // maxRow is dynamically calculated as we print the headers
@@ -89,4 +92,18 @@ func (t *Table) Print(w io.Writer) error {
 		fmt.Fprintf(w, fieldLine)
 	}
 	return nil
+}
+
+func drawLine(ch string) string {
+	y, _, _ := term.GetSize(0)
+	if y == 0 {
+		return ""
+	}
+	lc := color.New(color.Bold, color.FgGreen)
+	var str string
+	for i := 0; i < y; i++ {
+		str += lc.Sprintf("%s", ch)
+	}
+	str += "\n"
+	return str
 }
