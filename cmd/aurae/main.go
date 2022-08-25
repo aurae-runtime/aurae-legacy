@@ -66,6 +66,7 @@ func main() {
 			Adopt(),
 			Close(),
 			Status(),
+			Run(),
 		},
 		Flags:                GlobalFlags([]cli.Flag{}),
 		EnableBashCompletion: true,
