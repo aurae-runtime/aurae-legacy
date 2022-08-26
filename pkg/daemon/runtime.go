@@ -19,7 +19,7 @@ package daemon
 import (
 	"context"
 	"fmt"
-	"github.com/kris-nova/aurae"
+	"github.com/kris-nova/aurae/gen/aurae"
 	"github.com/kris-nova/aurae/pkg/config"
 	"github.com/kris-nova/aurae/pkg/config/local"
 	"github.com/kris-nova/aurae/pkg/peer"
@@ -27,7 +27,6 @@ import (
 	"github.com/kris-nova/aurae/pkg/register"
 	"github.com/kris-nova/aurae/pkg/runtime"
 	system2 "github.com/kris-nova/aurae/pkg/system"
-	"github.com/kris-nova/aurae/rpc/rpc"
 	"github.com/kris-nova/aurae/system"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
@@ -69,7 +68,7 @@ func (d *Daemon) Run(ctx context.Context) error {
 
 	// Establish context in the logs.
 	logrus.Infof("----------------------------------------------------")
-	logrus.Infof("Aurae daemon daemon. Version: %s", aurae.Version)
+	//logrus.Infof("Aurae daemon daemon. Version: %s", aurae.Version)
 	logrus.Infof("Aurae Socket [%s]", d.socket)
 	logrus.Infof("Aurae Local  [%s]", d.localStore)
 
@@ -113,16 +112,16 @@ func (d *Daemon) Run(ctx context.Context) error {
 	// Default to getFromMemory=false we can change this later
 	coreSvc.SetGetFromMemory(false)
 
-	rpc.RegisterConfigServer(server, coreSvc)
+	aurae.RegisterConfigServer(server, coreSvc)
 	logrus.Infof("Register: ConfigServer")
 
-	rpc.RegisterRegisterServer(server, register.NewService())
+	aurae.RegisterRegisterServer(server, register.NewService())
 	logrus.Infof("Register: RegisterServer")
 
-	rpc.RegisterRuntimeServer(server, runtime.NewService())
+	aurae.RegisterRuntimeServer(server, runtime.NewService())
 	logrus.Infof("Register: RuntimeServer")
 
-	rpc.RegisterSystemServer(server, system2.NewService()) // TODO package name collision
+	aurae.RegisterSystemServer(server, system2.NewService()) // TODO package name collision
 	logrus.Infof("Register: SystemServer")
 
 	serveCancel := make(chan error)
@@ -148,15 +147,15 @@ func (d *Daemon) Run(ctx context.Context) error {
 	//d.Self = self
 	//logrus.Debugf("Starting Auare handshake protocol on peer network")
 	//
-	//peerConn := p2pgrpc.NewGRPCProtocol(ctx, self.Host())
+	//peerConn := p2pgaurae.NewGRPCProtocol(ctx, self.Host())
 	//if err != nil {
 	//	return fmt.Errorf("unable to create peer peer-grpc: %v", err)
 	//}
 	//server = peerConn.GetGRPCServer()
-	//rpc.RegisterCoreServer(server, coreSvc)
-	//rpc.RegisterProxyServer(server, register.NewService())
-	//rpc.RegisterRuntimeServer(server, runtime.NewService())
-	//rpc.RegisterScheduleServer(server, schedule.NewService())
+	//aurae.RegisterCoreServer(server, coreSvc)
+	//aurae.RegisterProxyServer(server, register.NewService())
+	//aurae.RegisterRuntimeServer(server, runtime.NewService())
+	//aurae.RegisterScheduleServer(server, schedule.NewService())
 	//logrus.Debugf("Starting Auare peer-grpc protocol on peer network")
 
 	// Run the firecracker daemon

@@ -21,8 +21,8 @@ import (
 	"fmt"
 	"github.com/hanwen/go-fuse/v2/fs"
 	"github.com/hanwen/go-fuse/v2/fuse"
+	"github.com/kris-nova/aurae/gen/aurae"
 	"github.com/kris-nova/aurae/pkg/config"
-	"github.com/kris-nova/aurae/rpc/rpc"
 	"github.com/sirupsen/logrus"
 	"path"
 	"sync"
@@ -59,7 +59,7 @@ func (n *Dir) NewSubFile(ctx context.Context, name string, data []byte) (uint64,
 	if c == nil {
 		return 0, nil
 	}
-	setResp, err := c.Set(ctx, &rpc.SetReq{
+	setResp, err := c.Set(ctx, &aurae.SetReq{
 		Key: name, // No trailing slash (file)
 	})
 	if err != nil {
@@ -86,7 +86,7 @@ func (n *Dir) NewSubDir(ctx context.Context, name string) (uint64, *Dir) {
 	if c == nil {
 		return 0, nil
 	}
-	setResp, err := c.Set(ctx, &rpc.SetReq{
+	setResp, err := c.Set(ctx, &aurae.SetReq{
 		Key: fmt.Sprintf("%s/", name), // Trailing slash (dir)
 	})
 	if err != nil {

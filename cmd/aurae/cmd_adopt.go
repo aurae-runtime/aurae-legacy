@@ -20,8 +20,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/kris-nova/aurae/client"
+	"github.com/kris-nova/aurae/gen/aurae"
 	"github.com/kris-nova/aurae/pkg/printer"
-	"github.com/kris-nova/aurae/rpc/rpc"
 	"github.com/urfave/cli/v2"
 )
 
@@ -53,7 +53,7 @@ func Adopt() *cli.Command {
 					if err != nil {
 						return err
 					}
-					resp, err := auraeClient.AdoptSocket(ctx, &rpc.AdoptSocketRequest{
+					resp, err := auraeClient.AdoptSocket(ctx, &aurae.AdoptSocketRequest{
 						Path:                path,
 						UniqueComponentName: name,
 					})
@@ -81,7 +81,7 @@ func Adopt() *cli.Command {
 					if err != nil {
 						return err
 					}
-					resp, err := auraeClient.AdoptService(ctx, &rpc.AdoptServiceRequest{
+					resp, err := auraeClient.AdoptService(ctx, &aurae.AdoptServiceRequest{
 						UniqueComponentName: name,
 					})
 					if err != nil {

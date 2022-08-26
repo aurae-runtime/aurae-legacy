@@ -16,7 +16,7 @@
 
 syntax = "proto3";
 
-option go_package = "github.com/kris-nova/aurae/rpc/rpc";
+option go_package = "gen/aurae";
 
 package aurae;
 

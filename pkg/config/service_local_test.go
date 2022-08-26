@@ -18,9 +18,9 @@ package config
 
 import (
 	"context"
-	"github.com/kris-nova/aurae/pkg/config/local"
-	"github.com/kris-nova/aurae/rpc/rpc"
-	"testing"
+	"github.com/kris-nova/aurae/gen/aurae"
+"github.com/kris-nova/aurae/pkg/config/local"
+"testing"
 )
 
 const localStateBase = "/tmp/aurae.test"

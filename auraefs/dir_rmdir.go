@@ -19,8 +19,8 @@ package auraefs
 import (
 	"context"
 	"github.com/hanwen/go-fuse/v2/fs"
+	"github.com/kris-nova/aurae/gen/aurae"
 	"github.com/kris-nova/aurae/pkg/config"
-	"github.com/kris-nova/aurae/rpc/rpc"
 	"github.com/sirupsen/logrus"
 	"syscall"
 )
@@ -32,7 +32,7 @@ func (n *Dir) Rmdir(ctx context.Context, name string) syscall.Errno {
 	if c == nil {
 		return 0
 	}
-	rmResp, err := c.Remove(ctx, &rpc.RemoveReq{
+	rmResp, err := c.Remove(ctx, &aurae.RemoveReq{
 		Key: name,
 	})
 	if err != nil {

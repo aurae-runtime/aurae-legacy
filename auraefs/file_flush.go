@@ -19,8 +19,8 @@ package auraefs
 import (
 	"context"
 	"github.com/hanwen/go-fuse/v2/fs"
+	"github.com/kris-nova/aurae/gen/aurae"
 	"github.com/kris-nova/aurae/pkg/config"
-	"github.com/kris-nova/aurae/rpc/rpc"
 	"github.com/sirupsen/logrus"
 	"syscall"
 )
@@ -32,7 +32,7 @@ func (f *File) Flush(ctx context.Context, fh fs.FileHandle) syscall.Errno {
 	if c == nil {
 		return 0
 	}
-	setResp, err := c.Set(ctx, &rpc.SetReq{
+	setResp, err := c.Set(ctx, &aurae.SetReq{
 		Key: f.path,
 		Val: string(f.Data),
 	})

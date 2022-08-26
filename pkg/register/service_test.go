@@ -19,12 +19,12 @@ package register
 import (
 	"context"
 	"fmt"
-	"github.com/kris-nova/aurae/pkg/common"
-	"github.com/kris-nova/aurae/providers/socket/tsocket"
-	"github.com/kris-nova/aurae/rpc/rpc"
-	"net"
-	"os"
-	"testing"
+	"github.com/kris-nova/aurae/gen/aurae"
+"github.com/kris-nova/aurae/pkg/common"
+"github.com/kris-nova/aurae/providers/socket/tsocket"
+"net"
+"os"
+"testing"
 )
 
 func TestMain(m *testing.M) {

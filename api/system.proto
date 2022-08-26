@@ -16,45 +16,19 @@
 
 syntax = "proto3";
 
-option go_package = "github.com/kris-nova/aurae/rpc/rpc";
+option go_package = "gen/aurae";
 
 package aurae;
 
-// TODO what about "app" instead of "container"? Where is the abstraction layer?
-service Runtime {
-
-  // RunProcess
-  rpc RunProcess(RunProcessRequest) returns (RunProcessResponse) {}
-
-  // RunContainer
-  rpc RunContainer(RunContainerRequest) returns (RunContainerResponse) {}
-
-  // RunVirtualMachine
-  rpc RunVirtualMachine(RunVirtualMachineRequest)
-      returns (RunVirtualMachineResponse) {}
+service System {
+  rpc Status(StatusRequest) returns (StatusResponse) {}
 }
 
-message RunVirtualMachineRequest { string Name = 1; }
+message StatusRequest {}
 
-message RunVirtualMachineResponse {
-  int32 Code = 10;
-  string Message = 12;
-}
-
-message RunProcessRequest {
-  string Name = 1;
-  string ExecutablePath = 2;
-  string ExecutableArgs = 3;
-}
-
-message RunProcessResponse {
-  int32 Code = 10;
-  string Message = 12;
-}
-
-message RunContainerRequest { string Name = 1; }
-
-message RunContainerResponse {
+message StatusResponse {
+  string AuraeInstanceEncapsulated = 1;
+  string Version = 2;
   int32 Code = 10;
   string Message = 12;
 }

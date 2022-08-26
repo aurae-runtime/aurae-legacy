@@ -20,7 +20,7 @@ import (
 	"context"
 	"github.com/hanwen/go-fuse/v2/fs"
 	"github.com/hanwen/go-fuse/v2/fuse"
-	"github.com/kris-nova/aurae/rpc/rpc"
+	"github.com/kris-nova/aurae/gen/aurae"
 	"github.com/sirupsen/logrus"
 	"syscall"
 )
@@ -34,7 +34,7 @@ func (n *Dir) Readdir(ctx context.Context) (fs.DirStream, syscall.Errno) {
 		return fs.NewListDirStream(dirents), 0
 	}
 	logrus.Debugf("dir.Readdir() --[d]--> client.List() path=%s", n.path)
-	listResp, err := c.List(ctx, &rpc.ListReq{
+	listResp, err := c.List(ctx, &aurae.ListReq{
 		Key: n.path,
 	})
 	if err != nil {
@@ -45,7 +45,7 @@ func (n *Dir) Readdir(ctx context.Context) (fs.DirStream, syscall.Errno) {
 		var ino uint64
 		if node.GetFile() {
 			mode = fuse.S_IFREG
-			getResp, err := c.Get(ctx, &rpc.GetReq{
+			getResp, err := c.Get(ctx, &aurae.GetReq{
 				Key: filename,
 			})
 			if err != nil {

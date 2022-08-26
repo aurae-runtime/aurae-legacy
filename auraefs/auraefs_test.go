@@ -17,6 +17,7 @@
 package auraefs
 
 import (
+	"context"
 	"github.com/kris-nova/aurae/client"
 	"github.com/kris-nova/aurae/pkg/daemon"
 	"github.com/sirupsen/logrus"
@@ -44,7 +45,7 @@ func TestMain(m *testing.M) {
 	ch := make(chan bool)
 	go func() {
 		ch <- true
-		err := d.Run()
+		err := d.Run(context.TODO())
 		if err != nil {
 			logrus.Errorf("Error running daemon: %v", err)
 			os.Exit(1)
@@ -52,8 +53,8 @@ func TestMain(m *testing.M) {
 	}()
 
 	// Create a client
-	c := client.NewClient("/run/aurae.test.sock")
-	err := c.Connect()
+	c := client.NewClient()
+	err := c.ConnectSocket("/run/aurae.test.sock")
 	if err != nil {
 		logrus.Errorf("Error establishing client: %v", err)
 		os.Exit(1)

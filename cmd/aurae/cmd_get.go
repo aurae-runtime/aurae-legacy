@@ -20,8 +20,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/kris-nova/aurae/client"
+	"github.com/kris-nova/aurae/gen/aurae"
 	"github.com/kris-nova/aurae/pkg/daemon"
-	"github.com/kris-nova/aurae/rpc/rpc"
 	"github.com/urfave/cli/v2"
 )
 
@@ -50,7 +50,7 @@ func Get() *cli.Command {
 			if err != nil {
 				return err
 			}
-			getResp, err := auraeClient.Get(context.Background(), &rpc.GetReq{
+			getResp, err := auraeClient.Get(context.Background(), &aurae.GetReq{
 				Key: key,
 			})
 			if err != nil {

@@ -19,21 +19,21 @@ package register
 import (
 	"context"
 	"fmt"
+	"github.com/kris-nova/aurae/gen/aurae"
 	"github.com/kris-nova/aurae/pkg/common"
 	"github.com/kris-nova/aurae/pkg/registry"
-	"github.com/kris-nova/aurae/rpc/rpc"
 	"github.com/kris-nova/aurae/system"
 	"github.com/sirupsen/logrus"
 	"os"
 )
 
-var _ rpc.RegisterServer = &Service{}
+var _ aurae.RegisterServer = &Service{}
 
 type Service struct {
-	rpc.UnimplementedRegisterServer
+	aurae.UnimplementedRegisterServer
 }
 
-func (s *Service) AdoptService(ctx context.Context, in *rpc.AdoptServiceRequest) (*rpc.AdoptServiceResponse, error) {
+func (s *Service) AdoptService(ctx context.Context, in *aurae.AdoptServiceRequest) (*aurae.AdoptServiceResponse, error) {
 
 	name := in.UniqueComponentName
 
@@ -43,7 +43,7 @@ func (s *Service) AdoptService(ctx context.Context, in *rpc.AdoptServiceRequest)
 		// Check if already loaded
 		a := system.AuraeInstance()
 		if _, ok := a.ServiceComponents[name]; ok {
-			return &rpc.AdoptServiceResponse{
+			return &aurae.AdoptServiceResponse{
 				Message: fmt.Sprintf("Already registered: %s", name),
 				Code:    common.ResponseCode_REJECT,
 			}, nil
@@ -53,70 +53,70 @@ func (s *Service) AdoptService(ctx context.Context, in *rpc.AdoptServiceRequest)
 		serviceInstance := newFunc()
 		err := serviceInstance.Start()
 		if err != nil {
-			return &rpc.AdoptServiceResponse{
+			return &aurae.AdoptServiceResponse{
 				Message: fmt.Sprintf("Unable to adopt service: %s: %v", name, err),
 				Code:    common.ResponseCode_ERROR,
 			}, nil
 		}
 		a.ServiceComponents[name] = serviceInstance
 	} else {
-		return &rpc.AdoptServiceResponse{
+		return &aurae.AdoptServiceResponse{
 			Message: fmt.Sprintf("Service not found in registry: %s", name),
 			Code:    common.ResponseCode_ERROR,
 		}, nil
 	}
 
 	logrus.Infof("Success. Registered service: %s", name)
-	return &rpc.AdoptServiceResponse{
+	return &aurae.AdoptServiceResponse{
 		Message: fmt.Sprintf("Success. Registered socket: %s", name),
 		Code:    common.ResponseCode_OKAY,
 	}, nil
 }
 
-func (s *Service) AbandonService(ctx context.Context, in *rpc.AbandonServiceRequest) (*rpc.AbandonServiceResponse, error) {
+func (s *Service) AbandonService(ctx context.Context, in *aurae.AbandonServiceRequest) (*aurae.AbandonServiceResponse, error) {
 	name := in.UniqueComponentName
 
 	a := system.AuraeInstance()
 	if _, ok := a.SocketComponents[name]; ok {
 		delete(a.SocketComponents, name)
 		logrus.Infof("Success. Abandoned service: %s", name)
-		return &rpc.AbandonServiceResponse{
+		return &aurae.AbandonServiceResponse{
 			Message: fmt.Sprintf("Stopped service: %s", name),
 			Code:    common.ResponseCode_OKAY,
 		}, nil
 	}
-	return &rpc.AbandonServiceResponse{
+	return &aurae.AbandonServiceResponse{
 		Message: fmt.Sprintf("Service not found in registry: %s", name),
 		Code:    common.ResponseCode_REJECT,
 	}, nil
 }
 
-func (s *Service) AbandonSocket(ctx context.Context, in *rpc.AbandonSocketRequest) (*rpc.AbandonSocketResponse, error) {
+func (s *Service) AbandonSocket(ctx context.Context, in *aurae.AbandonSocketRequest) (*aurae.AbandonSocketResponse, error) {
 	name := in.UniqueComponentName
 
 	a := system.AuraeInstance()
 	if _, ok := a.SocketComponents[name]; ok {
 		delete(a.SocketComponents, name)
 		logrus.Infof("Success. Abandoned socket: %s", name)
-		return &rpc.AbandonSocketResponse{
+		return &aurae.AbandonSocketResponse{
 			Message: fmt.Sprintf("Closed socket: %s", name),
 			Code:    common.ResponseCode_OKAY,
 		}, nil
 	}
-	return &rpc.AbandonSocketResponse{
+	return &aurae.AbandonSocketResponse{
 		Message: fmt.Sprintf("Socket not found in registry: %s", name),
 		Code:    common.ResponseCode_REJECT,
 	}, nil
 }
 
-func (s *Service) AdoptSocket(ctx context.Context, in *rpc.AdoptSocketRequest) (*rpc.AdoptSocketResponse, error) {
+func (s *Service) AdoptSocket(ctx context.Context, in *aurae.AdoptSocketRequest) (*aurae.AdoptSocketResponse, error) {
 	name := in.UniqueComponentName
 	path := in.Path
 
 	// Check if a valid socket exists at this location
 	stat, err := os.Stat(path)
 	if err != nil {
-		return &rpc.AdoptSocketResponse{
+		return &aurae.AdoptSocketResponse{
 			Message: fmt.Sprintf("Unable to stat file type: %s: %v", path, err),
 			Code:    common.ResponseCode_ERROR,
 		}, nil
@@ -125,7 +125,7 @@ func (s *Service) AdoptSocket(ctx context.Context, in *rpc.AdoptSocketRequest) (
 	// Srwxr-xr-x    Example socket with "S" and other permissions
 	// S---------    Example os.ModeSocket with "S" only
 	if stat.Mode()&os.ModeSocket == 0 {
-		return &rpc.AdoptSocketResponse{
+		return &aurae.AdoptSocketResponse{
 			Message: fmt.Sprintf("File not of type socket: %s: %v", path, err),
 			Code:    common.ResponseCode_ERROR,
 		}, nil
@@ -134,7 +134,7 @@ func (s *Service) AdoptSocket(ctx context.Context, in *rpc.AdoptSocketRequest) (
 	// Check if already loaded
 	a := system.AuraeInstance()
 	if _, ok := a.SocketComponents[name]; ok {
-		return &rpc.AdoptSocketResponse{
+		return &aurae.AdoptSocketResponse{
 			Message: fmt.Sprintf("Already registered: %s", name),
 			Code:    common.ResponseCode_REJECT,
 		}, nil
@@ -145,21 +145,21 @@ func (s *Service) AdoptSocket(ctx context.Context, in *rpc.AdoptSocketRequest) (
 		socketInstance := newFunc()
 		err := socketInstance.Adopt()
 		if err != nil {
-			return &rpc.AdoptSocketResponse{
+			return &aurae.AdoptSocketResponse{
 				Message: fmt.Sprintf("Unable to adopt socket: %s: %v", name, err),
 				Code:    common.ResponseCode_ERROR,
 			}, nil
 		}
 		a.SocketComponents[name] = socketInstance
 	} else {
-		return &rpc.AdoptSocketResponse{
+		return &aurae.AdoptSocketResponse{
 			Message: fmt.Sprintf("Socket not found in registry: %s", name),
 			Code:    common.ResponseCode_ERROR,
 		}, nil
 	}
 
 	logrus.Infof("Success. Registered socket: %s [%s]", name, path)
-	return &rpc.AdoptSocketResponse{
+	return &aurae.AdoptSocketResponse{
 		Message: fmt.Sprintf("Success. Registered socket: %s [%s]", name, path),
 		Code:    common.ResponseCode_OKAY,
 	}, nil

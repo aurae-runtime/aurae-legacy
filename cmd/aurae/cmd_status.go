@@ -20,9 +20,9 @@ import (
 	"context"
 	"fmt"
 	"github.com/kris-nova/aurae/client"
+	"github.com/kris-nova/aurae/gen/aurae"
 	"github.com/kris-nova/aurae/pkg/common"
 	"github.com/kris-nova/aurae/pkg/printer"
-	"github.com/kris-nova/aurae/rpc/rpc"
 	"github.com/kris-nova/aurae/system"
 	"github.com/urfave/cli/v2"
 )
@@ -48,7 +48,7 @@ func Status() *cli.Command {
 			if err != nil {
 				return err
 			}
-			status, err := auraeClient.Status(ctx, &rpc.StatusRequest{})
+			status, err := auraeClient.Status(ctx, &aurae.StatusRequest{})
 			if err != nil {
 				return err
 			}

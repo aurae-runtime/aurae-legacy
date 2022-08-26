@@ -20,8 +20,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/kris-nova/aurae/client"
+	"github.com/kris-nova/aurae/gen/aurae"
 	"github.com/kris-nova/aurae/pkg/daemon"
-	"github.com/kris-nova/aurae/rpc/rpc"
 	"github.com/urfave/cli/v2"
 )
 
@@ -54,7 +54,7 @@ func Set() *cli.Command {
 			if err != nil {
 				return err
 			}
-			_, err = auraeClient.Set(context.Background(), &rpc.SetReq{
+			_, err = auraeClient.Set(context.Background(), &aurae.SetReq{
 				Key: key,
 				Val: val,
 			})

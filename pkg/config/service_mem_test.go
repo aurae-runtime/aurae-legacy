@@ -18,10 +18,10 @@ package config
 
 import (
 	"context"
-	"github.com/kris-nova/aurae/pkg/config/empty"
-	"github.com/kris-nova/aurae/rpc/rpc"
-	"strings"
-	"testing"
+	"github.com/kris-nova/aurae/gen/aurae"
+"github.com/kris-nova/aurae/pkg/config/empty"
+"strings"
+"testing"
 )
 
 func TestBasicIOSad(t *testing.T) {

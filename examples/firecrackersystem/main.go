@@ -20,8 +20,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/kris-nova/aurae/client"
+	"github.com/kris-nova/aurae/gen/aurae"
 	"github.com/kris-nova/aurae/pkg/daemon"
-	"github.com/kris-nova/aurae/rpc/rpc"
 )
 
 func runtime() error {

@@ -20,8 +20,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/kris-nova/aurae/client"
+	"github.com/kris-nova/aurae/gen/aurae"
 	"github.com/kris-nova/aurae/pkg/printer"
-	"github.com/kris-nova/aurae/rpc/rpc"
 	"github.com/urfave/cli/v2"
 )
 
@@ -49,7 +49,7 @@ func Close() *cli.Command {
 					if err != nil {
 						return err
 					}
-					resp, err := auraeClient.AbandonSocket(ctx, &rpc.AbandonSocketRequest{
+					resp, err := auraeClient.AbandonSocket(ctx, &aurae.AbandonSocketRequest{
 						UniqueComponentName: name,
 					})
 					if err != nil {
@@ -76,7 +76,7 @@ func Close() *cli.Command {
 					if err != nil {
 						return err
 					}
-					resp, err := auraeClient.AbandonService(ctx, &rpc.AbandonServiceRequest{
+					resp, err := auraeClient.AbandonService(ctx, &aurae.AbandonServiceRequest{
 						UniqueComponentName: name,
 					})
 					if err != nil {

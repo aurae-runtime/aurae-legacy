@@ -76,13 +76,11 @@ install: ## Install the program to /usr/bin 🎉
 gen: generate ## Alias for generate
 generate: ## Will generate Go code from auraefs .proto files
 	@echo "Generating..."
-	clang-format -i ./rpc/*.proto
+	clang-format -i ./api/*.proto
 	protoc \
-	--go_out=./rpc \
-	--go_opt=paths=source_relative \
-	--go-grpc_out=./rpc \
-	--go-grpc_opt=paths=source_relative \
-	rpc/*.proto
+	--go_out=. \
+	--go-grpc_out=. \
+	api/*.proto
 
 .PHONY: test
 test: compile ## 🤓 Run go tests

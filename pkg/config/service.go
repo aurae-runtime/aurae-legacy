@@ -18,14 +18,14 @@ package config
 
 import (
 	"context"
+	"github.com/kris-nova/aurae/gen/aurae"
 	"github.com/kris-nova/aurae/pkg/common"
 	"github.com/kris-nova/aurae/pkg/config/memfs"
-	"github.com/kris-nova/aurae/rpc/rpc"
 	"github.com/sirupsen/logrus"
 	"sync"
 )
 
-var _ rpc.ConfigServer = &Service{}
+var _ aurae.ConfigServer = &Service{}
 
 const (
 	CoreCode_OKAY   int32 = 0
@@ -41,19 +41,19 @@ var (
 
 type Service struct {
 	mtx sync.Mutex
-	rpc.UnimplementedConfigServer
+	aurae.UnimplementedConfigServer
 
 	store CoreServicer
 }
 
-func (c *Service) List(ctx context.Context, req *rpc.ListReq) (*rpc.ListResp, error) {
+func (c *Service) List(ctx context.Context, req *aurae.ListReq) (*aurae.ListResp, error) {
 	c.mtx.Lock()
 	defer c.mtx.Unlock()
 
 	path := common.Path(req.Key) // Data mutation!
 
 	resp := make(map[string]bool)
-	rpcResp := make(map[string]*rpc.Node)
+	rpcResp := make(map[string]*aurae.Node)
 
 	respMem := memfs.List(path)     // MemFS implementation
 	respState := c.store.List(path) // LocalState implementation
@@ -65,13 +65,13 @@ func (c *Service) List(ctx context.Context, req *rpc.ListReq) (*rpc.ListResp, er
 	}
 
 	for name, isFile := range resp {
-		rpcResp[name] = &rpc.Node{
+		rpcResp[name] = &aurae.Node{
 			Name: name,
 			File: isFile,
 		}
 	}
 
-	response := &rpc.ListResp{
+	response := &aurae.ListResp{
 		Entries: rpcResp,
 		Code:    CoreCode_OKAY,
 	}
@@ -79,7 +79,7 @@ func (c *Service) List(ctx context.Context, req *rpc.ListReq) (*rpc.ListResp, er
 }
 
 // Set is liable to mutate data!
-func (c *Service) Set(ctx context.Context, req *rpc.SetReq) (*rpc.SetResp, error) {
+func (c *Service) Set(ctx context.Context, req *aurae.SetReq) (*aurae.SetResp, error) {
 	c.mtx.Lock()
 	defer c.mtx.Unlock()
 
@@ -87,7 +87,7 @@ func (c *Service) Set(ctx context.Context, req *rpc.SetReq) (*rpc.SetResp, error
 
 	// Ignore empty paths
 	if path == "/" {
-		return &rpc.SetResp{
+		return &aurae.SetResp{
 			Code: CoreCode_EMPTY,
 		}, nil
 	}
@@ -95,7 +95,7 @@ func (c *Service) Set(ctx context.Context, req *rpc.SetReq) (*rpc.SetResp, error
 	memfs.Set(path, req.Val)      // MemFS implementation
 	go c.store.Set(path, req.Val) // LocalState implementation
 
-	response := &rpc.SetResp{
+	response := &aurae.SetResp{
 		Code: CoreCode_OKAY,
 	}
 	return response, nil
@@ -104,7 +104,7 @@ func (c *Service) Set(ctx context.Context, req *rpc.SetReq) (*rpc.SetResp, error
 // Remove is irreversible!
 //
 // To empty the database pass "/"
-func (c *Service) Remove(ctx context.Context, req *rpc.RemoveReq) (*rpc.RemoveResp, error) {
+func (c *Service) Remove(ctx context.Context, req *aurae.RemoveReq) (*aurae.RemoveResp, error) {
 	c.mtx.Lock()
 	defer c.mtx.Unlock()
 
@@ -112,13 +112,13 @@ func (c *Service) Remove(ctx context.Context, req *rpc.RemoveReq) (*rpc.RemoveRe
 	memfs.Remove(path)           // MemFS implementation
 	go c.store.Remove(path)      // LocalState implementation
 
-	response := &rpc.RemoveResp{
+	response := &aurae.RemoveResp{
 		Code: CoreCode_OKAY,
 	}
 	return response, nil
 }
 
-func (c *Service) Get(ctx context.Context, req *rpc.GetReq) (*rpc.GetResp, error) {
+func (c *Service) Get(ctx context.Context, req *aurae.GetReq) (*aurae.GetResp, error) {
 	c.mtx.Lock()
 	defer c.mtx.Unlock()
 
@@ -140,7 +140,7 @@ func (c *Service) Get(ctx context.Context, req *rpc.GetReq) (*rpc.GetResp, error
 		// logrus.Warnf("State corruption detected. Local != Memory.")
 	}
 
-	response := &rpc.GetResp{
+	response := &aurae.GetResp{
 		Val:  resp,
 		Code: CoreCode_OKAY,
 	}

@@ -20,9 +20,9 @@ import (
 	"context"
 	"fmt"
 	"github.com/kris-nova/aurae/client"
+	"github.com/kris-nova/aurae/gen/aurae"
 	"github.com/kris-nova/aurae/pkg/config"
 	"github.com/kris-nova/aurae/pkg/daemon"
-	"github.com/kris-nova/aurae/rpc/rpc"
 	"github.com/urfave/cli/v2"
 )
 
@@ -51,7 +51,7 @@ func Remove() *cli.Command {
 			if err != nil {
 				return err
 			}
-			removeResp, err := auraeClient.Remove(context.Background(), &rpc.RemoveReq{
+			removeResp, err := auraeClient.Remove(context.Background(), &aurae.RemoveReq{
 				Key: key,
 			})
 			if err != nil {

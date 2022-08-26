@@ -20,8 +20,8 @@ import (
 	"context"
 	"github.com/hanwen/go-fuse/v2/fs"
 	"github.com/hanwen/go-fuse/v2/fuse"
+	"github.com/kris-nova/aurae/gen/aurae"
 	"github.com/kris-nova/aurae/pkg/config"
-	"github.com/kris-nova/aurae/rpc/rpc"
 	"github.com/sirupsen/logrus"
 	"syscall"
 )
@@ -35,7 +35,7 @@ func (f *File) Read(ctx context.Context, fh fs.FileHandle, dest []byte, off int6
 	if c == nil {
 		return fuse.ReadResultData(f.Data), 0
 	}
-	getResp, err := c.Get(ctx, &rpc.GetReq{
+	getResp, err := c.Get(ctx, &aurae.GetReq{
 		Key: f.path,
 	})
 	if err != nil {

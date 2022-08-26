@@ -19,9 +19,9 @@ package client
 import (
 	"context"
 	"fmt"
+	"github.com/kris-nova/aurae/gen/aurae"
 	"github.com/kris-nova/aurae/pkg/peer"
 	p2pgrpc "github.com/kris-nova/aurae/pkg/peer-grpc"
-	"github.com/kris-nova/aurae/rpc/rpc"
 	peer2peer "github.com/libp2p/go-libp2p-core/peer"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
@@ -29,10 +29,10 @@ import (
 )
 
 type Client struct {
-	rpc.ConfigClient
-	rpc.RuntimeClient
-	rpc.RegisterClient
-	rpc.SystemClient
+	aurae.ConfigClient
+	aurae.RuntimeClient
+	aurae.RegisterClient
+	aurae.SystemClient
 	socket    string
 	connected bool
 	peer      *peer.Peer
@@ -101,13 +101,13 @@ func (c *Client) ConnectSocket(sock string) error {
 
 func (c *Client) establish(conn grpc.ClientConnInterface) error {
 	// Establish the connection from the conn
-	cfg := rpc.NewConfigClient(conn)
+	cfg := aurae.NewConfigClient(conn)
 	c.ConfigClient = cfg
-	runtime := rpc.NewRuntimeClient(conn)
+	runtime := aurae.NewRuntimeClient(conn)
 	c.RuntimeClient = runtime
-	register := rpc.NewRegisterClient(conn)
+	register := aurae.NewRegisterClient(conn)
 	c.RegisterClient = register
-	system := rpc.NewSystemClient(conn)
+	system := aurae.NewSystemClient(conn)
 	c.SystemClient = system
 	c.connected = true
 	return nil

@@ -16,19 +16,44 @@
 
 syntax = "proto3";
 
-option go_package = "github.com/kris-nova/aurae/rpc/rpc";
+option go_package = "gen/aurae";
 
 package aurae;
 
-service System {
-  rpc Status(StatusRequest) returns (StatusResponse) {}
+// Config is a key/value store that resembles a Linux filesystem
+service Config {
+  rpc Set(SetReq) returns (SetResp) {}
+  rpc Get(GetReq) returns (GetResp) {}
+  rpc List(ListReq) returns (ListResp) {}
+  rpc Remove(RemoveReq) returns (RemoveResp) {}
 }
 
-message StatusRequest {}
+message SetReq {
+  string key = 1;
+  string val = 2;
+}
 
-message StatusResponse {
-  string AuraeInstanceEncapsulated = 1;
-  string Version = 2;
-  int32 Code = 10;
-  string Message = 12;
+message SetResp { int32 code = 1; }
+
+message GetReq { string key = 1; }
+
+message GetResp {
+  string val = 1;
+  int32 code = 2;
+}
+
+message RemoveReq { string key = 1; }
+
+message RemoveResp { int32 code = 1; }
+
+message ListReq { string key = 1; }
+
+message Node {
+  string name = 1;
+  bool file = 2;
+}
+
+message ListResp {
+  map<string, Node> entries = 1;
+  int32 code = 2;
 }

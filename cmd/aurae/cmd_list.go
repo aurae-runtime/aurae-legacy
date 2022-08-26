@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"github.com/fatih/color"
 	"github.com/kris-nova/aurae/client"
-	"github.com/kris-nova/aurae/rpc/rpc"
+	"github.com/kris-nova/aurae/gen/aurae"
 	"github.com/urfave/cli/v2"
 )
 
@@ -43,7 +43,7 @@ func List() *cli.Command {
 			if err != nil {
 				return err
 			}
-			listResp, err := auraeClient.List(context.Background(), &rpc.ListReq{
+			listResp, err := auraeClient.List(context.Background(), &aurae.ListReq{
 				Key: key,
 			})
 			if err != nil {
