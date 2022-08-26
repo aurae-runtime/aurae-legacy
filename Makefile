@@ -31,7 +31,7 @@ copyright     ?=  Copyright (c) $(year)
 firecrackerversion  =  1.1.1
 firecrackertarball  =  firecracker-v$(firecrackerversion)-x86_64.tgz
 
-compile: gen aurae auraed auraefs ## Compile for the local architecture ⚙
+compile: gen aurae auraed ## Compile for the local architecture ⚙
 
 .PHONY: aurae
 aurae: ## Compile aurae (local arch)
@@ -95,8 +95,7 @@ test-auraefs:
 clean: ## Clean your artifacts 🧼
 	@echo "Cleaning..."
 	rm -rvf release/*
-	rm -rvf rpc/rpc/*
-	rm -rvf rpc/*.pb.*
+	rm -rvf /gen/*
 	rm -rvf bin/*
 
 # auare-firecracker
