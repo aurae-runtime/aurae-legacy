@@ -95,7 +95,7 @@ test-auraefs:
 clean: ## Clean your artifacts 🧼
 	@echo "Cleaning..."
 	rm -rvf release/*
-	rm -rvf /gen/*
+	rm -rvf gen/*
 	rm -rvf bin/*
 
 # auare-firecracker
