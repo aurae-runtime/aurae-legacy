@@ -20,13 +20,25 @@ option go_package = "gen/aurae";
 
 package aurae;
 
-// TODO what about "app" instead of "container"? Where is the abstraction layer?
+// Runtime is the main service for running pods, processes, and VMs
+// with Aurae.
+//
+// There is a simple convention that says that the daemon will manage
+// all child processes similar to a POSIX signal handler.
+//
+// Therefore all calling code above the socket, will detach by default.
 service Runtime {
 
   // RunProcess
+  //
+  // RunProcess is modelled off systemd "ExecStart" which calls fork(2)
   rpc RunProcess(RunProcessRequest) returns (RunProcessResponse) {}
+  // TODO We need a way to get process metadata EG: stdout, logs, attach, etc
 
   // RunContainer
+  //
+  // RunContainer is modelled after container runtimes leveraging
+  // cgroup namespaces which calls clone(2)
   rpc RunContainer(RunContainerRequest) returns (RunContainerResponse) {}
 
   // RunVirtualMachine
@@ -42,12 +54,36 @@ message RunVirtualMachineResponse {
 }
 
 message RunProcessRequest {
-  string Name = 1;
-  string ExecutablePath = 2;
-  string ExecutableArgs = 3;
+
+  // ExecutableCommand is a carry-over of systemd's "ExecStart"
+  // field.
+  //
+  // This is a verbatim translation of a shell command which can
+  // be executed by execve(2) and clone(2)/fork(2).
+  //
+  // Examples:
+  //    "bash -c ./mycommand --boops=beeps"
+  //    "cat /etc/shadow"
+  //    "ENVAR=false ls -lat /etc"
+  //
+  string ExecutableCommand = 1;
+
+  // User is the string version of the associated OS user.
+  // Note: This is NOT the UID/GUID of the user.
+  //
+  // Examples:
+  //    "nova"
+  //    "wheel"
+  //    "root"
+  string User = 2;
+
+  // Description is an arbitrary description of the process.
+  // This is modelled after systemd Description.
+  string Description = 3;
 }
 
 message RunProcessResponse {
+  int32 PID = 1; // PID is the ppid() of the process.
   int32 Code = 10;
   string Message = 12;
 }

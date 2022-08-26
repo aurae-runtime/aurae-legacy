@@ -23,7 +23,6 @@ import (
 	"github.com/kris-nova/aurae/gen/aurae"
 	"github.com/kris-nova/aurae/pkg/printer"
 	"github.com/urfave/cli/v2"
-	"strings"
 )
 
 var runRun = &RuntimeRunOptions{}
@@ -58,11 +57,11 @@ func Run() *cli.Command {
 						return fmt.Errorf("usage: aurae run process -c 'command' <arguments>")
 					}
 
-					spl := strings.Split(cmd, " ")
-					if len(spl) < 1 {
-						return fmt.Errorf("usage: aurae run process -c 'command' <arguments>")
-					}
-					first, args := spl[0], spl[1:]
+					//spl := strings.Split(cmd, " ")
+					//if len(spl) < 1 {
+					//	return fmt.Errorf("usage: aurae run process -c 'command' <arguments>")
+					//}
+					//first, args := spl[0], spl[1:]
 
 					ctx := context.Background()
 					auraeClient := client.NewClient()
@@ -71,9 +70,9 @@ func Run() *cli.Command {
 						return err
 					}
 					resp, err := auraeClient.RunProcess(ctx, &aurae.RunProcessRequest{
-						Name:           first,
-						ExecutablePath: first,
-						ExecutableArgs: strings.Join(args, " "),
+						ExecutableCommand: cmd,
+						Description:       "", //TODO Plumb description flag
+						User:              "", //TODO Lookup user/plumb user string
 					})
 					if err != nil {
 						return err
