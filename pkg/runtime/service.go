@@ -25,17 +25,17 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var _ aurae.RuntimeServer = &Service{}
+var _ aurae.LocalRuntimeServer = &Service{}
 
 type Service struct {
-	aurae.UnimplementedRuntimeServer
+	aurae.LocalRuntimeServer
 }
 
 // TODO This can (and should) be simpler.
 
-type RunProcessCapability interface {
-	RunProcess(ctx context.Context, in *aurae.RunProcessRequest) (*aurae.RunProcessResponse, error)
-}
+//type RunProcessCapability interface {
+//	RunProcess(ctx context.Context, in *aurae.RunProcessRequest) (*aurae.RunProcessResponse, error)
+//}
 
 func (s *Service) RunProcess(ctx context.Context, in *aurae.RunProcessRequest) (*aurae.RunProcessResponse, error) {
 
@@ -51,12 +51,12 @@ func (s *Service) RunProcess(ctx context.Context, in *aurae.RunProcessRequest) (
 	logrus.Infof("Description      : %s", in.Description)
 
 	// Polymorphism here
-	if runtimeExecutor, ok := executor.(RunProcessCapability); ok {
+	if runtimeExecutor, ok := executor.(aurae.LocalRuntimeServer); ok {
 		return runtimeExecutor.RunProcess(ctx, in) // Run the implementation
 	}
 
 	return &aurae.RunProcessResponse{
-		Message: fmt.Sprintf("Unable to cast exector to RuntimeServer"),
+		Message: fmt.Sprintf("Unable to cast exector to RunProcessCapability"),
 		Code:    common.ResponseCode_ERROR,
 	}, nil
 
