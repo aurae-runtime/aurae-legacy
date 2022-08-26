@@ -18,6 +18,7 @@ package runtime
 
 import (
 	"context"
+	"fmt"
 	"github.com/kris-nova/aurae/gen/aurae"
 	"github.com/kris-nova/aurae/pkg/common"
 	"github.com/kris-nova/aurae/system"
@@ -30,6 +31,12 @@ type Service struct {
 	aurae.UnimplementedRuntimeServer
 }
 
+// TODO This can (and should) be simpler.
+
+type RunProcessCapability interface {
+	RunProcess(ctx context.Context, in *aurae.RunProcessRequest) (*aurae.RunProcessResponse, error)
+}
+
 func (s *Service) RunProcess(ctx context.Context, in *aurae.RunProcessRequest) (*aurae.RunProcessResponse, error) {
 
 	executor := system.AuraeInstance().CapRunProcess
@@ -40,16 +47,19 @@ func (s *Service) RunProcess(ctx context.Context, in *aurae.RunProcessRequest) (
 		}, nil
 	}
 
-	logrus.Infof("Command:   %s", in.ExecutablePath)
-	logrus.Infof("Arguments: %s", in.ExecutableArgs)
+	logrus.Infof("ExecutableCommand: %s", in.ExecutableCommand)
+	logrus.Infof("Description      : %s", in.Description)
 
-	// TODO Left off here
-	// TODO We now need to be able to build polymorphic capabilities
-	// TODO If exec provides CapRunProcess we should be able to cast it to a new type
+	// Polymorphism here
+	if runtimeExecutor, ok := executor.(RunProcessCapability); ok {
+		return runtimeExecutor.RunProcess(ctx, in) // Run the implementation
+	}
 
 	return &aurae.RunProcessResponse{
-		Code: common.ResponseCode_ERROR,
+		Message: fmt.Sprintf("Unable to cast exector to RuntimeServer"),
+		Code:    common.ResponseCode_ERROR,
 	}, nil
+
 }
 
 func (s *Service) RunContainer(ctx context.Context, in *aurae.RunContainerRequest) (*aurae.RunContainerResponse, error) {
