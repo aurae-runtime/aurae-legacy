@@ -25,6 +25,7 @@ import (
 	peer2peer "github.com/libp2p/go-libp2p-core/peer"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
+	"os"
 	"time"
 )
 
@@ -91,11 +92,22 @@ func (c *Client) ConnectSocket(sock string) error {
 	// Cache the socket
 	c.socket = sock
 
+	stat, err := os.Stat(c.socket)
+	if err != nil {
+		return fmt.Errorf("unable to stat socket: %v", err)
+	}
+	if stat.Mode()&os.ModeSocket == 0 {
+		return fmt.Errorf("file is not of type unix socket")
+	}
+
 	logrus.Warnf("mTLS disabled. running insecure.")
 	conn, err := grpc.Dial(fmt.Sprintf("passthrough:///unix://%s", c.socket),
 		grpc.WithInsecure(), grpc.WithTimeout(time.Second*3))
 	if err != nil {
 		return err
+	}
+	if conn == nil {
+		return fmt.Errorf("unable to establish connection")
 	}
 	return c.establish(conn)
 }
