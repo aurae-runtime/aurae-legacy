@@ -22,7 +22,6 @@ import (
 	"github.com/kris-nova/aurae/gen/aurae"
 	"github.com/kris-nova/aurae/pkg/common"
 	"github.com/kris-nova/aurae/system"
-	"github.com/sirupsen/logrus"
 	"io"
 	"os/exec"
 	"strings"
@@ -85,6 +84,7 @@ func (e *Exec) ReadStdout(ctx context.Context, in *aurae.ReadStdoutRequest) (*au
 	length := in.Length
 	pid := in.PID
 	e.Lock()
+	defer e.Unlock()
 	if procMeta, ok := e.cache[pid]; !ok {
 		return &aurae.ReadStdoutResponse{
 			Code:    common.ResponseCode_REJECT,
@@ -109,12 +109,39 @@ func (e *Exec) ReadStdout(ctx context.Context, in *aurae.ReadStdoutRequest) (*au
 			Message: common.ResponseMsg_Success,
 		}, nil
 	}
-	e.Unlock()
 	return nil, nil
 }
 
 func (e *Exec) ReadStderr(ctx context.Context, in *aurae.ReadStderrRequest) (*aurae.ReadStderrResponse, error) {
-	return &aurae.ReadStderrResponse{}, nil
+	length := in.Length
+	pid := in.PID
+	e.Lock()
+	defer e.Unlock()
+	if procMeta, ok := e.cache[pid]; !ok {
+		return &aurae.ReadStderrResponse{
+			Code:    common.ResponseCode_REJECT,
+			Message: fmt.Sprintf("Pid %d not found in table.", pid),
+		}, nil
+	} else {
+		pipe := procMeta.stderrPipe
+		buf := make([]byte, length)
+		n, err := pipe.Read(buf)
+		if err != nil {
+			return &aurae.ReadStderrResponse{
+				Code:    common.ResponseCode_ERROR,
+				Message: fmt.Sprintf("Unable to read bytes from pipe: %v", err),
+			}, nil
+		}
+		// Success
+		return &aurae.ReadStderrResponse{
+			PID:     pid,
+			Size:    int32(n),
+			Data:    string(buf),
+			Code:    common.ResponseCode_OKAY,
+			Message: common.ResponseMsg_Success,
+		}, nil
+	}
+	return nil, nil
 }
 
 func (e *Exec) RunProcess(ctx context.Context, in *aurae.RunProcessRequest) (*aurae.RunProcessResponse, error) {
@@ -179,11 +206,9 @@ func (e *Exec) pidCache(x *exec.Cmd, stdoutPipe, stderrPipe io.ReadCloser) {
 	e.Unlock()
 
 	go func() {
-		err := x.Wait()
-		if err != nil {
-			logrus.Warnf("error waiting for process in table: %v", err)
-		}
 		time.Sleep(time.Duration(CacheLengthSeconds) * time.Second)
+		x.Wait() // Wait will close the FDs "for our convenience", so wait and then call this!
 		delete(e.cache, int32(pid))
+
 	}()
 }

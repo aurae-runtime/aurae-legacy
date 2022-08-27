@@ -30,7 +30,8 @@ import (
 
 type Client struct {
 	aurae.ConfigClient
-	aurae.RuntimeClient
+	aurae.LocalRuntimeClient
+	aurae.SandboxRuntimeClient
 	aurae.RegisterClient
 	aurae.SystemClient
 	socket    string
@@ -103,8 +104,10 @@ func (c *Client) establish(conn grpc.ClientConnInterface) error {
 	// Establish the connection from the conn
 	cfg := aurae.NewConfigClient(conn)
 	c.ConfigClient = cfg
-	runtime := aurae.NewRuntimeClient(conn)
-	c.RuntimeClient = runtime
+	local := aurae.NewLocalRuntimeClient(conn)
+	c.LocalRuntimeClient = local
+	sandbox := aurae.NewSandboxRuntimeClient(conn)
+	c.SandboxRuntimeClient = sandbox
 	register := aurae.NewRegisterClient(conn)
 	c.RegisterClient = register
 	system := aurae.NewSystemClient(conn)

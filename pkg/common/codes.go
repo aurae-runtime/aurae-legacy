@@ -17,8 +17,9 @@
 package common
 
 const (
-	ResponseCode_OKAY   int32 = 0
-	ResponseCode_ERROR  int32 = 1
-	ResponseCode_EMPTY  int32 = 2
-	ResponseCode_REJECT int32 = 3
+	ResponseCode_OKAY   int32  = 0
+	ResponseCode_ERROR  int32  = 1
+	ResponseCode_EMPTY  int32  = 2
+	ResponseCode_REJECT int32  = 3
+	ResponseMsg_Success string = "Success."
 )

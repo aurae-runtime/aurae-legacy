@@ -25,9 +25,8 @@ service LocalRuntime {
   // RunProcess is modelled off systemd "ExecStart" which calls fork(2)
   rpc RunProcess(RunProcessRequest) returns (RunProcessResponse) {}
 
-  // GetProcessMeta is used to get the process metadata at or shortly after
-  // runtime
-  rpc GetProcessMeta(GetProcessMetaRequest) returns (GetProcessMetaResponse) {}
+  rpc ReadStdout(ReadStdoutRequest) returns (ReadStdoutResponse) {}
+  rpc ReadStderr(ReadStderrRequest) returns (ReadStderrResponse) {}
 }
 
 service SandboxRuntime {
@@ -43,13 +42,30 @@ service SandboxRuntime {
       returns (RunVirtualMachineResponse) {}
 }
 
-message GetProcessMetaRequest { int32 PID = 1; }
-
-message GetProcessMetaResponse {
+message ReadStdoutRequest {
   int32 PID = 1;
-  string Stdout = 8;
-  string Stderr = 9;
+  int32 Length = 2;
+}
+
+message ReadStderrRequest {
+  int32 PID = 1;
+  int32 Length = 2;
+}
+
+message ReadStdoutResponse {
+  int32 PID = 1;
+  string Data = 2;
+  int32 Size = 3;
   int32 Code = 10;
+  string Message = 12;
+}
+
+message ReadStderrResponse {
+  int32 PID = 1;
+  string Data = 2;
+  int32 Size = 3;
+  int32 Code = 10;
+  string Message = 12;
 }
 
 message RunProcessRequest {
