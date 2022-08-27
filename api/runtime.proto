@@ -98,7 +98,7 @@ message RunProcessRequest {
 }
 
 message RunProcessResponse {
-  int32 PID = 1; // PID is the ppid() of the process.
+  int32 PID = 1;
   int32 Code = 10;
   string Message = 12;
 }

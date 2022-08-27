@@ -58,7 +58,6 @@ func Status() *cli.Command {
 					printer.PrintStdout("status", status)
 					return fmt.Errorf("unable to marshal aurae status from remote: %v", err)
 				}
-				fmt.Printf("%+v\n", auraeInstance)
 				printer.PrintStdout("status", auraeInstance)
 				return nil
 			}

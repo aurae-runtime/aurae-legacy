@@ -56,12 +56,19 @@ type AuraeSafe struct {
 // Here we manually map the state of the system to the output we wish to expose to users.
 func AuraeToSafe(a *Aurae) *AuraeSafe {
 	safe := &AuraeSafe{
-		SocketComponents: make(map[string]string),
+		SocketComponents:  make(map[string]string),
+		ServiceComponents: make(map[string]string),
 	}
 	for _, c := range a.SocketComponents {
+		if c == nil {
+			continue
+		}
 		safe.SocketComponents[c.Name()] = c.Path()
 	}
 	for _, p := range a.ServiceComponents {
+		if p == nil {
+			continue
+		}
 		safe.ServiceComponents[p.Name()] = p.Name()
 	}
 	if a.CapRunVirtualMachine != nil {

@@ -68,10 +68,7 @@ auraefs: ## Compile auraefs (local arch)
 
 install: ## Install the program to /usr/bin 🎉
 	@echo "Installing..."
-	sudo cp -v bin/$(auraetarget) /usr/bin/$(auraetarget)
-	sudo cp -v bin/$(auraefstarget) /usr/bin/$(auraefstarget)
-	sudo cp -v bin/$(auraedtarget) /usr/bin/$(auraedtarget)
-
+	sudo cp -v bin/* /usr/bin
 
 gen: generate ## Alias for generate
 generate: ## Will generate Go code from auraefs .proto files

@@ -77,7 +77,33 @@ func Run() *cli.Command {
 					if err != nil {
 						return err
 					}
+					pid := resp.PID
 					printer.PrintStdout("Run Process", resp)
+					stdoutResp, err := auraeClient.ReadStdout(ctx, &aurae.ReadStdoutRequest{
+						PID:    pid,
+						Length: 1024 * 1024,
+					})
+					if err != nil {
+						return err
+					}
+					if stdoutResp.Size != 0 {
+						fmt.Println(stdoutResp.Data)
+						stdoutResp.Data = "" // Unset the data
+					}
+					printer.PrintStdout("Stdout", stdoutResp)
+
+					stderrResp, err := auraeClient.ReadStderr(ctx, &aurae.ReadStderrRequest{
+						PID:    pid,
+						Length: 1024 * 1024,
+					})
+					if err != nil {
+						return err
+					}
+					if stderrResp.Size != 0 {
+						fmt.Println(stderrResp.Data)
+						stderrResp.Data = "" // Unset the data
+					}
+					printer.PrintStdout("Stderr", stderrResp)
 					return nil
 				},
 			},
