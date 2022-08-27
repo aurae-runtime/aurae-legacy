@@ -26,7 +26,7 @@ func TestExec_RunProcess_ls_stdout(t *testing.T) {
 
 	// Run
 	r := &aurae.RunProcessRequest{
-		ExecutableCommand: "ls",
+		ExecutableCommand: "ls -la /tmp",
 	}
 
 	var pid int32
@@ -34,6 +34,7 @@ func TestExec_RunProcess_ls_stdout(t *testing.T) {
 	e := NewExec()
 	if l, ok := e.(aurae.LocalRuntimeServer); !ok {
 		t.Errorf("exec does not implement LocalRuntimeServer")
+		t.FailNow()
 	} else {
 		resp, err := l.RunProcess(nil, r)
 		if err != nil {
@@ -47,25 +48,25 @@ func TestExec_RunProcess_ls_stdout(t *testing.T) {
 			t.Errorf("unable to find PID from process")
 			t.FailNow()
 		}
-		procResp, err := l.GetProcessMeta(nil, &aurae.GetProcessMetaRequest{
-			PID: pid,
-		})
-		if err != nil {
-			t.Errorf("unable to get process meta: %v", err)
-			t.FailNow()
-		}
-		if procResp.Code == common.ResponseCode_ERROR {
-			t.Errorf("unable to get process meta, error code")
-			t.FailNow()
-		}
-		if procResp.Stdout != "" {
-			t.Logf("stdout: \n")
-			t.Logf("%v", procResp.Stdout)
-		}
-		if procResp.Stdout != "" {
-			t.Logf("stderr: \n")
-			t.Logf("%v", procResp.Stderr)
-		}
+		//procResp, err := l.GetProcessMeta(nil, &aurae.GetProcessMetaRequest{
+		//	PID: pid,
+		//})
+		//if err != nil {
+		//	t.Errorf("unable to get process meta: %v", err)
+		//	t.FailNow()
+		//}
+		//if procResp.Code == common.ResponseCode_ERROR {
+		//	t.Errorf("unable to get process meta, error code")
+		//	t.FailNow()
+		//}
+		//if procResp.Stdout != "" {
+		//	t.Logf("stdout: \n")
+		//	t.Logf("%v", procResp.Stdout)
+		//}
+		//if procResp.Stdout != "" {
+		//	t.Logf("stderr: \n")
+		//	t.Logf("%v", procResp.Stderr)
+		//}
 
 	}
 

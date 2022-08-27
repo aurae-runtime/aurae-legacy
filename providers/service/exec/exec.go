@@ -17,12 +17,12 @@
 package exec
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"github.com/kris-nova/aurae/gen/aurae"
 	"github.com/kris-nova/aurae/pkg/common"
 	"github.com/kris-nova/aurae/system"
+	"github.com/sirupsen/logrus"
 	"io"
 	"os/exec"
 	"strings"
@@ -42,13 +42,14 @@ type Exec struct {
 	aurae.LocalRuntimeServer
 	sync.Mutex
 	name  string
-	cache map[int32]*LocalMeta
+	cache map[int32]*ProcessMeta
 }
 
-type LocalMeta struct {
-	x      *exec.Cmd
-	stdout *bytes.Buffer
-	stderr *bytes.Buffer
+type ProcessMeta struct {
+	pid        int32
+	x          *exec.Cmd
+	stdoutPipe io.ReadCloser
+	stderrPipe io.ReadCloser
 }
 
 func (e *Exec) Name() string {
@@ -74,51 +75,40 @@ func (e *Exec) Stop() error {
 
 func NewExec() system.Service {
 	return &Exec{
-		cache: make(map[int32]*LocalMeta),
+		cache: make(map[int32]*ProcessMeta),
 		name:  Name,
 		Mutex: sync.Mutex{},
 	}
 }
 
-func (e *Exec) GetProcessMeta(ctx context.Context, in *aurae.GetProcessMetaRequest) (*aurae.GetProcessMetaResponse, error) {
-
-	pid := in.PID
-	e.Lock()
-	if x, ok := e.cache[pid]; !ok {
-		return &aurae.GetProcessMetaResponse{
-			Code: common.ResponseCode_ERROR,
-		}, nil
-	} else {
-		var stdoutBytes, stderrBytes []byte
-		if x.stderr != nil {
-			var err error
-			stderrBytes, err = io.ReadAll(x.stderr)
-			if err != nil {
-				return &aurae.GetProcessMetaResponse{
-					Code: common.ResponseCode_ERROR,
-				}, nil
-			}
-		}
-		if x.stdout != nil {
-			var err error
-			stdoutBytes, err = io.ReadAll(x.stdout)
-			if err != nil {
-				return &aurae.GetProcessMetaResponse{
-					Code: common.ResponseCode_ERROR,
-				}, nil
-			}
-		}
-
-		return &aurae.GetProcessMetaResponse{
-			Stderr: string(stderrBytes),
-			Stdout: string(stdoutBytes),
-			Code:   common.ResponseCode_OKAY,
-		}, nil
-	}
-
-	e.Unlock()
-	return &aurae.GetProcessMetaResponse{}, nil
-}
+//func (e *Exec) GetProcessMeta(ctx context.Context, in *aurae.GetProcessMetaRequest) (*aurae.GetProcessMetaResponse, error) {
+//
+//	pid := in.PID
+//	e.Lock()
+//	if x, ok := e.cache[pid]; !ok {
+//		return &aurae.GetProcessMetaResponse{
+//			Code: common.ResponseCode_ERROR,
+//		}, nil
+//	} else {
+//
+//		var stdoutStr, stderrStr string
+//		if x.stderr != nil {
+//			stderrStr = x.stderr.String()
+//		}
+//		if x.stdout != nil {
+//			stdoutStr = x.stdout.String()
+//		}
+//
+//		return &aurae.GetProcessMetaResponse{
+//			Stderr: stderrStr,
+//			Stdout: stdoutStr,
+//			Code:   common.ResponseCode_OKAY,
+//		}, nil
+//	}
+//
+//	e.Unlock()
+//	return &aurae.GetProcessMetaResponse{}, nil
+//}
 
 func (e *Exec) RunProcess(ctx context.Context, in *aurae.RunProcessRequest) (*aurae.RunProcessResponse, error) {
 
@@ -139,11 +129,21 @@ func (e *Exec) RunProcess(ctx context.Context, in *aurae.RunProcessRequest) (*au
 	// TODO We need to spend a lot of time evaluating execve() and various arch/os types
 	eCmd := exec.Command(first, args...)
 
-	stderr := &bytes.Buffer{}
-	stdout := &bytes.Buffer{}
-	eCmd.Stdout = stdout
-	eCmd.Stderr = stderr
-	err := eCmd.Start()
+	// Pipes
+	stdoutPipe, err := eCmd.StdoutPipe()
+	if err != nil {
+		return &aurae.RunProcessResponse{
+			Code: common.ResponseCode_ERROR,
+		}, fmt.Errorf("unable to stdoutPipe: %v", err)
+	}
+	stderrPipe, err := eCmd.StderrPipe()
+	if err != nil {
+		return &aurae.RunProcessResponse{
+			Code: common.ResponseCode_ERROR,
+		}, fmt.Errorf("unable to stderrPipe: %v", err)
+	}
+
+	err = eCmd.Start()
 	if err != nil {
 		return &aurae.RunProcessResponse{
 			Code:    common.ResponseCode_ERROR,
@@ -151,7 +151,8 @@ func (e *Exec) RunProcess(ctx context.Context, in *aurae.RunProcessRequest) (*au
 		}, fmt.Errorf("unable to start process: %v", err)
 	}
 
-	e.pidCache(eCmd, stdout, stderr)
+	// Cache our process in the "process table"
+	e.pidCache(eCmd, stdoutPipe, stderrPipe)
 
 	return &aurae.RunProcessResponse{
 		Code:    common.ResponseCode_OKAY,
@@ -161,23 +162,21 @@ func (e *Exec) RunProcess(ctx context.Context, in *aurae.RunProcessRequest) (*au
 
 }
 
-func (e *Exec) pidCache(x *exec.Cmd, stdout, stderr *bytes.Buffer) {
-	if stderr == nil {
-		panic("nil stderr")
-	}
-	if stdout == nil {
-		panic("nil stdout")
-	}
+func (e *Exec) pidCache(x *exec.Cmd, stdoutPipe, stderrPipe io.ReadCloser) {
 	pid := x.Process.Pid
 	e.Lock()
-	e.cache[int32(pid)] = &LocalMeta{
-		x:      x,
-		stderr: stderr,
-		stdout: stdout,
+	e.cache[int32(pid)] = &ProcessMeta{
+		x:          x,
+		stdoutPipe: stdoutPipe,
+		stderrPipe: stderrPipe,
 	}
 	e.Unlock()
 
 	go func() {
+		err := x.Wait()
+		if err != nil {
+			logrus.Warnf("error waiting for process in table: %v", err)
+		}
 		time.Sleep(time.Duration(CacheLengthSeconds) * time.Second)
 		delete(e.cache, int32(pid))
 	}()

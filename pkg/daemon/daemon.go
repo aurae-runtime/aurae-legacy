@@ -118,8 +118,11 @@ func (d *Daemon) Run(ctx context.Context) error {
 	aurae.RegisterRegisterServer(server, register.NewService())
 	logrus.Infof("Register: RegisterServer")
 
-	aurae.RegisterRuntimeServer(server, runtime.NewService())
-	logrus.Infof("Register: RuntimeServer")
+	aurae.RegisterLocalRuntimeServer(server, runtime.NewService())
+	logrus.Infof("Register: LocalRuntimeServer")
+
+	//aurae.RegisterSandboxRuntimeServer(server, r()) // TODO Sandbox implementation
+	logrus.Infof("Register: SandboxRuntimeServer")
 
 	aurae.RegisterSystemServer(server, system2.NewService()) // TODO package name collision
 	logrus.Infof("Register: SystemServer")
