@@ -81,37 +81,42 @@ func NewExec() system.Service {
 	}
 }
 
-//func (e *Exec) GetProcessMeta(ctx context.Context, in *aurae.GetProcessMetaRequest) (*aurae.GetProcessMetaResponse, error) {
-//
-//	pid := in.PID
-//	e.Lock()
-//	if x, ok := e.cache[pid]; !ok {
-//		return &aurae.GetProcessMetaResponse{
-//			Code: common.ResponseCode_ERROR,
-//		}, nil
-//	} else {
-//
-//		var stdoutStr, stderrStr string
-//		if x.stderr != nil {
-//			stderrStr = x.stderr.String()
-//		}
-//		if x.stdout != nil {
-//			stdoutStr = x.stdout.String()
-//		}
-//
-//		return &aurae.GetProcessMetaResponse{
-//			Stderr: stderrStr,
-//			Stdout: stdoutStr,
-//			Code:   common.ResponseCode_OKAY,
-//		}, nil
-//	}
-//
-//	e.Unlock()
-//	return &aurae.GetProcessMetaResponse{}, nil
-//}
+func (e *Exec) ReadStdout(ctx context.Context, in *aurae.ReadStdoutRequest) (*aurae.ReadStdoutResponse, error) {
+	length := in.Length
+	pid := in.PID
+	e.Lock()
+	if procMeta, ok := e.cache[pid]; !ok {
+		return &aurae.ReadStdoutResponse{
+			Code:    common.ResponseCode_REJECT,
+			Message: fmt.Sprintf("Pid %d not found in table.", pid),
+		}, nil
+	} else {
+		pipe := procMeta.stdoutPipe
+		buf := make([]byte, length)
+		_, err := pipe.Read(buf)
+		if err != nil {
+			return &aurae.ReadStdoutResponse{
+				Code:    common.ResponseCode_ERROR,
+				Message: fmt.Sprintf("Unable to read bytes from pipe: %v", err),
+			}, nil
+		}
+		// Success
+		return &aurae.ReadStdoutResponse{
+			PID:     pid,
+			Data:    string(buf),
+			Code:    common.ResponseCode_OKAY,
+			Message: common.ResponseMsg_Success,
+		}, nil
+	}
+	e.Unlock()
+	return nil, nil
+}
+
+func (e *Exec) ReadStderr(ctx context.Context, in *aurae.ReadStderrRequest) (*aurae.ReadStderrResponse, error) {
+	return &aurae.ReadStderrResponse{}, nil
+}
 
 func (e *Exec) RunProcess(ctx context.Context, in *aurae.RunProcessRequest) (*aurae.RunProcessResponse, error) {
-
 	execStart := in.ExecutableCommand // Nod to systemd :)
 	spl := strings.Split(execStart, " ")
 
