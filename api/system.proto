@@ -24,7 +24,10 @@ service System {
   rpc Status(StatusRequest) returns (StatusResponse) {}
 }
 
-message StatusRequest {}
+message StatusRequest {
+  string Name = 1;
+  bool Something = 2;
+}
 
 message StatusResponse {
   string AuraeInstanceEncapsulated = 1;
