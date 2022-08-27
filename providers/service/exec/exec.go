@@ -93,7 +93,7 @@ func (e *Exec) ReadStdout(ctx context.Context, in *aurae.ReadStdoutRequest) (*au
 	} else {
 		pipe := procMeta.stdoutPipe
 		buf := make([]byte, length)
-		_, err := pipe.Read(buf)
+		n, err := pipe.Read(buf)
 		if err != nil {
 			return &aurae.ReadStdoutResponse{
 				Code:    common.ResponseCode_ERROR,
@@ -103,6 +103,7 @@ func (e *Exec) ReadStdout(ctx context.Context, in *aurae.ReadStdoutRequest) (*au
 		// Success
 		return &aurae.ReadStdoutResponse{
 			PID:     pid,
+			Size:    int32(n),
 			Data:    string(buf),
 			Code:    common.ResponseCode_OKAY,
 			Message: common.ResponseMsg_Success,
